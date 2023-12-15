@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.32
+# v0.19.35
 
 using Markdown
 using InteractiveUtils
@@ -74,12 +74,15 @@ Read data from a well defined path based on parameters
 - minute : Minute at which the simulation ended
 - arrested : Rivulet limited by contact angle field
 """
-function read_data(;R=50, r=80, kbT=0.0, nm=93, θ=20, day=26, month=10, hour=7, minute=5, arrested=false)
+function read_data(;R=50, r=80, kbT=0.0, nm=93, θ=20, day=26, month=10, hour=7, minute=5, arrested=false, gamma="")
 	dpath = joinpath("/home/zitz", "Swalbe.jl/data/Rivulets")
 	file_name = "$(dpath)/height_R_$(R)_r_$(r)_ang_$(θ)_kbt_$(kbT)_nm_3-2_runDate_2023$(month)$(day)$(hour)$(minute).jld2"
 	if arrested
 		file_name = "$(dpath)/arrested_height_R_$(R)_r_$(r)_ang_$(θ)_kbt_$(kbT)_nm_3-2_runDate_2023$(month)$(day)$(hour)$(minute).jld2"
+	elseif gamma != ""
+		file_name = "$(dpath)/$(gamma)height_R_$(R)_r_$(r)_ang_$(θ)_kbt_$(kbT)_nm_3-2_runDate_2023$(month)$(day)$(hour)$(minute).jld2"
 	end
+
 	if isfile(file_name) 
 		data = load(file_name)
 	else 
@@ -119,7 +122,7 @@ end
 # ╔═╡ 2df8c833-7ca7-4d7a-ade5-0df083a013a1
 begin
 	h_some = 
-	plot_slice(read_data(R=180, r=40, kbT=0.0, month=11, day=5, hour=1, minute=28, θ=30, nm=32, arrested=false), t=2500000)
+	plot_slice(read_data(R=180, r=40, kbT=0.0, month=11, day=5, hour=1, minute=28, θ=30, nm=32, arrested=false), t=25000)
 	
 end
 
@@ -221,12 +224,12 @@ end
 # ╔═╡ 04e344a3-3d5b-449e-9222-481df24015c7
 # (160, 20, 0.0,    11,27, 14, 51, 20
 begin
-hja = read_data(R=160, r=20, kbT=0.0, month=11, day=27, hour=14, minute=51, θ=20 ,nm=32, arrested=true)
-measure_cluster(hja, t=2500000)
+	hja = read_data(R=160, r=20, kbT=0.0, month=11, day=27, hour=14, minute=51, θ=20 ,nm=32, arrested=true)
+	measure_cluster(hja, t=2500000)
 end
 
 # ╔═╡ 974c334e-38fb-436e-842b-bb016854d136
-heatmap_data(hja, t=2500000)
+heatmap_data(hja, t=875000)
 
 # ╔═╡ 20d68b97-40d4-41a4-b4df-bde6a3abb587
 """
@@ -786,6 +789,132 @@ data_arrested = [
 	(200, 40, 1.0e-6, 11,27, 13, 20, 10), 	#
 ]
 
+# ╔═╡ dc5ab038-569e-4603-95af-0549c6e4ee76
+md"For even more data we varied the surface tension γ and reduced it by a factor of 2 as well as increased it by a factor of 2.
+
+- data_gamma05 half surface tension
+- data_gamma20 double surface tension
+"
+
+# ╔═╡ 9070e432-d2ae-4633-9ad6-637b3eca9bce
+data_gamma05 = [
+	(160, 20, 0.0,    12, 7, 17,  8, 20), 	#
+	(160, 30, 0.0,    12, 7, 18, 22, 20), 	#
+	(160, 40, 0.0,    12, 7, 19, 38, 20), 	#
+	(180, 20, 0.0,    12, 7, 20, 58, 20), 	#
+	(180, 30, 0.0,    12, 7, 22, 18, 20), 	#
+	(180, 40, 0.0,    12, 7, 23, 38, 20), 	#
+	(200, 20, 0.0,    12, 8,  0, 58, 20), 	#
+	(200, 30, 0.0,    12, 8,  2, 18, 20), 	#
+	(200, 40, 0.0,    12, 8,  3, 39, 20), 	#
+	(160, 20, 0.0,    12, 8, 17,  0, 40), 	#
+	(160, 30, 0.0,    12, 8, 18, 20, 40), 	#
+	(160, 40, 0.0,    12, 8, 19, 40, 40), 	#
+	(180, 20, 0.0,    12, 8, 21,  0, 40), 	#
+	(180, 30, 0.0,    12, 8, 22, 20, 40), 	#
+	(180, 40, 0.0,    12, 8, 23, 39, 40), 	#
+	(200, 20, 0.0,    12, 9,  0, 55, 40), 	#
+	(200, 30, 0.0,    12, 9,  2, 10, 40), 	#
+	(200, 40, 0.0,    12, 9,  3, 26, 40), 	#
+	(160, 20, 0.0,    12, 9, 16, 46, 30), 	#
+	(160, 30, 0.0,    12, 9, 18,  6, 30), 	#
+	(160, 40, 0.0,    12, 9, 19, 26, 30), 	#
+	(180, 20, 0.0,    12, 9, 20, 46, 30), 	#
+	(180, 30, 0.0,    12, 9, 22,  6, 30), 	#
+	(180, 40, 0.0,    12, 9, 23, 26, 30), 	#
+	(200, 20, 0.0,    12,10,  0, 46, 30), 	#
+	(200, 30, 0.0,    12,10,  2,  6, 30), 	#
+	(200, 40, 0.0,    12,10,  3, 26, 30), 	#
+	(160, 20, 0.0,    12,10, 16, 31, 10), 	#
+	(160, 30, 0.0,    12,10, 17, 52, 10), 	#
+	(160, 40, 0.0,    12,10, 19, 12, 10), 	#
+	(180, 20, 0.0,    12,10, 20, 32, 10), 	#
+	(180, 30, 0.0,    12,10, 21, 53, 10), 	#
+	(180, 40, 0.0,    12,10, 23, 13, 10), 	#
+	(200, 20, 0.0,    12,11,  0, 34, 10), 	#
+	(200, 30, 0.0,    12,11,  1, 54, 10), 	#
+	(200, 40, 0.0,    12,11,  3, 14, 10), 	#
+	]
+
+# ╔═╡ 93e8f4ee-7558-4178-8f06-96a422528c48
+data_gamma20 = [
+	(160, 20, 0.0,    12, 8,  4, 59, 20), 	#
+	(160, 30, 0.0,    12, 8,  6, 19, 20), 	#
+	(160, 40, 0.0,    12, 8,  7, 39, 20), 	#
+	(180, 20, 0.0,    12, 8,  8, 59, 20), 	#
+	(180, 30, 0.0,    12, 8, 10, 19, 20), 	#
+	(180, 40, 0.0,    12, 8, 11, 39, 20), 	#
+	(200, 20, 0.0,    12, 8, 12, 59, 20), 	#
+	(200, 30, 0.0,    12, 8, 14, 20, 20), 	#
+	(200, 40, 0.0,    12, 8, 15, 40, 20), 	#
+	(160, 20, 0.0,    12, 9,  4, 46, 40), 	#
+	(160, 30, 0.0,    12, 9,  6,  6, 40), 	#
+	(160, 40, 0.0,    12, 9,  7, 26, 40), 	#
+	(180, 20, 0.0,    12, 9,  8, 46, 40), 	#
+	(180, 30, 0.0,    12, 9, 10,  6, 40), 	#
+	(180, 40, 0.0,    12, 9, 11, 26, 40), 	#
+	(200, 20, 0.0,    12, 9, 12, 46, 40), 	#
+	(200, 30, 0.0,    12, 9, 14,  6, 40), 	#
+	(200, 40, 0.0,    12, 9, 15, 26, 40), 	#
+	(160, 20, 0.0,    12,10,  4, 46, 30), 	#
+	(160, 30, 0.0,    12,10,  6,  6, 30), 	#
+	(160, 40, 0.0,    12,10,  7, 26, 30), 	#
+	(180, 20, 0.0,    12,10,  8, 42, 30), 	#
+	(180, 30, 0.0,    12,10,  9, 55, 30), 	#
+	(180, 40, 0.0,    12,10, 11, 11, 30), 	#
+	(200, 20, 0.0,    12,10, 12, 31, 30), 	#
+	(200, 30, 0.0,    12,10, 13, 51, 30), 	#
+	(200, 40, 0.0,    12,10, 15, 11, 30), 	#
+	(160, 20, 0.0,    12,11,  4, 34, 10), 	#
+	(160, 30, 0.0,    12,11,  5, 54, 10), 	#
+	(160, 40, 0.0,    12,11,  7, 14, 10), 	#
+	(180, 20, 0.0,    12,11,  8, 34, 10), 	#
+	(180, 30, 0.0,    12,11,  9, 55, 10), 	#
+	(180, 40, 0.0,    12,11, 11, 15, 10), 	#
+	(200, 20, 0.0,    12,11, 12, 35, 10), 	#
+	(200, 30, 0.0,    12,11, 13, 55, 10), 	#
+	(200, 40, 0.0,    12,11, 15, 14, 10), 	#
+]
+
+# ╔═╡ 5a733a9a-759c-4e31-9bb6-ad9d62425f45
+"""
+	renderGifs()
+
+Reads all data that is currently available and generates a gif for every simulation.
+"""
+function renderGifs(; verbose=false)
+	for input in ([data, ""], [data_arrested, "arr_"], [data_gamma05, "gamma05_"], [data_gamma20, "gamma20_"])
+		kbtDict = Dict(0.0 => "kbt_off", 1.0e-6 => "kbt_on")
+		arrDict = Dict("arr_" => true, "" => false, "gamma05_" => false, "gamma20_" => false)
+		for i in eachindex(input[1])
+			path2Swalbe = "../../Swalbe.jl/assets/"
+			filename = "$(path2Swalbe)$(input[2])ang_$(input[1][i][8])_R_$(input[1][i][1])_rr_$(input[1][i][2])_$(kbtDict[input[1][i][3]]).gif"
+			if isfile(filename)
+				if verbose
+					println("There is alread a file called $(input[2])ang_$(input[1][i][8])_R_$(input[1][i][1])_rr_$(input[1][i][2])_$(kbtDict[input[1][i][3]]).gif  in the assets folder")
+				end
+			else
+				if input[2] == "arr_"
+					h = read_data(R=input[1][i][1], r=input[1][i][2], kbT=input[1][i][3], month=input[1][i][4], day=input[1][i][5], hour=input[1][i][6], minute=input[1][i][7], θ=input[1][i][8], nm=32, arrested=arrDict[input[2]], gamma="")
+				else
+					h = read_data(R=input[1][i][1], r=input[1][i][2], kbT=input[1][i][3], month=input[1][i][4], day=input[1][i][5], hour=input[1][i][6], minute=input[1][i][7], θ=input[1][i][8], nm=32, arrested=arrDict[input[2]], gamma=input[2])
+				end
+				if verbose
+					println("R=$(input[1][i][1]) with rr=$(input[1][i][2]) and kbt=$(input[1][i][3])")
+				end
+				if input[1][i][3] == 0.0
+					do_gif(h, "$(path2Swalbe)$(input[2])ang_$(input[1][i][8])_R_$(input[1][i][1])_rr_$(input[1][i][2])_$(kbtDict[input[1][i][3]])", timeMax=2500000)
+				elseif input[1][i][3] == 1.0e-6
+					do_gif(h, "$(path2Swalbe)$(input[2])ang_$(input[1][i][8])_R_$(input[1][i][1])_rr_$(input[1][i][2])_$(kbtDict[input[1][i][3]])", timeMax=2500000)
+				end
+			end
+		end
+	end
+end
+
+# ╔═╡ b3be394c-5997-4494-ad40-ced2f10fd364
+renderGifs()
+
 # ╔═╡ 0f204a06-71b2-438a-bb49-4af8ebda0001
 md" ## Results
 
@@ -823,7 +952,11 @@ We use the function `data2gif()` to do this.
 
 #### The quartet of possibilities
 
-In the next three cells we show what the rivulet can do by loading the gifs.
+In the next three cells we show what the rivulet can do by loading the gifs of some simulations.
+Here we are not strictly comparing apples with apples, instead we mix our data.
+Thus we include data from both the patterned substrate as well as the uniform substrate.
+Considering these two setups we observe the following processes:
+
 1. Retract
 "
 
@@ -840,7 +973,7 @@ LocalResource("../assets/ang_40_R_180_rr_20_kbt_off.gif", :width => 600)
 
 # ╔═╡ 7f8b5fe8-f5d1-46eb-a30e-8f0a6e9707bc
 md"
-3. Breakup without retraction
+3. Breakup without retraction (patterned substrate)
 "
 
 # ╔═╡ 2e7b7b97-f4b9-4ef8-b360-e086ffc0a025
@@ -848,7 +981,7 @@ LocalResource("../assets/arr_ang_30_R_180_rr_40_kbt_off.gif", :width => 600)
 
 # ╔═╡ dc37fa99-ceb5-40cb-846a-6cdf9d33c2f3
 md"
-4. Don't breakup without retraction
+4. Don't breakup without retraction (patterned substrate)
 
 Which we don't show, however there are quite a few of those very stable simulations where essentially nothing happens.
 In the animations you see the height field which color coded and the range is dynamically adjusted.
@@ -861,18 +994,19 @@ On the other hand we want to know if the rivulet has ruptured, thus we use the i
 
 # ╔═╡ 4e7487ad-b8e6-43f7-aff1-99d826ee1963
 """
-	measure_data(data, label::String, remeasure::Bool)
+	measure_data(data, label::String, remeasure::Bool, pat::Bool, gam::String)
 
 Generates a dataframe of dynamic measurements for a set of `data` and writes it to a `.csv` or reads it from a `.csv`.
 """
-function measure_data(data, label::String, remeasure::Bool, pat::Bool)
+function measure_data(data, label::String, remeasure::Bool, pat::Bool, gam::String)
 	measurements = DataFrame()
+	dpath = joinpath("/home/zitz", "Ring_rivulets/data/")
 	if remeasure
 		measurements = DataFrame()
 		for i in eachindex(data)
 			# println(i)
 			someFrame = DataFrame()
-			h = read_data(R=data[i][1], r=data[i][2], kbT=data[i][3], month=data[i][4], day=data[i][5], hour=data[i][6], minute=data[i][7], θ=data[i][8] ,nm=32, arrested=pat)
+			h = read_data(R=data[i][1], r=data[i][2], kbT=data[i][3], month=data[i][4], day=data[i][5], hour=data[i][6], minute=data[i][7], θ=data[i][8] ,nm=32, arrested=pat, gamma=gam)
 			R = Float64[]
 			rr = Float64[]
 			beta = Float64[]
@@ -903,7 +1037,7 @@ function measure_data(data, label::String, remeasure::Bool, pat::Bool)
 			measurements = vcat(measurements, someFrame)
 			println("done with $(i) of $(length(data))")
 		end
-		CSV.write("data/$(label).csv", measurements)
+		CSV.write("$(dpath)$(label).csv", measurements)
 	else
 		println("No data analysis is performed because remasure is set false")
 	end
@@ -922,7 +1056,13 @@ There is data on
 # ╔═╡ df519afa-309a-4633-860d-2fe40a384fa9
 for to_analyse in [(data, "dynamics_uniform", false), (data_arrested, "dynamics_patterned", true)]
 	run_me = false
-	measure_data(to_analyse[1], to_analyse[2], run_me, to_analyse[3])
+	measure_data(to_analyse[1], to_analyse[2], run_me, to_analyse[3], "")
+end
+
+# ╔═╡ 3273792c-41fb-4225-a4f7-2f1c9d58be4a
+for to_analyse in [(data_gamma05, "gamma05_uniform", "gamma05_"), (data_gamma20, "gamma20_uniform", "gamma20_")]
+	run_me = true
+	measure_data(to_analyse[1], to_analyse[2], run_me, false, to_analyse[3])
 end
 
 # ╔═╡ 144e23e9-ce3d-4ed6-be2c-dff1fed39e59
@@ -965,6 +1105,18 @@ We might come back to `all_df` but for the first simple information we want to e
 
 # ╔═╡ 7f60e96f-9a5e-41f5-a388-f531585e15b0
 all_df = combined_df("data_all_rivulets")
+
+# ╔═╡ 96dea7cc-4742-460f-a18e-ae22f0c92033
+
+
+# ╔═╡ e4bb69eb-e608-4f50-9c42-678a74b99192
+all_df.gamma .= 0.01
+
+# ╔═╡ 010e992a-f35a-4a7a-946e-f796aba41a32
+
+
+# ╔═╡ cdbe66ff-d643-4b7a-a446-85c284c668ba
+all_df
 
 # ╔═╡ 6b34bdad-2518-43f5-9fb0-d28a99a411fe
 md"
@@ -3252,11 +3404,11 @@ version = "1.4.1+1"
 # ╠═f268582b-0756-41cf-910d-7a57b698451d
 # ╟─1b26468c-b4f7-4252-b891-4f95bc04c869
 # ╟─6d3c1725-75fa-412e-9b30-8f8df4e7874b
-# ╟─0acf9712-b27c-40c8-9bec-64d6389ce2c4
+# ╠═0acf9712-b27c-40c8-9bec-64d6389ce2c4
 # ╟─eadae383-6b5b-4e4e-80b9-5eb2fc4a5ead
 # ╟─789e9f0e-863a-4cd5-8f99-f830120e8960
 # ╟─2df8c833-7ca7-4d7a-ade5-0df083a013a1
-# ╟─81d255ea-1ab3-4635-ab4c-66100a820b28
+# ╠═81d255ea-1ab3-4635-ab4c-66100a820b28
 # ╟─6e82547e-c935-4a3e-b736-a0dae07bfb50
 # ╟─9da027de-9ee2-487c-b978-cbfd77e35fef
 # ╟─f25c4971-572f-41e2-be87-ad513c86e737
@@ -3281,12 +3433,17 @@ version = "1.4.1+1"
 # ╟─5baa1023-db81-4374-913d-1e88bacdb2ac
 # ╟─b3ae647b-1de9-4f56-b786-8719705c1e09
 # ╟─37756334-7859-499d-b355-658349aa1805
-# ╟─063757cb-b822-44e3-8a2b-57808c6f30cf
+# ╠═063757cb-b822-44e3-8a2b-57808c6f30cf
 # ╟─4fb1d7ad-47f2-4adf-a2ba-0ecc0fc8eeb0
 # ╟─41aee571-9016-4759-859a-c99eb143a410
 # ╟─13ce2bea-889f-4727-a126-71a5006a86ab
 # ╟─c9572357-8d97-47a7-914a-91c0b452eb6b
 # ╟─846ebcbe-34d6-48a4-bc23-cbd04bacf526
+# ╟─dc5ab038-569e-4603-95af-0549c6e4ee76
+# ╟─9070e432-d2ae-4633-9ad6-637b3eca9bce
+# ╟─93e8f4ee-7558-4178-8f06-96a422528c48
+# ╟─5a733a9a-759c-4e31-9bb6-ad9d62425f45
+# ╟─b3be394c-5997-4494-ad40-ced2f10fd364
 # ╟─0f204a06-71b2-438a-bb49-4af8ebda0001
 # ╟─d5152b67-bc1d-4cc0-b73e-90d79dbadcb4
 # ╟─ab5b4c7c-ae24-4aae-a528-1dc427a7f1f1
@@ -3300,11 +3457,16 @@ version = "1.4.1+1"
 # ╟─dc37fa99-ceb5-40cb-846a-6cdf9d33c2f3
 # ╟─4e7487ad-b8e6-43f7-aff1-99d826ee1963
 # ╟─38345378-66ee-42c1-b37f-6691119ecc60
-# ╟─df519afa-309a-4633-860d-2fe40a384fa9
+# ╠═df519afa-309a-4633-860d-2fe40a384fa9
+# ╠═3273792c-41fb-4225-a4f7-2f1c9d58be4a
 # ╟─144e23e9-ce3d-4ed6-be2c-dff1fed39e59
-# ╟─f7521761-e9f1-43df-a95c-57aec7c83011
+# ╠═f7521761-e9f1-43df-a95c-57aec7c83011
 # ╟─77697cb7-40fa-4ed4-9008-8d78cfa0c247
-# ╟─7f60e96f-9a5e-41f5-a388-f531585e15b0
+# ╠═7f60e96f-9a5e-41f5-a388-f531585e15b0
+# ╠═96dea7cc-4742-460f-a18e-ae22f0c92033
+# ╠═e4bb69eb-e608-4f50-9c42-678a74b99192
+# ╠═010e992a-f35a-4a7a-946e-f796aba41a32
+# ╠═cdbe66ff-d643-4b7a-a446-85c284c668ba
 # ╟─6b34bdad-2518-43f5-9fb0-d28a99a411fe
 # ╟─627c3c50-b22f-4e95-a755-26f2197fff92
 # ╟─bebbf9b7-0d4a-44d0-baa1-aba99b9c59ef
@@ -3316,7 +3478,7 @@ version = "1.4.1+1"
 # ╟─14d1a55a-43b0-4857-8dd9-b10c86f8a123
 # ╠═512e1060-eee5-4374-966c-02d7fb62f303
 # ╠═61474944-c347-448a-beb9-aa2e4ef6331e
-# ╠═af255535-e903-4eef-8629-13d836f1f145
+# ╟─af255535-e903-4eef-8629-13d836f1f145
 # ╠═13257859-e48e-4aa3-a3a3-a4ecf4c8dd1f
 # ╠═9e40d379-50e9-4d33-a53c-6c5089059de5
 # ╠═df08506c-f66d-430a-b235-4c9dfb80d414
