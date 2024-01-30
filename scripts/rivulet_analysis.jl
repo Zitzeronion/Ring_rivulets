@@ -1,11 +1,14 @@
 ### A Pluto.jl notebook ###
-# v0.19.35
+# v0.19.37
 
 using Markdown
 using InteractiveUtils
 
 # ╔═╡ f268582b-0756-41cf-910d-7a57b698451d
-using FileIO, PlutoUI, Plots, DataFrames, CSV, JLD2, Images, ImageSegmentation, Random
+using FileIO, PlutoUI, Plots, DataFrames, CSV, JLD2, Images, ImageSegmentation, Random, FFTW
+
+# ╔═╡ 569bbd2c-7fae-4e26-afe5-3f4d06f7d505
+TableOfContents()
 
 # ╔═╡ 94b9bdb0-73ee-11ee-10e9-e93688ea4523
 md"# Rivulet analysis
@@ -48,7 +51,7 @@ Thus the rivulet is retracting to a droplet."
 end
 
 # ╔═╡ 6d3c1725-75fa-412e-9b30-8f8df4e7874b
-md"## Functions
+md"# Functions
 
 At this point the data has been created and is ready to be analyzed.
 But what is it that we actually look for?
@@ -74,13 +77,15 @@ Read data from a well defined path based on parameters
 - minute : Minute at which the simulation ended
 - arrested : Rivulet limited by contact angle field
 """
-function read_data(;R=50, r=80, kbT=0.0, nm=93, θ=20, day=26, month=10, hour=7, minute=5, arrested=false, gamma="")
+function read_data(;R=50, r=80, kbT=0.0, nm=93, θ=20, year=2023, month=10, day=26, hour=7, minute=5, arrested=false, gamma="", slip=0)
 	dpath = joinpath("/home/zitz", "Swalbe.jl/data/Rivulets")
-	file_name = "$(dpath)/height_R_$(R)_r_$(r)_ang_$(θ)_kbt_$(kbT)_nm_3-2_runDate_2023$(month)$(day)$(hour)$(minute).jld2"
+	file_name = "$(dpath)/height_R_$(R)_r_$(r)_ang_$(θ)_kbt_$(kbT)_nm_3-2_runDate_$(year)$(month)$(day)$(hour)$(minute).jld2"
 	if arrested
-		file_name = "$(dpath)/arrested_height_R_$(R)_r_$(r)_ang_$(θ)_kbt_$(kbT)_nm_3-2_runDate_2023$(month)$(day)$(hour)$(minute).jld2"
+		file_name = "$(dpath)/arrested_height_R_$(R)_r_$(r)_ang_$(θ)_kbt_$(kbT)_nm_3-2_runDate_$(year)$(month)$(day)$(hour)$(minute).jld2"
 	elseif gamma != ""
-		file_name = "$(dpath)/$(gamma)height_R_$(R)_r_$(r)_ang_$(θ)_kbt_$(kbT)_nm_3-2_runDate_2023$(month)$(day)$(hour)$(minute).jld2"
+		file_name = "$(dpath)/$(gamma)height_R_$(R)_r_$(r)_ang_$(θ)_kbt_$(kbT)_nm_3-2_runDate_$(year)$(month)$(day)$(hour)$(minute).jld2"
+	elseif slip != 0
+		file_name = "$(dpath)/slip_$(slip)_height_R_$(R)_r_$(r)_ang_$(θ)_kbt_$(kbT)_nm_3-2_runDate_$(year)$(month)$(day)$(hour)$(minute).jld2"
 	end
 
 	if isfile(file_name) 
@@ -98,8 +103,11 @@ end
 
 Creates a heatmap of the height of some simulation `data` at given `time`.
 """
-function heatmap_data(data; t=25000)
+function heatmap_data(data; t=25000,  just_data=false)
 	h = reshape(data["h_$(t)"], 512, 512)
+	if just_data
+		return h
+	end
 	heatmap(h, aspect_ratio=1, c=:viridis, colorbar_title="height")
 end
 
@@ -108,6 +116,26 @@ end
 	plot_slice(data)
 
 Plots a cut through the rivulet
+
+# Example
+
+```jldoctest
+julia> R = 180; rr = 40; θ = 30;
+
+julia> data_example = read_data( 	# Simulation data
+		R=R, 
+		r=rr, 
+		kbT=0.0, 
+		month=11, 
+		day=5, 
+		hour=1, 
+		minute=28, 
+		θ=θ, 
+		nm=32, 
+		arrested=false)
+
+julia> plot_slice(data_example, t=25000)
+```
 """
 function plot_slice(data; t=25000, window=(false, 80, 110))
 	h = reshape(data["h_$(t)"], 512, 512)
@@ -137,6 +165,24 @@ function do_gif(data, filename::String; timeMax=5000000)
 	anim = Animation()
 	for x in 50000:25000:timeMax
 		plot(heatmap_data(data, t=x))
+		frame(anim)
+	end
+	gif(anim, "../assets/$(filename).gif")
+end
+
+# ╔═╡ fae89add-5036-44d7-b4f4-0d9e9fad0966
+"""
+	do_gif_slice(data, filename::String)
+
+Creates an animation of a slice of the heightfield for the available time steps.
+"""
+function do_gif_slice(data, filename::String; timeMax=5000000)
+	h0 = reshape(data["h_25000"], 512, 512)
+	p = plot(h0[256, :], label="t=$(25000)Δt", xlabel="x/[Δx]", ylabel="height")
+	anim = Animation()
+	for t in 50000:25000:timeMax
+		h = reshape(data["h_$(t)"], 512, 512)
+		plot(h[256, :], label="t=$(t)Δt", xlabel="x/[Δx]", ylabel="height")
 		frame(anim)
 	end
 	gif(anim, "../assets/$(filename).gif")
@@ -476,6 +522,49 @@ md" With its visual representation shown below."
 a,v = compute_droplet(torus(512, 512, 20, 180, 1/9, (256,256)), 1/9)
   ╠═╡ =#
 
+# ╔═╡ 60ce933e-4335-4190-a7b0-5c86d0326a35
+md"### Profile initial conditions
+
+We assume that the simulations will be very sensitive to the ratio of the two radii
+```math
+\beta = \frac{r}{R}.
+```
+
+Another point of view can be that the radii are not the relevant quantity but the curvatures 
+```math
+	\kappa_0 = \frac{1}{r}, \\
+
+	\kappa_1 = \frac{1}{R},
+```
+where the two $\kappa$'s correspond to the two radii.
+One problem could in fact be that all our simulations have the same $\kappa_0$.
+Therefore let us have a look at the initial conditions:
+"
+
+# ╔═╡ 3eaf9941-d510-4a91-99bf-2084bbe3ea40
+begin
+	p = plot()
+	for ang in [1/9, 1/6, 2/9]
+		for R in [180]
+			for rr in [20, 40, 80]
+				h = torus(512, 512, rr, R, ang, (256,256))
+				plot!(h[256, :], 
+					xlims=(0, 256),
+					ylims=(0, 20),
+					lw = 2,
+					aspect_ratio = 5,
+					xlabel = "x/[Δx]",
+					ylabel = "height",
+					palette = :Paired_10,
+					label="R=$(R)-r=$(rr)-θ=$(Int(round(rad2deg((ang*π)))))",
+				)
+			end
+		end
+	end
+	savefig(p, "../assets/initial_conditions_R180.png")
+	p
+end
+
 # ╔═╡ 70da13b0-6111-4d5d-a6f5-49fcc0499738
 md" ### Data analysis 
 
@@ -519,7 +608,7 @@ function t0_data()
 	# Loop through initial conditions
 	for angle in [2/9, 1/6, 1/9, 1/18]
 		for R in [150, 160, 180, 200]
-			for rr in [20, 30, 40, 80]
+			for rr in [20, 30, 40, 60, 80, 100]
 				# Create initial condition
 				h = torus(512, 512, rr, R, angle, (256, 256))
 				# measure relevant parameter
@@ -601,7 +690,7 @@ function csv2df(file_name)
 end
 
 # ╔═╡ 4fb1d7ad-47f2-4adf-a2ba-0ecc0fc8eeb0
-md" ## The Data
+md" # The Data
 
 Below we create three dataframes that hosts a load of information.
 Arguably too much information to have a clear picture what we want to say.
@@ -611,12 +700,16 @@ The three dataframes host:
 - Initial geometrical data: `initial_data`
 - Simulation data: `data`
 - Simulation data on patterned substrates: `data_arrested`
-
-
+- Simulation data with different surface tension: `data_gammaX`
+- Simulation data with different slip length: `data_slip`
 "
 
 # ╔═╡ 41aee571-9016-4759-859a-c99eb143a410
-initial_data = t0_data()
+begin
+	initial_data = t0_data()
+	CSV.write("../data/initial_conditions.csv", initial_data)
+	initial_data
+end
 
 # ╔═╡ 13ce2bea-889f-4727-a126-71a5006a86ab
 md"A single simulation creates one data file, which is about 500mb in size. 
@@ -903,6 +996,23 @@ data_gamma20 = [
 	(200, 40, 0.0,    12,11, 15, 14, 10), 	#
 ]
 
+# ╔═╡ 24fde296-5a6f-4a92-bf16-855df4c99227
+data_slip= [
+	# R, rr, kbt, year, month, day, hour, min, theta, slip
+	(180, 20, 0.0, 2024, 1, 25, 11, 40, 20, 5), 	# 1
+	(180, 40, 0.0, 2024, 1, 25, 12, 57, 20, 5), 	# 2
+	(180, 20, 0.0, 2024, 1, 25, 14, 16, 20, 25), 	# 3
+	(180, 40, 0.0, 2024, 1, 25, 15, 36, 20, 25), 	# 4
+	(180, 20, 0.0, 2024, 1, 25, 16, 55, 30, 5), 	# 5
+	(180, 40, 0.0, 2024, 1, 25, 18, 14, 30, 5), 	# 6
+	(180, 20, 0.0, 2024, 1, 25, 19, 34, 30, 25), 	# 7
+	(180, 40, 0.0, 2024, 1, 25, 20, 53, 30, 25), 	# 8 
+	(180, 20, 0.0, 2024, 1, 25, 22, 13, 40, 5), 	# 9
+	(180, 40, 0.0, 2024, 1, 25, 23, 32, 40, 5), 	# 10
+	(180, 20, 0.0, 2024, 1, 26,  0, 51, 40, 25), 	# 11
+	(180, 40, 0.0, 2024, 1, 26,  2, 11, 40, 25), 	# 12
+]
+
 # ╔═╡ 5a733a9a-759c-4e31-9bb6-ad9d62425f45
 """
 	renderGifs()
@@ -942,8 +1052,42 @@ end
 # ╔═╡ b3be394c-5997-4494-ad40-ced2f10fd364
 renderGifs()
 
+# ╔═╡ 4476c046-db75-4e22-9701-04d68c357198
+"""
+	render_slip(; verbose=false)
+
+Renders the slip data to gifs
+"""
+function render_slip(; verbose=false)
+	# For easier naming of output
+	kbtDict = Dict(0.0 => "kbt_off", 1.0e-6 => "kbt_on")
+	# Loop through the slip data
+	for i in eachindex(data_slip)
+		# Save it with the other files
+		path2Swalbe = "../../Swalbe.jl/assets/"
+		# File name for the gif
+		filename = "$(path2Swalbe)slip_$(data_slip[i][10])_ang_$(data_slip[i][9])_R_$(data_slip[i][1])_rr_$(data_slip[i][2])_$(kbtDict[data_slip[i][3]]).gif"
+		# Check if it is already existing
+		if isfile(filename)
+			if verbose
+				println("This file alread exists")
+			end
+		else
+			# Otherwise read the data
+			h = read_data(R=data_slip[i][1], r=data_slip[i][2], kbT=data_slip[i][3], year=data_slip[i][4], month=data_slip[i][5], day=data_slip[i][6], hour=data_slip[i][7], minute=data_slip[i][8], θ=data_slip[i][9], nm=32, slip=data_slip[i][10])
+			if verbose
+				println("Reading file with parameters R=$(data_slip[i][1]), rr=$(data_slip[i][2]) and slip=$(data_slip[i][10])")
+			end
+			do_gif(h, "$(path2Swalbe)slip_$(data_slip[i][10])_ang_$(data_slip[i][9])_R_$(data_slip[i][1])_rr_$(data_slip[i][2])_$(kbtDict[data_slip[i][3]])", timeMax=2500000)
+		end
+	end
+end
+
+# ╔═╡ 6ee87ada-668c-4d1b-aa55-e35b7b475f2a
+render_slip(verbose=true)
+
 # ╔═╡ 0f204a06-71b2-438a-bb49-4af8ebda0001
-md" ## Results
+md" # Results
 
 So what does the simulations produce?
 Below is an image of the state at the end of the time loop.
@@ -990,6 +1134,13 @@ Considering these two setups we observe the following processes:
 # ╔═╡ a58ec747-09cb-4cba-a9f0-4de683c80052
 LocalResource("../assets/ang_40_R_180_rr_40_kbt_off.gif", :width => 600)
 
+# ╔═╡ 03bf6a75-a98c-4641-9939-2336c78e1be7
+begin
+	slice_gif = read_data(R=180, r=40, kbT=0.0, month=11, day=3, hour=23, minute=34, θ=40 ,nm=32, arrested=false)
+	# (180, 40, 0.0,    11, 3, 23, 34, 40
+	do_gif_slice(slice_gif, "slice_R180_r40_t40"; timeMax=2500000)
+end
+
 # ╔═╡ c66bac82-feaf-4e77-ab1b-ea7a2a5cf6c7
 md"
 2. Retract into breakup
@@ -1017,7 +1168,60 @@ For a better grip on the dynamics we take all our simulations and perform some s
 We are, for example, interested in the growth of the instability on the rivulet. 
 That is why we measure the maximum height difference along the rivulet at every time step.
 On the other hand we want to know if the rivulet has ruptured, thus we use the image analysis introduced in `measure_clusters()`. 
+Often stability can be calculated using a so-called **linear-stability analysis**. 
+I still have to find a way to compute that however what I readily can do is to analyse the spectra.
+
+#### Spectra
+
+In the following we work with the hight data only, we don't measure but simply transform it with a **FFT**.
+This way we can compute dominate wavelengths and have a time resolved analysis of which wavelengths are growing and which get damped.
+This information should differ between the arrested rivulets and the contracting rivulets, because 
+- the major and minor radii are not constant and 
+- the wave modes are directly correlated with both them, at least I assume so.
+
+So let's get started and compute some spectra.
+First we need the height field, perferably as matrix of real values.
 "
+
+# ╔═╡ 289205ad-0bd3-473c-b076-fab42e1643c3
+begin
+	fftset = 26
+	time_here = 250000
+	fft_try = read_data(R=data[fftset][1], r=data[fftset][2], kbT=data[fftset][3], month=data[fftset][4], day=data[fftset][5], hour=data[fftset][6], minute=data[fftset][7], θ=data[fftset][8], nm=32)
+	fft_data = heatmap_data(fft_try, t=time_here, just_data=true)
+end
+
+# ╔═╡ 8d0b7517-1be8-41c4-8a4b-716bcad169fb
+heatmap(fft_data, c=:viridis, aspect_ratio=1)
+
+# ╔═╡ fc37abf6-6acd-4b11-bdab-ddee379d8d72
+md" 
+The above matrix is a single time step of one of our simulations.
+In fact, a simulation where the rivulet breaks while retracting.
+This height field, `fft_data` can then be used to compute a spectrum as shown below, where we interpret the height data as grayscale.
+"
+
+# ╔═╡ 29f4022e-28dc-4ef8-8e83-11d466437813
+spectrumH= fftshift(fft(Float64.(Gray.(fft_data))))
+
+# ╔═╡ a1f13b96-fbd3-40ab-aa3f-9af14d55ed55
+md"`spectrumH` is a two dimensional *FFT* of the height which is shown in the plot three cells above.
+The *FFT* itself has all the information we need to know for a dispertion relation.
+Radial averaging of this data should correspond to the growth of a dominate wave number and to the damping of wave numbers which are too large to be resolved. 
+"
+
+# ╔═╡ ef66b620-cfa3-47b4-bc2b-6cc77427764f
+heatmap(log.(abs.(spectrumH .* spectrumH)) .+ 1, aspect_ratio=1)
+
+# ╔═╡ 19deee02-5fb7-400c-a853-74bd44a8deaf
+md"The *FFT* is as far as I know symmetric and does only contain information for wave lengths up to $L/2$, which in our case is $256\Delta x$.
+That is why a quater of the above image should be enough for further analysis."
+
+# ╔═╡ 608b2a67-b34b-4440-9282-3f225e5714be
+heatmap(log.(abs.(spectrumH[256:end, 256:end] .* spectrumH[256:end, 256:end])) .+ 1, aspect_ratio=1, xlims=(1,256), ylims=(1,256))
+
+# ╔═╡ 2d5b3f57-efac-4bbd-99df-a81daf569733
+plot(log.(abs.(spectrumH[256, 256:end] .* spectrumH[256, 256:end])) .+ 1, xaxis=:log)
 
 # ╔═╡ 4e7487ad-b8e6-43f7-aff1-99d826ee1963
 """
@@ -1078,17 +1282,19 @@ There is data on
 - Patterend substrate
 
 (However to redo the analysis simply change `run_me` to `true` in the cell below.)
+
+# Lets get some graphs tomorrow!
 "
 
 # ╔═╡ df519afa-309a-4633-860d-2fe40a384fa9
-for to_analyse in [(data, "dynamics_uniform", false), (data_arrested, "dynamics_patterned", true)]
+for to_analyse in [(data_arrested, "dynamics_patterned", true)]
 	run_me = false
-	measure_data(to_analyse[1], to_analyse[2], run_me, to_analyse[3], "")
+	measure_data(to_analyse[1], to_analyse[2], run_me, to_analyse[3], "arrested_more")
 end
 
 # ╔═╡ 3273792c-41fb-4225-a4f7-2f1c9d58be4a
 for to_analyse in [(data_gamma05, "gamma05_uniform", "gamma05_"), (data_gamma20, "gamma20_uniform", "gamma20_")]
-	run_me = true
+	run_me = false
 	measure_data(to_analyse[1], to_analyse[2], run_me, false, to_analyse[3])
 end
 
@@ -1622,6 +1828,7 @@ PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+FFTW = "7a1cc6ca-52ef-59f5-83cd-3a7055c09341"
 FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
 ImageSegmentation = "80713f31-8817-5129-9cf8-209ff8fb23e1"
 Images = "916415d5-f1e6-5110-898d-aaa5f9f070e0"
@@ -1633,6 +1840,7 @@ Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 [compat]
 CSV = "~0.10.11"
 DataFrames = "~1.6.1"
+FFTW = "~1.8.0"
 FileIO = "~1.16.1"
 ImageSegmentation = "~1.8.2"
 Images = "~0.26.0"
@@ -1647,7 +1855,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.9.3"
 manifest_format = "2.0"
-project_hash = "0f4b2485a2f67a72bbecd1cbb9468ad99391f4be"
+project_hash = "5286f60fecff71f8146b066f29c133ecd063211a"
 
 [[deps.AbstractFFTs]]
 deps = ["LinearAlgebra"]
@@ -1979,9 +2187,9 @@ version = "0.3.2"
 
 [[deps.FFTW]]
 deps = ["AbstractFFTs", "FFTW_jll", "LinearAlgebra", "MKL_jll", "Preferences", "Reexport"]
-git-tree-sha1 = "b4fbdd20c889804969571cc589900803edda16b7"
+git-tree-sha1 = "4820348781ae578893311153d69049a93d05f39d"
 uuid = "7a1cc6ca-52ef-59f5-83cd-3a7055c09341"
-version = "1.7.1"
+version = "1.8.0"
 
 [[deps.FFTW_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -3431,15 +3639,17 @@ version = "1.4.1+1"
 """
 
 # ╔═╡ Cell order:
+# ╟─569bbd2c-7fae-4e26-afe5-3f4d06f7d505
 # ╟─94b9bdb0-73ee-11ee-10e9-e93688ea4523
 # ╠═f268582b-0756-41cf-910d-7a57b698451d
 # ╟─1b26468c-b4f7-4252-b891-4f95bc04c869
 # ╟─6d3c1725-75fa-412e-9b30-8f8df4e7874b
 # ╠═0acf9712-b27c-40c8-9bec-64d6389ce2c4
-# ╟─eadae383-6b5b-4e4e-80b9-5eb2fc4a5ead
+# ╠═eadae383-6b5b-4e4e-80b9-5eb2fc4a5ead
 # ╟─789e9f0e-863a-4cd5-8f99-f830120e8960
 # ╟─2df8c833-7ca7-4d7a-ade5-0df083a013a1
-# ╟─81d255ea-1ab3-4635-ab4c-66100a820b28
+# ╠═81d255ea-1ab3-4635-ab4c-66100a820b28
+# ╟─fae89add-5036-44d7-b4f4-0d9e9fad0966
 # ╟─6e82547e-c935-4a3e-b736-a0dae07bfb50
 # ╟─9da027de-9ee2-487c-b978-cbfd77e35fef
 # ╟─f25c4971-572f-41e2-be87-ad513c86e737
@@ -3460,32 +3670,47 @@ version = "1.4.1+1"
 # ╟─7cf4ce88-33de-472c-99c6-5b3ae258f3d1
 # ╟─8b2c77d3-f743-4840-a9d9-9308e05be28d
 # ╠═0361d281-4a64-4792-812f-7eb9d268d2ae
+# ╟─60ce933e-4335-4190-a7b0-5c86d0326a35
+# ╟─3eaf9941-d510-4a91-99bf-2084bbe3ea40
 # ╟─70da13b0-6111-4d5d-a6f5-49fcc0499738
 # ╟─5baa1023-db81-4374-913d-1e88bacdb2ac
 # ╟─b3ae647b-1de9-4f56-b786-8719705c1e09
 # ╟─37756334-7859-499d-b355-658349aa1805
-# ╠═063757cb-b822-44e3-8a2b-57808c6f30cf
+# ╟─063757cb-b822-44e3-8a2b-57808c6f30cf
 # ╟─4fb1d7ad-47f2-4adf-a2ba-0ecc0fc8eeb0
-# ╟─41aee571-9016-4759-859a-c99eb143a410
+# ╠═41aee571-9016-4759-859a-c99eb143a410
 # ╟─13ce2bea-889f-4727-a126-71a5006a86ab
 # ╟─c9572357-8d97-47a7-914a-91c0b452eb6b
 # ╟─846ebcbe-34d6-48a4-bc23-cbd04bacf526
 # ╟─dc5ab038-569e-4603-95af-0549c6e4ee76
 # ╟─9070e432-d2ae-4633-9ad6-637b3eca9bce
 # ╟─93e8f4ee-7558-4178-8f06-96a422528c48
+# ╟─24fde296-5a6f-4a92-bf16-855df4c99227
 # ╟─5a733a9a-759c-4e31-9bb6-ad9d62425f45
-# ╟─b3be394c-5997-4494-ad40-ced2f10fd364
-# ╟─0f204a06-71b2-438a-bb49-4af8ebda0001
-# ╟─d5152b67-bc1d-4cc0-b73e-90d79dbadcb4
+# ╠═b3be394c-5997-4494-ad40-ced2f10fd364
+# ╟─4476c046-db75-4e22-9701-04d68c357198
+# ╟─6ee87ada-668c-4d1b-aa55-e35b7b475f2a
+# ╠═0f204a06-71b2-438a-bb49-4af8ebda0001
+# ╠═d5152b67-bc1d-4cc0-b73e-90d79dbadcb4
 # ╟─ab5b4c7c-ae24-4aae-a528-1dc427a7f1f1
 # ╟─c945050f-3ddc-4d0e-80dd-af909c3f4ab5
 # ╟─89045ff9-bfb2-43e7-865b-235181cdf9f7
 # ╟─a58ec747-09cb-4cba-a9f0-4de683c80052
+# ╟─03bf6a75-a98c-4641-9939-2336c78e1be7
 # ╟─c66bac82-feaf-4e77-ab1b-ea7a2a5cf6c7
 # ╟─b385a6b2-e2b0-4179-ac81-21a8600f86cf
 # ╟─7f8b5fe8-f5d1-46eb-a30e-8f0a6e9707bc
 # ╟─2e7b7b97-f4b9-4ef8-b360-e086ffc0a025
 # ╟─dc37fa99-ceb5-40cb-846a-6cdf9d33c2f3
+# ╠═289205ad-0bd3-473c-b076-fab42e1643c3
+# ╠═8d0b7517-1be8-41c4-8a4b-716bcad169fb
+# ╟─fc37abf6-6acd-4b11-bdab-ddee379d8d72
+# ╠═29f4022e-28dc-4ef8-8e83-11d466437813
+# ╟─a1f13b96-fbd3-40ab-aa3f-9af14d55ed55
+# ╠═ef66b620-cfa3-47b4-bc2b-6cc77427764f
+# ╟─19deee02-5fb7-400c-a853-74bd44a8deaf
+# ╠═608b2a67-b34b-4440-9282-3f225e5714be
+# ╠═2d5b3f57-efac-4bbd-99df-a81daf569733
 # ╟─4e7487ad-b8e6-43f7-aff1-99d826ee1963
 # ╟─38345378-66ee-42c1-b37f-6691119ecc60
 # ╠═df519afa-309a-4633-860d-2fe40a384fa9
