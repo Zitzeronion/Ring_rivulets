@@ -11,4 +11,4 @@ Increasing tehe slip length $\delta$
 
 ![](assets/slip_5_ang_20_R_180_rr_40_kbt_off.gif)
 ![](assets/ang_20_R_180_rr_40_kbt_off.gif)
-![](assets/slip_25_ang_30_R_180_rr_40_kbt_off.gif)
+![](assets/slip_25_ang_20_R_180_rr_40_kbt_off.gif)
