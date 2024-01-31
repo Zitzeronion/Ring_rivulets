@@ -717,6 +717,8 @@ The data file contains the temporal evolution of the height field.
 Every 25000Δt we make a snapshot of the system until we reach the end of the time loop at 2500000Δt.
 The file that contains this series is uniquely labeled with date and parameters for the initial condition (`torus()`).
 Every entry in the `data` and `data_arrested` array points towards one such files.
+
+### Unpatterned Substrate
 "
 
 # ╔═╡ c9572357-8d97-47a7-914a-91c0b452eb6b
@@ -805,6 +807,11 @@ begin
 	# println(typeof(dataH), " ", typeof(dataH) == Dict{String, Any})
 	heatmap_data(data0, t=25000)
 end
+
+# ╔═╡ a1ee76ab-bf27-466e-8324-01ecde09931c
+md"
+### Patterned Substrate
+"
 
 # ╔═╡ 846ebcbe-34d6-48a4-bc23-cbd04bacf526
 data_arrested = [
@@ -910,7 +917,10 @@ data_arrested = [
 ]
 
 # ╔═╡ dc5ab038-569e-4603-95af-0549c6e4ee76
-md"For even more data we varied the surface tension γ and reduced it by a factor of 2 as well as increased it by a factor of 2.
+md"
+### Surface tension variation
+
+For even more data we varied the surface tension γ and reduced it by a factor of 2 as well as increased it by a factor of 2.
 
 - data_gamma05 half surface tension
 - data_gamma20 double surface tension
@@ -996,23 +1006,6 @@ data_gamma20 = [
 	(200, 40, 0.0,    12,11, 15, 14, 10), 	#
 ]
 
-# ╔═╡ 24fde296-5a6f-4a92-bf16-855df4c99227
-data_slip= [
-	# R, rr, kbt, year, month, day, hour, min, theta, slip
-	(180, 20, 0.0, 2024, 1, 25, 11, 40, 20, 5), 	# 1
-	(180, 40, 0.0, 2024, 1, 25, 12, 57, 20, 5), 	# 2
-	(180, 20, 0.0, 2024, 1, 25, 14, 16, 20, 25), 	# 3
-	(180, 40, 0.0, 2024, 1, 25, 15, 36, 20, 25), 	# 4
-	(180, 20, 0.0, 2024, 1, 25, 16, 55, 30, 5), 	# 5
-	(180, 40, 0.0, 2024, 1, 25, 18, 14, 30, 5), 	# 6
-	(180, 20, 0.0, 2024, 1, 25, 19, 34, 30, 25), 	# 7
-	(180, 40, 0.0, 2024, 1, 25, 20, 53, 30, 25), 	# 8 
-	(180, 20, 0.0, 2024, 1, 25, 22, 13, 40, 5), 	# 9
-	(180, 40, 0.0, 2024, 1, 25, 23, 32, 40, 5), 	# 10
-	(180, 20, 0.0, 2024, 1, 26,  0, 51, 40, 25), 	# 11
-	(180, 40, 0.0, 2024, 1, 26,  2, 11, 40, 25), 	# 12
-]
-
 # ╔═╡ 5a733a9a-759c-4e31-9bb6-ad9d62425f45
 """
 	renderGifs()
@@ -1049,8 +1042,35 @@ function renderGifs(; verbose=false)
 	end
 end
 
-# ╔═╡ b3be394c-5997-4494-ad40-ced2f10fd364
-renderGifs()
+# ╔═╡ 05715ba9-fdd3-43c8-b6fc-ee32d225cdf0
+md"
+### Slip variation
+
+Very recently we also added another set of simulations.
+This time we varied the slip length, which is an effective parameter for the velocity boundary condition.
+For all other simulations we used a slip length $\delta = 1$, to check if there is an influence at all we now have:
+- δ = 0.5
+- δ = 2
+
+thus a similar approach as in the surface tension case.
+"
+
+# ╔═╡ 24fde296-5a6f-4a92-bf16-855df4c99227
+data_slip= [
+	# R, rr, kbt, year, month, day, hour, min, theta, slip
+	(180, 20, 0.0, 2024, 1, 25, 11, 40, 20, 5), 	# 1
+	(180, 40, 0.0, 2024, 1, 25, 12, 57, 20, 5), 	# 2
+	(180, 20, 0.0, 2024, 1, 25, 14, 16, 20, 25), 	# 3
+	(180, 40, 0.0, 2024, 1, 25, 15, 36, 20, 25), 	# 4
+	(180, 20, 0.0, 2024, 1, 25, 16, 55, 30, 5), 	# 5
+	(180, 40, 0.0, 2024, 1, 25, 18, 14, 30, 5), 	# 6
+	(180, 20, 0.0, 2024, 1, 25, 19, 34, 30, 25), 	# 7
+	(180, 40, 0.0, 2024, 1, 25, 20, 53, 30, 25), 	# 8 
+	(180, 20, 0.0, 2024, 1, 25, 22, 13, 40, 5), 	# 9
+	(180, 40, 0.0, 2024, 1, 25, 23, 32, 40, 5), 	# 10
+	(180, 20, 0.0, 2024, 1, 26,  0, 51, 40, 25), 	# 11
+	(180, 40, 0.0, 2024, 1, 26,  2, 11, 40, 25), 	# 12
+]
 
 # ╔═╡ 4476c046-db75-4e22-9701-04d68c357198
 """
@@ -1083,12 +1103,23 @@ function render_slip(; verbose=false)
 	end
 end
 
+# ╔═╡ b3be394c-5997-4494-ad40-ced2f10fd364
+renderGifs()
+
 # ╔═╡ 6ee87ada-668c-4d1b-aa55-e35b7b475f2a
 render_slip(verbose=true)
 
 # ╔═╡ 0f204a06-71b2-438a-bb49-4af8ebda0001
 md" # Results
 
+Here comes the actual research part.
+So far we have set up quite a lot of tools to generate and analyse the data.
+But we haven't answered the question of what we expect to find or what should happen yet.
+We know though that not every rivulet is stable and we know that some of them breakup and form droplets.
+But how many of them do that and is there a systematic behind it?
+This and some more questions will be adressed in the forth coming cells.
+
+## Real space
 So what does the simulations produce?
 Below is an image of the state at the end of the time loop.
 Clearly the rivulet has broken into droplets.
@@ -1099,7 +1130,6 @@ begin
 	nmset = 10
 	ts = 1000000
 	dataH = read_data(R=data[nmset][1], r=data[nmset][2], kbT=data[nmset][3], month=data[nmset][4], day=data[nmset][5], hour=data[nmset][6], minute=data[nmset][7], θ=data[nmset][8], nm=32)
-	# println(typeof(dataH), " ", typeof(dataH) == Dict{String, Any})
 	heatmap_data(dataH, t=ts)
 end
 
@@ -1114,8 +1144,14 @@ In the image below we do this analysis for a single state and colorate each feat
 # ╔═╡ c945050f-3ddc-4d0e-80dd-af909c3f4ab5
 segment_image(dataH, ts)
 
+# ╔═╡ 7e2fd675-28ba-4412-9c56-4b40b3380576
+md"
+We measure 27 droplets and if we were to count the different colored discs we also would find 27 discs.
+This is an rather straightforward way to see if a rivulet is stable or if it breaks during the simulation.
+"
+
 # ╔═╡ 89045ff9-bfb2-43e7-865b-235181cdf9f7
-md" ### Dynamics
+md" ### Dynamics in real space
 
 The easist way to identify what is going on, is to just see whats going on.
 This is why we generate a `.gif` file for each individual simulation.
@@ -1131,15 +1167,15 @@ Considering these two setups we observe the following processes:
 1. Retract
 "
 
-# ╔═╡ a58ec747-09cb-4cba-a9f0-4de683c80052
-LocalResource("../assets/ang_40_R_180_rr_40_kbt_off.gif", :width => 600)
-
 # ╔═╡ 03bf6a75-a98c-4641-9939-2336c78e1be7
 begin
-	slice_gif = read_data(R=180, r=40, kbT=0.0, month=11, day=3, hour=23, minute=34, θ=40 ,nm=32, arrested=false)
+	# slice_gif = read_data(R=180, r=40, kbT=0.0, month=11, day=3, hour=23, minute=34, θ=40 ,nm=32, arrested=false)
 	# (180, 40, 0.0,    11, 3, 23, 34, 40
-	do_gif_slice(slice_gif, "slice_R180_r40_t40"; timeMax=2500000)
+	# do_gif_slice(slice_gif, "slice_R180_r40_t40"; timeMax=2500000)
 end
+
+# ╔═╡ a58ec747-09cb-4cba-a9f0-4de683c80052
+LocalResource("../assets/ang_40_R_180_rr_40_kbt_off.gif", :width => 600)
 
 # ╔═╡ c66bac82-feaf-4e77-ab1b-ea7a2a5cf6c7
 md"
@@ -1171,28 +1207,40 @@ On the other hand we want to know if the rivulet has ruptured, thus we use the i
 Often stability can be calculated using a so-called **linear-stability analysis**. 
 I still have to find a way to compute that however what I readily can do is to analyse the spectra.
 
-#### Spectra
 
 In the following we work with the hight data only, we don't measure but simply transform it with a **FFT**.
-This way we can compute dominate wavelengths and have a time resolved analysis of which wavelengths are growing and which get damped.
+This way we can compute dominate wavelengths. 
+We also get a dispertion relation, showing (hopefully) growth and damping of different wave modes.
 This information should differ between the arrested rivulets and the contracting rivulets, because 
 - the major and minor radii are not constant and 
 - the wave modes are directly correlated with both them, at least I assume so.
 
 So let's get started and compute some spectra.
-First we need the height field, perferably as matrix of real values.
+First let's introduce the fft method.
 "
+
+# ╔═╡ 1c6b09bb-9809-411d-8ddd-2095256d0601
+md"
+
+## Reciprocal space
+Using `Image.jl` is in fact one way to look at this issue, because we can also **Fourier transform** the data and analyse the spectrum in reciprocal space.
+This is why we loaded `FFTW.jl` at the top of the notebook to compute the **FFT** of the height field $h(\mathbf{x},t)$, where $\mathbf{x} = (x,y)$.
+
+We therefore load a single time step of a simulation as shown below:
+"
+
+# ╔═╡ 2a66eee4-be06-43a2-a9be-fc2e0c4a0f32
+fftset = 32
+
+# ╔═╡ ea5f58f9-5394-4536-9458-0484e85fdc85
+time_here = 500000
 
 # ╔═╡ 289205ad-0bd3-473c-b076-fab42e1643c3
 begin
-	fftset = 26
-	time_here = 250000
 	fft_try = read_data(R=data[fftset][1], r=data[fftset][2], kbT=data[fftset][3], month=data[fftset][4], day=data[fftset][5], hour=data[fftset][6], minute=data[fftset][7], θ=data[fftset][8], nm=32)
 	fft_data = heatmap_data(fft_try, t=time_here, just_data=true)
+	# fft_data[fft_data .< 0.055] .= 0.0
 end
-
-# ╔═╡ 8d0b7517-1be8-41c4-8a4b-716bcad169fb
-heatmap(fft_data, c=:viridis, aspect_ratio=1)
 
 # ╔═╡ fc37abf6-6acd-4b11-bdab-ddee379d8d72
 md" 
@@ -1211,7 +1259,23 @@ Radial averaging of this data should correspond to the growth of a dominate wave
 "
 
 # ╔═╡ ef66b620-cfa3-47b4-bc2b-6cc77427764f
-heatmap(log.(abs.(spectrumH .* spectrumH)) .+ 1, aspect_ratio=1)
+heatmap(log.(abs.(spectrumH .* spectrumH)) .+ 1, aspect_ratio=1, 
+	#clim=(0.1, 1000)
+	)
+
+# ╔═╡ 010e2c3b-f66a-411b-b819-3d37448c4087
+md"
+The height field that produces the fft above is shown in the cell below.
+We clearly see that this annulus has some funky undulations and this funky undulations are actually well captured by the fft signal.
+
+If we would take a annulus that is just retracting we would see an isotropic annulus pattern with distance between them based on the real space annulus radius. 
+"
+
+# ╔═╡ 8d0b7517-1be8-41c4-8a4b-716bcad169fb
+heatmap(fft_data, c=:viridis, aspect_ratio=1)
+
+# ╔═╡ 4b31ba28-8d45-4e81-bf71-ab17424cab15
+plot(fft_data[256, :])
 
 # ╔═╡ 19deee02-5fb7-400c-a853-74bd44a8deaf
 md"The *FFT* is as far as I know symmetric and does only contain information for wave lengths up to $L/2$, which in our case is $256\Delta x$.
@@ -1221,7 +1285,38 @@ That is why a quater of the above image should be enough for further analysis."
 heatmap(log.(abs.(spectrumH[256:end, 256:end] .* spectrumH[256:end, 256:end])) .+ 1, aspect_ratio=1, xlims=(1,256), ylims=(1,256))
 
 # ╔═╡ 2d5b3f57-efac-4bbd-99df-a81daf569733
-plot(log.(abs.(spectrumH[256, 256:end] .* spectrumH[256, 256:end])) .+ 1, xaxis=:log)
+plot(abs.(spectrumH[256, 256:end] .* spectrumH[256, 256:end]) .+ 1, 
+	# xaxis=:log,
+	yaxis=:log,
+	# xlims = (1, 10)
+)
+
+# ╔═╡ 45f2bff6-5edb-47ac-8db5-7adefe2d7960
+50π/256
+
+# ╔═╡ a59cefd2-27c4-4332-943e-1fbd79ae2481
+begin
+	someset = 32
+	fft_anim = read_data(R=data[someset][1], r=data[someset][2], kbT=data[someset][3], month=data[someset][4], day=data[someset][5], hour=data[someset][6], minute=data[someset][7], θ=data[someset][8], nm=32)
+	anim = Animation()
+	dataEnd = heatmap_data(fft_anim, t=2500000, just_data=true)
+	maxH = maximum(dataEnd)
+	for t in 25000:25000:2500000
+		fftdata = heatmap_data(fft_anim, t=t, just_data=true) ./ maxH
+		specH= fftshift(fft(Float64.(Gray.(fftdata))))
+		specH[256, 256] = 1.0
+		plot(abs.(specH[256, 256:end] .* specH[256, 256:end]) .+ 1, 
+			label="t=$(t)Δt", 
+			xlabel="k/[Δx⁻¹]", 
+			ylabel="S(k)",
+			yaxis=:log,
+			# xaxis=:log,
+			# xlims = (1, 10)
+    	)
+		frame(anim)
+	end
+	gif(anim, "../assets/spectrum_try.gif")
+end
 
 # ╔═╡ 4e7487ad-b8e6-43f7-aff1-99d826ee1963
 """
@@ -3644,11 +3739,11 @@ version = "1.4.1+1"
 # ╠═f268582b-0756-41cf-910d-7a57b698451d
 # ╟─1b26468c-b4f7-4252-b891-4f95bc04c869
 # ╟─6d3c1725-75fa-412e-9b30-8f8df4e7874b
-# ╠═0acf9712-b27c-40c8-9bec-64d6389ce2c4
-# ╠═eadae383-6b5b-4e4e-80b9-5eb2fc4a5ead
+# ╟─0acf9712-b27c-40c8-9bec-64d6389ce2c4
+# ╟─eadae383-6b5b-4e4e-80b9-5eb2fc4a5ead
 # ╟─789e9f0e-863a-4cd5-8f99-f830120e8960
 # ╟─2df8c833-7ca7-4d7a-ade5-0df083a013a1
-# ╠═81d255ea-1ab3-4635-ab4c-66100a820b28
+# ╟─81d255ea-1ab3-4635-ab4c-66100a820b28
 # ╟─fae89add-5036-44d7-b4f4-0d9e9fad0966
 # ╟─6e82547e-c935-4a3e-b736-a0dae07bfb50
 # ╟─9da027de-9ee2-487c-b978-cbfd77e35fef
@@ -3669,7 +3764,7 @@ version = "1.4.1+1"
 # ╟─dad911c1-c8b2-4315-9c3b-b1859d44719b
 # ╟─7cf4ce88-33de-472c-99c6-5b3ae258f3d1
 # ╟─8b2c77d3-f743-4840-a9d9-9308e05be28d
-# ╠═0361d281-4a64-4792-812f-7eb9d268d2ae
+# ╟─0361d281-4a64-4792-812f-7eb9d268d2ae
 # ╟─60ce933e-4335-4190-a7b0-5c86d0326a35
 # ╟─3eaf9941-d510-4a91-99bf-2084bbe3ea40
 # ╟─70da13b0-6111-4d5d-a6f5-49fcc0499738
@@ -3677,40 +3772,50 @@ version = "1.4.1+1"
 # ╟─b3ae647b-1de9-4f56-b786-8719705c1e09
 # ╟─37756334-7859-499d-b355-658349aa1805
 # ╟─063757cb-b822-44e3-8a2b-57808c6f30cf
+# ╟─5a733a9a-759c-4e31-9bb6-ad9d62425f45
+# ╠═4476c046-db75-4e22-9701-04d68c357198
 # ╟─4fb1d7ad-47f2-4adf-a2ba-0ecc0fc8eeb0
-# ╠═41aee571-9016-4759-859a-c99eb143a410
+# ╟─41aee571-9016-4759-859a-c99eb143a410
 # ╟─13ce2bea-889f-4727-a126-71a5006a86ab
 # ╟─c9572357-8d97-47a7-914a-91c0b452eb6b
+# ╟─a1ee76ab-bf27-466e-8324-01ecde09931c
 # ╟─846ebcbe-34d6-48a4-bc23-cbd04bacf526
 # ╟─dc5ab038-569e-4603-95af-0549c6e4ee76
 # ╟─9070e432-d2ae-4633-9ad6-637b3eca9bce
 # ╟─93e8f4ee-7558-4178-8f06-96a422528c48
+# ╟─05715ba9-fdd3-43c8-b6fc-ee32d225cdf0
 # ╟─24fde296-5a6f-4a92-bf16-855df4c99227
-# ╟─5a733a9a-759c-4e31-9bb6-ad9d62425f45
-# ╠═b3be394c-5997-4494-ad40-ced2f10fd364
-# ╟─4476c046-db75-4e22-9701-04d68c357198
+# ╟─b3be394c-5997-4494-ad40-ced2f10fd364
 # ╟─6ee87ada-668c-4d1b-aa55-e35b7b475f2a
-# ╠═0f204a06-71b2-438a-bb49-4af8ebda0001
-# ╠═d5152b67-bc1d-4cc0-b73e-90d79dbadcb4
+# ╟─0f204a06-71b2-438a-bb49-4af8ebda0001
+# ╟─d5152b67-bc1d-4cc0-b73e-90d79dbadcb4
 # ╟─ab5b4c7c-ae24-4aae-a528-1dc427a7f1f1
 # ╟─c945050f-3ddc-4d0e-80dd-af909c3f4ab5
+# ╟─7e2fd675-28ba-4412-9c56-4b40b3380576
 # ╟─89045ff9-bfb2-43e7-865b-235181cdf9f7
-# ╟─a58ec747-09cb-4cba-a9f0-4de683c80052
 # ╟─03bf6a75-a98c-4641-9939-2336c78e1be7
+# ╟─a58ec747-09cb-4cba-a9f0-4de683c80052
 # ╟─c66bac82-feaf-4e77-ab1b-ea7a2a5cf6c7
 # ╟─b385a6b2-e2b0-4179-ac81-21a8600f86cf
 # ╟─7f8b5fe8-f5d1-46eb-a30e-8f0a6e9707bc
 # ╟─2e7b7b97-f4b9-4ef8-b360-e086ffc0a025
 # ╟─dc37fa99-ceb5-40cb-846a-6cdf9d33c2f3
+# ╠═1c6b09bb-9809-411d-8ddd-2095256d0601
+# ╠═2a66eee4-be06-43a2-a9be-fc2e0c4a0f32
+# ╠═ea5f58f9-5394-4536-9458-0484e85fdc85
 # ╠═289205ad-0bd3-473c-b076-fab42e1643c3
-# ╠═8d0b7517-1be8-41c4-8a4b-716bcad169fb
 # ╟─fc37abf6-6acd-4b11-bdab-ddee379d8d72
 # ╠═29f4022e-28dc-4ef8-8e83-11d466437813
 # ╟─a1f13b96-fbd3-40ab-aa3f-9af14d55ed55
 # ╠═ef66b620-cfa3-47b4-bc2b-6cc77427764f
+# ╟─010e2c3b-f66a-411b-b819-3d37448c4087
+# ╠═8d0b7517-1be8-41c4-8a4b-716bcad169fb
+# ╠═4b31ba28-8d45-4e81-bf71-ab17424cab15
 # ╟─19deee02-5fb7-400c-a853-74bd44a8deaf
 # ╠═608b2a67-b34b-4440-9282-3f225e5714be
 # ╠═2d5b3f57-efac-4bbd-99df-a81daf569733
+# ╠═45f2bff6-5edb-47ac-8db5-7adefe2d7960
+# ╠═a59cefd2-27c4-4332-943e-1fbd79ae2481
 # ╟─4e7487ad-b8e6-43f7-aff1-99d826ee1963
 # ╟─38345378-66ee-42c1-b37f-6691119ecc60
 # ╠═df519afa-309a-4633-860d-2fe40a384fa9
