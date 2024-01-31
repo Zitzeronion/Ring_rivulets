@@ -1223,17 +1223,28 @@ First let's introduce the fft method.
 md"
 
 ## Reciprocal space
-Using `Image.jl` is in fact one way to look at this issue, because we can also **Fourier transform** the data and analyse the spectrum in reciprocal space.
-This is why we loaded `FFTW.jl` at the top of the notebook to compute the **FFT** of the height field $h(\mathbf{x},t)$, where $\mathbf{x} = (x,y)$.
+Using `Image.jl` is in fact only one way to look at this issue, because we can also **Fourier transform** the data and analyse the spectrum in reciprocal space.
+Long waves have small wave numbers and short wavelengths have large wave numbers.
+This is why we loaded `FFTW.jl` at the top of the notebook to compute the **FFT** (fast Fourier transform) of the height field $h(\mathbf{x},t)$, where $\mathbf{x} = (x,y)$.
 
-We therefore load a single time step of a simulation as shown below:
+We therefore choose a single simulation for the unpatterned data set.
 "
 
 # ╔═╡ 2a66eee4-be06-43a2-a9be-fc2e0c4a0f32
-fftset = 32
+fftset = 25
+
+# ╔═╡ a86d30c5-03f0-4e11-ba25-1f08ba0998b7
+md"
+Next we choose a single time step where we want to compute the **FFT** of the height field.
+"
 
 # ╔═╡ ea5f58f9-5394-4536-9458-0484e85fdc85
-time_here = 500000
+time_here = 250000
+
+# ╔═╡ cca0ed73-b1e7-4895-8537-294ccb3f9e26
+md" 
+The actual height field is just a 512 by 512 matrix with height values at every lattice point, as shown below.
+"
 
 # ╔═╡ 289205ad-0bd3-473c-b076-fab42e1643c3
 begin
@@ -1259,9 +1270,12 @@ Radial averaging of this data should correspond to the growth of a dominate wave
 "
 
 # ╔═╡ ef66b620-cfa3-47b4-bc2b-6cc77427764f
-heatmap(log.(abs.(spectrumH .* spectrumH)) .+ 1, aspect_ratio=1, 
+funFFT = heatmap(log.(abs.(spectrumH .* spectrumH)) .+ 1, aspect_ratio=1, 
 	#clim=(0.1, 1000)
 	)
+
+# ╔═╡ 9b76fce9-3219-417f-83db-faa55c39694f
+savefig(funFFT, "../assets/someFFT.png")
 
 # ╔═╡ 010e2c3b-f66a-411b-b819-3d37448c4087
 md"
@@ -1275,7 +1289,10 @@ If we would take a annulus that is just retracting we would see an isotropic ann
 heatmap(fft_data, c=:viridis, aspect_ratio=1)
 
 # ╔═╡ 4b31ba28-8d45-4e81-bf71-ab17424cab15
+# ╠═╡ disabled = true
+#=╠═╡
 plot(fft_data[256, :])
+  ╠═╡ =#
 
 # ╔═╡ 19deee02-5fb7-400c-a853-74bd44a8deaf
 md"The *FFT* is as far as I know symmetric and does only contain information for wave lengths up to $L/2$, which in our case is $256\Delta x$.
@@ -1284,39 +1301,89 @@ That is why a quater of the above image should be enough for further analysis."
 # ╔═╡ 608b2a67-b34b-4440-9282-3f225e5714be
 heatmap(log.(abs.(spectrumH[256:end, 256:end] .* spectrumH[256:end, 256:end])) .+ 1, aspect_ratio=1, xlims=(1,256), ylims=(1,256))
 
-# ╔═╡ 2d5b3f57-efac-4bbd-99df-a81daf569733
-plot(abs.(spectrumH[256, 256:end] .* spectrumH[256, 256:end]) .+ 1, 
-	# xaxis=:log,
-	yaxis=:log,
-	# xlims = (1, 10)
-)
-
 # ╔═╡ 45f2bff6-5edb-47ac-8db5-7adefe2d7960
-50π/256
+512/(50)
+
+# ╔═╡ 28d6e267-117b-491f-8756-bf2d7fb06aec
+"""
+	distanceArray(; X=512, Y=512, center=(256,256))
+
+Computes the euclidian distance and returns a `X` time `Y` matrix with distances
+"""
+function distanceArray(; X=512, Y=512, center=(256,256))
+	distances = zeros(X,Y)
+	for x in 1:X
+		for y in 1:Y
+			distances[x,y] = Int(round(sqrt((x-center[1])^2 + (y-center[2])^2))) + 1
+		end
+	end
+	return distances
+end
+
+# ╔═╡ af7fa2dc-3e0e-420e-82fc-1451ae0afa67
+"""
+	simpleAverage(array)
+
+Simple radial averagering with Chebyshev distance.
+"""
+function simpleAverage(array)
+	Lx = size(array,1)
+	Ly = size(array,2)
+	fft_stuff = abs.(array .* array)
+	d = distanceArray(X=Lx, Y=Ly, center=(Lx÷2, Ly÷2))
+	averageRadialChebyshev = zeros(Lx÷2+1)
+	for i in 1:Lx÷2
+		toAverage = fft_stuff[d .== i]
+		averageRadialChebyshev[i] = sum(toAverage) / length(toAverage)
+	end
+	return averageRadialChebyshev
+end
 
 # ╔═╡ a59cefd2-27c4-4332-943e-1fbd79ae2481
 begin
-	someset = 32
-	fft_anim = read_data(R=data[someset][1], r=data[someset][2], kbT=data[someset][3], month=data[someset][4], day=data[someset][5], hour=data[someset][6], minute=data[someset][7], θ=data[someset][8], nm=32)
+	someset = 26
+	# Retraction
+	fft_anim1 = read_data(R=data[someset][1], r=data[someset][2], kbT=data[someset][3], month=data[someset][4], day=data[someset][5], hour=data[someset][6], minute=data[someset][7], θ=data[someset][8], nm=32)
+	# Breakup
+	fft_anim2 = read_data(R=data[someset-1][1], r=data[someset-1][2], kbT=data[someset-1][3], month=data[someset-1][4], day=data[someset-1][5], hour=data[someset-1][6], minute=data[someset-1][7], θ=data[someset-1][8], nm=32)
 	anim = Animation()
-	dataEnd = heatmap_data(fft_anim, t=2500000, just_data=true)
-	maxH = maximum(dataEnd)
+	dataEnd1 = heatmap_data(fft_anim1, t=2500000, just_data=true)
+	dataEnd2 = heatmap_data(fft_anim2, t=2500000, just_data=true)
+	max1 = maximum(dataEnd1)
+	max2 = maximum(dataEnd2)
 	for t in 25000:25000:2500000
-		fftdata = heatmap_data(fft_anim, t=t, just_data=true) ./ maxH
-		specH= fftshift(fft(Float64.(Gray.(fftdata))))
-		specH[256, 256] = 1.0
-		plot(abs.(specH[256, 256:end] .* specH[256, 256:end]) .+ 1, 
-			label="t=$(t)Δt", 
+		fftdata1 = heatmap_data(fft_anim1, t=t, just_data=true) ./ max1
+		fftdata2 = heatmap_data(fft_anim2, t=t, just_data=true) ./ max2
+		spec1= fftshift(fft(Float64.(Gray.(fftdata1))))
+		spec2= fftshift(fft(Float64.(Gray.(fftdata2))))
+		# specH[256, 256] = 1.0
+		averagedPSD1 = simpleAverage(spec1)
+		averagedPSD2 = simpleAverage(spec2)
+		plot(averagedPSD1 .+ 1,
+			title="t=$(t)Δt",
+			label="Retraction", 
 			xlabel="k/[Δx⁻¹]", 
 			ylabel="S(k)",
-			yaxis=:log,
-			# xaxis=:log,
+			yscale=:log10,
+			xscale=:log10,
+			grid=false,
+			minorticks=true,
+			# xlims = (1, 10)
+    	)
+		plot!(averagedPSD2 .+ 1, 
+			label="Breakup", 
 			# xlims = (1, 10)
     	)
 		frame(anim)
 	end
 	gif(anim, "../assets/spectrum_try.gif")
 end
+
+# ╔═╡ 72270f78-01c5-4ce5-aac4-901fd9a5143f
+hmmm = simpleAverage(spectrumH)
+
+# ╔═╡ 17f29f46-0463-4604-8783-b9c1057a7001
+plot(hmmm .+1, yaxis=:log)
 
 # ╔═╡ 4e7487ad-b8e6-43f7-aff1-99d826ee1963
 """
@@ -3773,7 +3840,7 @@ version = "1.4.1+1"
 # ╟─37756334-7859-499d-b355-658349aa1805
 # ╟─063757cb-b822-44e3-8a2b-57808c6f30cf
 # ╟─5a733a9a-759c-4e31-9bb6-ad9d62425f45
-# ╠═4476c046-db75-4e22-9701-04d68c357198
+# ╟─4476c046-db75-4e22-9701-04d68c357198
 # ╟─4fb1d7ad-47f2-4adf-a2ba-0ecc0fc8eeb0
 # ╟─41aee571-9016-4759-859a-c99eb143a410
 # ╟─13ce2bea-889f-4727-a126-71a5006a86ab
@@ -3802,20 +3869,26 @@ version = "1.4.1+1"
 # ╟─dc37fa99-ceb5-40cb-846a-6cdf9d33c2f3
 # ╠═1c6b09bb-9809-411d-8ddd-2095256d0601
 # ╠═2a66eee4-be06-43a2-a9be-fc2e0c4a0f32
+# ╟─a86d30c5-03f0-4e11-ba25-1f08ba0998b7
 # ╠═ea5f58f9-5394-4536-9458-0484e85fdc85
+# ╟─cca0ed73-b1e7-4895-8537-294ccb3f9e26
 # ╠═289205ad-0bd3-473c-b076-fab42e1643c3
 # ╟─fc37abf6-6acd-4b11-bdab-ddee379d8d72
 # ╠═29f4022e-28dc-4ef8-8e83-11d466437813
 # ╟─a1f13b96-fbd3-40ab-aa3f-9af14d55ed55
 # ╠═ef66b620-cfa3-47b4-bc2b-6cc77427764f
+# ╠═9b76fce9-3219-417f-83db-faa55c39694f
 # ╟─010e2c3b-f66a-411b-b819-3d37448c4087
 # ╠═8d0b7517-1be8-41c4-8a4b-716bcad169fb
 # ╠═4b31ba28-8d45-4e81-bf71-ab17424cab15
 # ╟─19deee02-5fb7-400c-a853-74bd44a8deaf
 # ╠═608b2a67-b34b-4440-9282-3f225e5714be
-# ╠═2d5b3f57-efac-4bbd-99df-a81daf569733
+# ╠═17f29f46-0463-4604-8783-b9c1057a7001
 # ╠═45f2bff6-5edb-47ac-8db5-7adefe2d7960
 # ╠═a59cefd2-27c4-4332-943e-1fbd79ae2481
+# ╠═28d6e267-117b-491f-8756-bf2d7fb06aec
+# ╠═af7fa2dc-3e0e-420e-82fc-1451ae0afa67
+# ╠═72270f78-01c5-4ce5-aac4-901fd9a5143f
 # ╟─4e7487ad-b8e6-43f7-aff1-99d826ee1963
 # ╟─38345378-66ee-42c1-b37f-6691119ecc60
 # ╠═df519afa-309a-4633-860d-2fe40a384fa9
