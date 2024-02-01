@@ -7,6 +7,12 @@ using InteractiveUtils
 # ╔═╡ f268582b-0756-41cf-910d-7a57b698451d
 using FileIO, PlutoUI, Plots, DataFrames, CSV, JLD2, Images, ImageSegmentation, Random, FFTW
 
+# ╔═╡ f075f19a-81b6-47b7-9104-57d2e51e7241
+begin
+	include("RivuletTools.jl")
+	import .RivuletTools
+end
+
 # ╔═╡ 569bbd2c-7fae-4e26-afe5-3f4d06f7d505
 TableOfContents()
 
@@ -150,7 +156,7 @@ end
 # ╔═╡ 2df8c833-7ca7-4d7a-ade5-0df083a013a1
 begin
 	h_some = 
-	plot_slice(read_data(R=180, r=40, kbT=0.0, month=11, day=5, hour=1, minute=28, θ=30, nm=32, arrested=false), t=25000)
+	plot_slice(RivuletTools.read_data(R=180, r=40, kbT=0.0, month=11, day=5, hour=1, minute=28, θ=30, nm=32, arrested=false), t=25000)
 	
 end
 
@@ -270,12 +276,12 @@ end
 # ╔═╡ 04e344a3-3d5b-449e-9222-481df24015c7
 # (160, 20, 0.0,    11,27, 14, 51, 20
 begin
-	hja = read_data(R=160, r=20, kbT=0.0, month=11, day=27, hour=14, minute=51, θ=20 ,nm=32, arrested=true)
-	measure_cluster(hja, t=2500000)
+	hja = RivuletTools.read_data(R=160, r=20, kbT=0.0, month=11, day=27, hour=14, minute=51, θ=20 ,nm=32, arrested=true)
+	RivuletTools.measure_cluster(hja, t=2500000)
 end
 
 # ╔═╡ 974c334e-38fb-436e-842b-bb016854d136
-heatmap_data(hja, t=875000)
+RivuletTools.heatmap_data(hja, t=875000)
 
 # ╔═╡ 20d68b97-40d4-41a4-b4df-bde6a3abb587
 """
@@ -3804,18 +3810,19 @@ version = "1.4.1+1"
 # ╟─569bbd2c-7fae-4e26-afe5-3f4d06f7d505
 # ╟─94b9bdb0-73ee-11ee-10e9-e93688ea4523
 # ╠═f268582b-0756-41cf-910d-7a57b698451d
+# ╠═f075f19a-81b6-47b7-9104-57d2e51e7241
 # ╟─1b26468c-b4f7-4252-b891-4f95bc04c869
 # ╟─6d3c1725-75fa-412e-9b30-8f8df4e7874b
 # ╟─0acf9712-b27c-40c8-9bec-64d6389ce2c4
-# ╟─eadae383-6b5b-4e4e-80b9-5eb2fc4a5ead
+# ╠═eadae383-6b5b-4e4e-80b9-5eb2fc4a5ead
 # ╟─789e9f0e-863a-4cd5-8f99-f830120e8960
-# ╟─2df8c833-7ca7-4d7a-ade5-0df083a013a1
+# ╠═2df8c833-7ca7-4d7a-ade5-0df083a013a1
 # ╟─81d255ea-1ab3-4635-ab4c-66100a820b28
 # ╟─fae89add-5036-44d7-b4f4-0d9e9fad0966
 # ╟─6e82547e-c935-4a3e-b736-a0dae07bfb50
 # ╟─9da027de-9ee2-487c-b978-cbfd77e35fef
 # ╟─f25c4971-572f-41e2-be87-ad513c86e737
-# ╟─04e344a3-3d5b-449e-9222-481df24015c7
+# ╠═04e344a3-3d5b-449e-9222-481df24015c7
 # ╠═974c334e-38fb-436e-842b-bb016854d136
 # ╟─0dd77f66-ec27-4cdf-81e8-bcecfbcfcf29
 # ╟─20d68b97-40d4-41a4-b4df-bde6a3abb587
@@ -3837,7 +3844,7 @@ version = "1.4.1+1"
 # ╟─70da13b0-6111-4d5d-a6f5-49fcc0499738
 # ╟─5baa1023-db81-4374-913d-1e88bacdb2ac
 # ╟─b3ae647b-1de9-4f56-b786-8719705c1e09
-# ╟─37756334-7859-499d-b355-658349aa1805
+# ╠═37756334-7859-499d-b355-658349aa1805
 # ╟─063757cb-b822-44e3-8a2b-57808c6f30cf
 # ╟─5a733a9a-759c-4e31-9bb6-ad9d62425f45
 # ╟─4476c046-db75-4e22-9701-04d68c357198
@@ -3860,7 +3867,7 @@ version = "1.4.1+1"
 # ╟─c945050f-3ddc-4d0e-80dd-af909c3f4ab5
 # ╟─7e2fd675-28ba-4412-9c56-4b40b3380576
 # ╟─89045ff9-bfb2-43e7-865b-235181cdf9f7
-# ╟─03bf6a75-a98c-4641-9939-2336c78e1be7
+# ╠═03bf6a75-a98c-4641-9939-2336c78e1be7
 # ╟─a58ec747-09cb-4cba-a9f0-4de683c80052
 # ╟─c66bac82-feaf-4e77-ab1b-ea7a2a5cf6c7
 # ╟─b385a6b2-e2b0-4179-ac81-21a8600f86cf
