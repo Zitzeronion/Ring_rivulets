@@ -9,6 +9,7 @@ using FileIO, PlutoUI, Plots, DataFrames, CSV, JLD2, Images, ImageSegmentation, 
 
 # ╔═╡ f075f19a-81b6-47b7-9104-57d2e51e7241
 begin
+	# Functions are stored in the local module!
 	include("RivuletTools.jl")
 	import .RivuletTools
 end
@@ -65,212 +66,11 @@ At this stage we don't know where the paper will eventually lead to, but we can 
 
 Below we define a few functions that will help us extracting relevant findings."
 
-# ╔═╡ 0acf9712-b27c-40c8-9bec-64d6389ce2c4
-"""
-	read_data()
-
-Read data from a well defined path based on parameters
-
-# Arguments
-- R : Radius of the (x,y)-plane
-- r : Radius of the (x,z) or (y,z)-plane
-- kbt : Energy that drives thermal fluctuations
-- nm : Parameters of the disjoining pressure, only 32 available
-- θ : Contact angle of the substrate
-- day : Day the simulation ended
-- month : Month the simulation ended in
-- hour : Hour at which the simulation finished
-- minute : Minute at which the simulation ended
-- arrested : Rivulet limited by contact angle field
-"""
-function read_data(;R=50, r=80, kbT=0.0, nm=93, θ=20, year=2023, month=10, day=26, hour=7, minute=5, arrested=false, gamma="", slip=0)
-	dpath = joinpath("/home/zitz", "Swalbe.jl/data/Rivulets")
-	file_name = "$(dpath)/height_R_$(R)_r_$(r)_ang_$(θ)_kbt_$(kbT)_nm_3-2_runDate_$(year)$(month)$(day)$(hour)$(minute).jld2"
-	if arrested
-		file_name = "$(dpath)/arrested_height_R_$(R)_r_$(r)_ang_$(θ)_kbt_$(kbT)_nm_3-2_runDate_$(year)$(month)$(day)$(hour)$(minute).jld2"
-	elseif gamma != ""
-		file_name = "$(dpath)/$(gamma)height_R_$(R)_r_$(r)_ang_$(θ)_kbt_$(kbT)_nm_3-2_runDate_$(year)$(month)$(day)$(hour)$(minute).jld2"
-	elseif slip != 0
-		file_name = "$(dpath)/slip_$(slip)_height_R_$(R)_r_$(r)_ang_$(θ)_kbt_$(kbT)_nm_3-2_runDate_$(year)$(month)$(day)$(hour)$(minute).jld2"
-	end
-
-	if isfile(file_name) 
-		data = load(file_name)
-	else 
-		data = 0
-		@error("The file:\n$(file_name)\ndoes not exists, check data or typos")
-	end
-	return data
-end
-
-# ╔═╡ eadae383-6b5b-4e4e-80b9-5eb2fc4a5ead
-"""
-	heatmap_data(data; time)
-
-Creates a heatmap of the height of some simulation `data` at given `time`.
-"""
-function heatmap_data(data; t=25000,  just_data=false)
-	h = reshape(data["h_$(t)"], 512, 512)
-	if just_data
-		return h
-	end
-	heatmap(h, aspect_ratio=1, c=:viridis, colorbar_title="height")
-end
-
-# ╔═╡ 789e9f0e-863a-4cd5-8f99-f830120e8960
-"""
-	plot_slice(data)
-
-Plots a cut through the rivulet
-
-# Example
-
-```jldoctest
-julia> R = 180; rr = 40; θ = 30;
-
-julia> data_example = read_data( 	# Simulation data
-		R=R, 
-		r=rr, 
-		kbT=0.0, 
-		month=11, 
-		day=5, 
-		hour=1, 
-		minute=28, 
-		θ=θ, 
-		nm=32, 
-		arrested=false)
-
-julia> plot_slice(data_example, t=25000)
-```
-"""
-function plot_slice(data; t=25000, window=(false, 80, 110))
-	h = reshape(data["h_$(t)"], 512, 512)
-	if window[1]
-		plot(h[256, window[2]:window[3]], label="t=$(t)Δt", xlabel="x/[Δx]", ylabel="height")
-	else
-		plot(h[256, :], label="t=$(t)Δt", xlabel="x/[Δx]", ylabel="height")
-	end
-	# println(maximum(h))
-end
-
 # ╔═╡ 2df8c833-7ca7-4d7a-ade5-0df083a013a1
 begin
 	h_some = 
-	plot_slice(RivuletTools.read_data(R=180, r=40, kbT=0.0, month=11, day=5, hour=1, minute=28, θ=30, nm=32, arrested=false), t=25000)
+	RivuletTools.plot_slice(RivuletTools.read_data(R=180, r=40, kbT=0.0, month=11, day=5, hour=1, minute=28, θ=30, nm=32, arrested=false), t=25000)
 	
-end
-
-# ╔═╡ 81d255ea-1ab3-4635-ab4c-66100a820b28
-"""
-	do_gif(data, filename::String)
-
-Creates an animation of the heightfield for the available time steps.
-"""
-function do_gif(data, filename::String; timeMax=5000000)
-	p = heatmap_data(data, t=25000)
-	anim = Animation()
-	for x in 50000:25000:timeMax
-		plot(heatmap_data(data, t=x))
-		frame(anim)
-	end
-	gif(anim, "../assets/$(filename).gif")
-end
-
-# ╔═╡ fae89add-5036-44d7-b4f4-0d9e9fad0966
-"""
-	do_gif_slice(data, filename::String)
-
-Creates an animation of a slice of the heightfield for the available time steps.
-"""
-function do_gif_slice(data, filename::String; timeMax=5000000)
-	h0 = reshape(data["h_25000"], 512, 512)
-	p = plot(h0[256, :], label="t=$(25000)Δt", xlabel="x/[Δx]", ylabel="height")
-	anim = Animation()
-	for t in 50000:25000:timeMax
-		h = reshape(data["h_$(t)"], 512, 512)
-		plot(h[256, :], label="t=$(t)Δt", xlabel="x/[Δx]", ylabel="height")
-		frame(anim)
-	end
-	gif(anim, "../assets/$(filename).gif")
-end
-
-# ╔═╡ 6e82547e-c935-4a3e-b736-a0dae07bfb50
-"""
-	measure_diameter(data)
-
-Measures the diameter of the fluid torus.
-"""
-function measure_diameter(data; t=25000, δ=0.055)
-	distance = 0
-	inner = 0
-	allr = 0
-	if typeof(data) == Dict{String, Any}
-		h_data_slice = reshape(data["h_$(t)"], 512, 512)[256, :]
-		riv = findall(h_data_slice .> δ)
-		if length(riv) > 1
-			allr = riv[end] - riv[begin]
-			for j in eachindex(riv[begin+1:end-1])
-				if riv[j+1] - riv[j] > 1
-					distance = riv[j+1] - riv[j]
-					inner = riv[j] - riv[begin]
-				end
-			end
-		end
-	else
-		h_data_slice = data[256, :]
-		riv = findall(h_data_slice .> δ)
-		if length(riv) > 1
-			allr = riv[end] - riv[begin]
-			for j in eachindex(riv[begin+1:end-1])
-				if riv[j+1] - riv[j] > 1
-					distance = riv[j+1] - riv[j]
-					inner = riv[j] - riv[begin]
-				end
-			end
-		end
-	end
-	return distance, inner, allr
-end
-
-# ╔═╡ 9da027de-9ee2-487c-b978-cbfd77e35fef
-"""
-	measure_Δh(data)
-
-Measures the height difference on the rivulet at a given time.
-"""
-function measure_Δh(data; t=25000)
-	Δh = 0 
-	
-	h = reshape(data["h_$(t)"], 512, 512)
-	riv = findall(h .> 0.056)
-	
-	hmin = minimum(h[riv], init=0)
-	hmax = maximum(h[riv], init=0)
-	Δh = hmax - hmin
-	return Δh
-end
-
-# ╔═╡ f25c4971-572f-41e2-be87-ad513c86e737
-"""
-	measure_clusters(data; t=25000)
-
-Measures the number of clusters, thus rivulet = 1, droplets = n
-"""
-function measure_cluster(data; t=25000)
-	clusters = Int64(0)
-	h = reshape(data["h_$(t)"], 512,512)
-	threshold = 0.06
-	bw = Gray.(h) .< threshold
-	dist = 1 .- distance_transform(feature_transform(bw))
-	markers = label_components(dist .< -5)
-	segments = watershed(dist, markers)
-	if length(segments.segment_labels) >= 1
-		clusters = segments.segment_labels[end]
-	else 
-		clusters = 0
-	end
-	# newH = map(i->get_random_color(i), labels_map(segments)) .* (1 .-bw)
-	return clusters
 end
 
 # ╔═╡ 04e344a3-3d5b-449e-9222-481df24015c7
@@ -282,70 +82,6 @@ end
 
 # ╔═╡ 974c334e-38fb-436e-842b-bb016854d136
 RivuletTools.heatmap_data(hja, t=875000)
-
-# ╔═╡ 20d68b97-40d4-41a4-b4df-bde6a3abb587
-"""
-	compute_droplet(h, θ; δ=0.052)
-
-Computes the equivalent base radius of a spherical cap for a given initial condition.
-
-# Returns
-
-- `baserad::Float`: Size of the baseradius of the droplet.
-- `vol::Float`: Volume of the liquid rivulet.
-- `baserad::Float`: Cap height of the droplet given rivulet volume and contact angle.
-"""
-function compute_droplet(h, θ; δ=0.0505)
-	riv = findall(h .> δ)
-	vol = sum(h[riv])
-	rad = cbrt(3vol/(π * (2+cospi(θ)) * (1-cospi(θ))^2))
-	baserad = rad * sinpi(θ)
-	capheight = rad * (1 - cospi(θ))
-
-	return baserad, vol, capheight
-end
-
-# ╔═╡ 34042674-6eaf-46ea-84ca-8f0a7b6d1bff
-"""
-	compute_Oh(R; μ=1/6, ρ=1, γ=0.01)
-
-Computes the Ohnesorge number based on the minor radius.
-
-# Definition
-
-``Oh = \\frac{\\mu}{\\sqrt{\\rho r\\gamma}}``
-
-"""
-function compute_Oh(R; μ=1/6, ρ=1, γ=0.01)
-	return μ/sqrt(ρ*R*γ)
-end
-
-# ╔═╡ d140fb71-f7bd-4b7e-91df-bba58474ff27
-"""
-	get_random_color(seed)
-
-Picks a random color from the RGB space.
-"""
-function get_random_color(seed)
-    Random.seed!(seed)
-    rand(RGB{N0f8})
-end
-
-# ╔═╡ 0dd77f66-ec27-4cdf-81e8-bcecfbcfcf29
-"""
-	segment_image(h_data, t)
-
-Plots the result of the image segmentation, thus colorates all found clusters.
-"""
-function segment_image(h_data, t)
-	hTry = reshape(h_data["h_$(t)"], 512,512)
-	bw = Gray.(hTry) .< 0.06
-	dist = 1 .- distance_transform(feature_transform(bw))
-	markers = label_components(dist .< -8)
-	segments = watershed(dist, markers)
-	println(segments)
-	newH = map(i->get_random_color(i), labels_map(segments)) .* (1 .-bw)
-end
 
 # ╔═╡ 5aad6dcc-8400-4a7a-a2bc-69105b32e09f
 md" ### Time scales
@@ -368,83 +104,6 @@ The following few functions introduce possible time scales
 
 "
 
-# ╔═╡ 0dcaae09-b57b-49b4-b924-537e59ac777b
-"""
-	t₀(r, μ, γ)
-
-Computes the visco-capillary time scale base on minor radius.
-
-# Definition
-
-``t_0 = \\frac{\\mu r}{\\gamma}``
-
-"""
-function t₀(r; μ=1/6, γ=0.01)
-	return (r * μ)/γ
-end
-
-# ╔═╡ 7429ac5f-5f38-4461-b11c-bc1a6c14c706
-"""
-	tic(r, ρ, γ)
-
-Computes the inertia capillary time scale base on minor radius, density and surface tension
-
-# Definition
-
-``t_{ic} = \\sqrt{\\frac{\\rho r^3}{\\gamma}}``
-
-"""
-function tic(r; ρ=1, γ=0.01)
-	return sqrt((ρ * r^3)/γ)
-end
-
-# ╔═╡ 3a17c4be-9d17-427b-9c9b-3faf22db4e9d
-"""
-	tau_rim(h0, θ; μ=1/6, γ=0.01)
-
-Capillary time scale of rim rectraction
-
-# Definition
-
-``\\tau_{r} = \\frac{9(R_0 - R_f))\\mu}{\\gamma\\theta^3}``
-"""
-function tau_rim(h0, θ; μ=1/6, γ=0.01)
-	return 9h0*μ/(γ*(θ*π)^3)
-end
-
-# ╔═╡ 0598d3b1-4be3-4df3-83d0-785ae7e6c446
-"""
-	t_s(h, θ; μ=1/6, γ=0.01, hs=0.1, M=0.5)
-
-Capillary time scale of thin rivulet (Kondic)
-
-# Definition
-
-``\\tau_{r} = \\frac{3\\mu h_{\\star}}{\\gamma}\\left[\\frac{M}{1-\\cos(\\theta)}\\right]^2``
-"""
-function t_s(h, θ; μ=1/6, γ=0.01, hs=0.1, M=0.5)
-	# return (3μ*hs/γ)*(M/(1 - cospi(θ)))^2
-	return (3μ*h/γ)*(M/(1 - cospi(θ)))^2
-end
-
-# ╔═╡ 0297792d-eec8-4a9a-82e1-06b8fe579f64
-"""
-	t_00(h, θ; μ=1/6, γ=0.01, hs=0.1)
-
-Capillary time scale for film dewetting
-
-# Definition
-
-``q_0^2 = h_{\\star}^{-2}(1-\\cos(\\theta))\\left(2\\frac{h_{\\star}^2}{h_0^3} - 3\\frac{h_{\\star}^3}{h_0^4}\\right)``
-
-``t_{00} = \\frac{3\\mu}{\\gamma h_{\\star}^3 q_0^4}``
-"""
-function t_00(h, θ; μ=1/6, γ=0.01, hs=0.1)
-	q₀² = (1 - cospi(θ))/hs^2 * (2*hs^2/h^3 - 3*hs^3/h^4)
-	
-	return 3μ/(γ*h^3*q₀²*q₀²)
-end
-
 # ╔═╡ 351d01de-7225-40e0-b650-0ef40b1a1cf7
 md" ### Initial condition
 
@@ -462,70 +121,13 @@ for $z$ instead of $r$ such that we have a representation for the thickness.
 In a second step we cut from this structure, which is a half a donut, to make it fit to the chosen contact angle `θ`. 
 "
 
-# ╔═╡ dad911c1-c8b2-4315-9c3b-b1859d44719b
-"""
-    torus(lx, ly, r₁, R₂, θ, center, hmin)
-
-Generates a cut torus with contact angle `θ`, (`x`,`y`) radius `R₂` and (`x`,`z`) radius `r₁` centered at `center`.
-
-# Arguments
-
-- `lx::Int`: Size of the domain in x-direction
-- `ly::Int`: Size of the domain in y-direction
-- `r₁::AbstractFloat`: Radius in (x,z)-plane
-- `R₂::AbstractFloat`: Radius in (x,y)-plane
-- `θ::AbstractFloat`: contact angle in multiples of `π`
-- `center::Tuple{Int, Int}`: Center position of the torus  
-- `hmin::AbstractFloat`: small value above 0.0
-
-# Examples
-
-```jldoctest
-julia> using Swalbe, Test
-
-julia> rad = 45; R = 80; θ = 1/9; center = (128, 128);
-
-julia> height = Swalbe.torus(256, 256, rad, R, θ, center);
-
-julia> @test maximum(height) ≈ rad * (1 - cospi(θ)) # Simple geometry
-Test Passed
-
-julia> argmax(height) # On the outer ring!
-CartesianIndex(128, 48)
-
-```
-"""
-function torus(lx, ly, r₁, R₂, θ, center, hmin = 0.05; noise=0.0)
-	h = zeros(lx,ly)
-	for i in eachindex(h[:,1]), j in eachindex(h[1,:])
-		coord = sqrt((i-center[1])^2 + (j-center[2])^2)
-		half = (r₁)^2 - (coord - R₂)^2
-		if half <= 0.0
-			h[i,j] = hmin
-		else
-			h[i,j] = sqrt(half)
-		end
-	end
-    # Second loop to have a well defined contact angle
-    for i in eachindex(h[:,1]), j in eachindex(h[1,:])
-        # Cut the half sphere to the desired contact angle θ
-        correction = h[i,j] - r₁ * cospi(θ)
-        if correction < hmin
-            h[i,j] = hmin
-        else
-            h[i,j] = correction + randn()*noise
-        end
-    end
-	return h
-end
-
 # ╔═╡ 7cf4ce88-33de-472c-99c6-5b3ae258f3d1
 md" With its visual representation shown below."
 
 # ╔═╡ 0361d281-4a64-4792-812f-7eb9d268d2ae
 # ╠═╡ disabled = true
 #=╠═╡
-a,v = compute_droplet(torus(512, 512, 20, 180, 1/9, (256,256)), 1/9)
+a,v = compute_droplet(RivuletTools.torus(512, 512, 20, 180, 1/9, (256,256)), 1/9)
   ╠═╡ =#
 
 # ╔═╡ 60ce933e-4335-4190-a7b0-5c86d0326a35
@@ -553,7 +155,7 @@ begin
 	for ang in [1/9, 1/6, 2/9]
 		for R in [180]
 			for rr in [20, 40, 80]
-				h = torus(512, 512, rr, R, ang, (256,256))
+				h = RivuletTools.torus(512, 512, rr, R, ang, (256,256))
 				plot!(h[256, :], 
 					xlims=(0, 256),
 					ylims=(0, 20),
@@ -577,124 +179,6 @@ md" ### Data analysis
 The data analysis is usually the most effort.
 Here are some functions that should help with data analysis."
 
-# ╔═╡ 5baa1023-db81-4374-913d-1e88bacdb2ac
-"""
-	select_subset(data; ...)
-
-Selection of a subset of large data file, based on R, rr, kbt, theta ...
-"""
-function select_subset(data; θ=20, R=180, rr=40, kbt=0.0)
-	data_part = data[(data.theta .== θ) .& (data.R .== R) .& (data.rr .== rr) .& (data.kbt .== kbt), :]
-	return data_part
-end
-
-# ╔═╡ b3ae647b-1de9-4f56-b786-8719705c1e09
-"""
-	t0_data()
-
-Computes different parameters from the initial condition, as such the true radii, liquid volume and many more.
-
-# Returns
-- `initial_data::Dataframe` : A dataframe with multiple case specific datapoints.
-"""
-function t0_data()
-	initial_data = DataFrame()
-	angs = Float64[] 	# initial condition angle
-	Rs = Float64[] 		# initial condition major radius
-	rrs = Float64[] 	# initial condition minor radius
-	m1 = Float64[] 		# measured outer radius
-	m2 = Float64[] 		# measured minor radius
-	m3 = Float64[] 		# measured outer-minor radius 
-	beta = Float64[] 	# measured relation minor/major
-	maxh = Float64[] 	# maximal rivulet height at t=0
-	vols = Float64[] 	# liquid volume of the rivulet
-	dropR = Float64[] 	# radius of a droplet containing all liquid
-	droph = Float64[] 	# maximal height of a droplet containing all liquid
-	Ohs = Float64[] 	# Ohnesorge number
-	# Loop through initial conditions
-	for angle in [2/9, 1/6, 1/9, 1/18]
-		for R in [150, 160, 180, 200]
-			for rr in [20, 30, 40, 60, 80, 100]
-				# Create initial condition
-				h = torus(512, 512, rr, R, angle, (256, 256))
-				# measure relevant parameter
-				drop_radius, drop_vol, drop_h = compute_droplet(h, angle)
-				geometry = measure_diameter(h)
-				push!(m1, geometry[1]/2)
-				push!(m2, geometry[2]/2)
-				push!(m3, geometry[3]/2)
-				push!(beta, (geometry[2]/2)/R)
-				push!(angs, angle)
-				push!(Ohs, compute_Oh(geometry[2]/2))
-				push!(Rs, R)
-				push!(rrs, rr)
-				push!(maxh, maximum(h))
-				push!(vols, drop_vol)
-				push!(dropR, drop_radius)
-				push!(droph, drop_h)
-			end
-		end
-	end
-	initial_data.angle = round.(rad2deg.(angs .* π)) 
-	initial_data.R0 = Rs
-	initial_data.rr0 = rrs
-	initial_data.realR = m3
-	initial_data.realrr = m2
-	initial_data.realOR = m1
-	initial_data.beta = beta
-	initial_data.maxh0 = maxh
-	initial_data.vol = vols
-	initial_data.rdrop = dropR
-	initial_data.hdrop = droph
-	initial_data.r0rf = m3 .- dropR
-	initial_data.t0 = round.(t₀.(m2))
-	initial_data.tic = round.(tic.(m2))
-	initial_data.tau = round.(tau_rim.(droph, angs))
-	initial_data.ts = round.(t_s.(droph, angs))
-	initial_data.t00 = round.(t_00.(m2, angs))
-	initial_data.Oh = Ohs 
-
-	return initial_data
-end
-
-# ╔═╡ 37756334-7859-499d-b355-658349aa1805
-"""
-	data2gif(data; prefix)
-
-Generates video files in gif formate for the supplied set of `data`.
-"""
-function data2gif(data; prefix="")
-	kbtDict = Dict(0.0 => "kbt_off", 1.0e-6 => "kbt_on")
-	maxtimestep = 2500000
-	for i in eachindex(data)
-		filename = "../assets/$(prefix)ang_$(data[i][8])_R_$(data[i][1])_rr_$(data[i][2])_$(kbtDict[data[i][3]]).gif"
-		if isfile(filename)
-			println("There is alread a file called $(prefix)ang_$(data[i][8])_R_$(data[i][1])_rr_$(data[i][2])_$(kbtDict[data[i][3]]).gif  in the assets folder")
-		else
-			h = read_data(R=data[i][1], r=data[i][2], kbT=data[i][3], month=data[i][4], day=data[i][5], hour=data[i][6], minute=data[i][7], θ=data[i][8], nm=32)
-			println("R=$(data[i][1]) with rr=$(data[i][2]) and kbt=$(data[i][3])")
-			if data[i][3] == 0.0
-				do_gif(h, "$(prefix)ang_$(data[i][8])_R_$(data[i][1])_rr_$(data[i][2])_$(kbtDict[data[i][3]])", timeMax=maxtimestep)
-			elseif data[i][3] == 1.0e-6
-				do_gif(h, "$(prefix)ang_$(data[i][8])_R_$(data[i][1])_rr_$(data[i][2])_$(kbtDict[data[i][3]])", timeMax=maxtimestep)
-			end
-		end
-	end
-end
-
-# ╔═╡ 063757cb-b822-44e3-8a2b-57808c6f30cf
-"""
-	csv2df(file_name)
-
-Read a `.csv` to a dataframe.
-"""
-function csv2df(file_name)
-	# path = "/net/euler/zitz/Swalbe.jl/data/DataFrames/$(file_name).csv"
-	path2 = "/net/euler/zitz/Ring_rivulets/data/$(file_name).csv"
-	measurements = CSV.read(path2, DataFrame)
-	return measurements
-end
-
 # ╔═╡ 4fb1d7ad-47f2-4adf-a2ba-0ecc0fc8eeb0
 md" # The Data
 
@@ -712,7 +196,7 @@ The three dataframes host:
 
 # ╔═╡ 41aee571-9016-4759-859a-c99eb143a410
 begin
-	initial_data = t0_data()
+	initial_data = RivuletTools.t0_data()
 	CSV.write("../data/initial_conditions.csv", initial_data)
 	initial_data
 end
@@ -721,7 +205,7 @@ end
 md"A single simulation creates one data file, which is about 500mb in size. 
 The data file contains the temporal evolution of the height field. 
 Every 25000Δt we make a snapshot of the system until we reach the end of the time loop at 2500000Δt.
-The file that contains this series is uniquely labeled with date and parameters for the initial condition (`torus()`).
+The file that contains this series is uniquely labeled with date and parameters for the initial condition (`RivuletTools.torus()`).
 Every entry in the `data` and `data_arrested` array points towards one such files.
 
 ### Unpatterned Substrate
@@ -809,9 +293,9 @@ data = [
 # ╔═╡ 8b2c77d3-f743-4840-a9d9-9308e05be28d
 begin
 	set = 8
-	data0 = read_data(R=data[set][1], r=data[set][2], kbT=data[set][3], month=data[set][4], day=data[set][5], hour=data[set][6], minute=data[set][7], θ=data[set][8], nm=32)
+	data0 = RivuletTools.read_data(R=data[set][1], r=data[set][2], kbT=data[set][3], month=data[set][4], day=data[set][5], hour=data[set][6], minute=data[set][7], θ=data[set][8], nm=32)
 	# println(typeof(dataH), " ", typeof(dataH) == Dict{String, Any})
-	heatmap_data(data0, t=25000)
+	RivuletTools.heatmap_data(data0, t=25000)
 end
 
 # ╔═╡ a1ee76ab-bf27-466e-8324-01ecde09931c
@@ -1012,42 +496,6 @@ data_gamma20 = [
 	(200, 40, 0.0,    12,11, 15, 14, 10), 	#
 ]
 
-# ╔═╡ 5a733a9a-759c-4e31-9bb6-ad9d62425f45
-"""
-	renderGifs()
-
-Reads all data that is currently available and generates a gif for every simulation.
-"""
-function renderGifs(; verbose=false)
-	for input in ([data, ""], [data_arrested, "arr_"], [data_gamma05, "gamma05_"], [data_gamma20, "gamma20_"])
-		kbtDict = Dict(0.0 => "kbt_off", 1.0e-6 => "kbt_on")
-		arrDict = Dict("arr_" => true, "" => false, "gamma05_" => false, "gamma20_" => false)
-		for i in eachindex(input[1])
-			path2Swalbe = "../../Swalbe.jl/assets/"
-			filename = "$(path2Swalbe)$(input[2])ang_$(input[1][i][8])_R_$(input[1][i][1])_rr_$(input[1][i][2])_$(kbtDict[input[1][i][3]]).gif"
-			if isfile(filename)
-				if verbose
-					println("There is alread a file called $(input[2])ang_$(input[1][i][8])_R_$(input[1][i][1])_rr_$(input[1][i][2])_$(kbtDict[input[1][i][3]]).gif  in the assets folder")
-				end
-			else
-				if input[2] == "arr_"
-					h = read_data(R=input[1][i][1], r=input[1][i][2], kbT=input[1][i][3], month=input[1][i][4], day=input[1][i][5], hour=input[1][i][6], minute=input[1][i][7], θ=input[1][i][8], nm=32, arrested=arrDict[input[2]], gamma="")
-				else
-					h = read_data(R=input[1][i][1], r=input[1][i][2], kbT=input[1][i][3], month=input[1][i][4], day=input[1][i][5], hour=input[1][i][6], minute=input[1][i][7], θ=input[1][i][8], nm=32, arrested=arrDict[input[2]], gamma=input[2])
-				end
-				if verbose
-					println("R=$(input[1][i][1]) with rr=$(input[1][i][2]) and kbt=$(input[1][i][3])")
-				end
-				if input[1][i][3] == 0.0
-					do_gif(h, "$(path2Swalbe)$(input[2])ang_$(input[1][i][8])_R_$(input[1][i][1])_rr_$(input[1][i][2])_$(kbtDict[input[1][i][3]])", timeMax=2500000)
-				elseif input[1][i][3] == 1.0e-6
-					do_gif(h, "$(path2Swalbe)$(input[2])ang_$(input[1][i][8])_R_$(input[1][i][1])_rr_$(input[1][i][2])_$(kbtDict[input[1][i][3]])", timeMax=2500000)
-				end
-			end
-		end
-	end
-end
-
 # ╔═╡ 05715ba9-fdd3-43c8-b6fc-ee32d225cdf0
 md"
 ### Slip variation
@@ -1078,42 +526,11 @@ data_slip= [
 	(180, 40, 0.0, 2024, 1, 26,  2, 11, 40, 25), 	# 12
 ]
 
-# ╔═╡ 4476c046-db75-4e22-9701-04d68c357198
-"""
-	render_slip(; verbose=false)
-
-Renders the slip data to gifs
-"""
-function render_slip(; verbose=false)
-	# For easier naming of output
-	kbtDict = Dict(0.0 => "kbt_off", 1.0e-6 => "kbt_on")
-	# Loop through the slip data
-	for i in eachindex(data_slip)
-		# Save it with the other files
-		path2Swalbe = "../../Swalbe.jl/assets/"
-		# File name for the gif
-		filename = "$(path2Swalbe)slip_$(data_slip[i][10])_ang_$(data_slip[i][9])_R_$(data_slip[i][1])_rr_$(data_slip[i][2])_$(kbtDict[data_slip[i][3]]).gif"
-		# Check if it is already existing
-		if isfile(filename)
-			if verbose
-				println("This file alread exists")
-			end
-		else
-			# Otherwise read the data
-			h = read_data(R=data_slip[i][1], r=data_slip[i][2], kbT=data_slip[i][3], year=data_slip[i][4], month=data_slip[i][5], day=data_slip[i][6], hour=data_slip[i][7], minute=data_slip[i][8], θ=data_slip[i][9], nm=32, slip=data_slip[i][10])
-			if verbose
-				println("Reading file with parameters R=$(data_slip[i][1]), rr=$(data_slip[i][2]) and slip=$(data_slip[i][10])")
-			end
-			do_gif(h, "$(path2Swalbe)slip_$(data_slip[i][10])_ang_$(data_slip[i][9])_R_$(data_slip[i][1])_rr_$(data_slip[i][2])_$(kbtDict[data_slip[i][3]])", timeMax=2500000)
-		end
-	end
-end
-
 # ╔═╡ b3be394c-5997-4494-ad40-ced2f10fd364
-renderGifs()
+RivuletTools.renderGifs()
 
 # ╔═╡ 6ee87ada-668c-4d1b-aa55-e35b7b475f2a
-render_slip(verbose=true)
+RivuletTools.render_slip(verbose=true)
 
 # ╔═╡ 0f204a06-71b2-438a-bb49-4af8ebda0001
 md" # Results
@@ -1135,8 +552,8 @@ Clearly the rivulet has broken into droplets.
 begin
 	nmset = 10
 	ts = 1000000
-	dataH = read_data(R=data[nmset][1], r=data[nmset][2], kbT=data[nmset][3], month=data[nmset][4], day=data[nmset][5], hour=data[nmset][6], minute=data[nmset][7], θ=data[nmset][8], nm=32)
-	heatmap_data(dataH, t=ts)
+	dataH = RivuletTools.read_data(R=data[nmset][1], r=data[nmset][2], kbT=data[nmset][3], month=data[nmset][4], day=data[nmset][5], hour=data[nmset][6], minute=data[nmset][7], θ=data[nmset][8], nm=32)
+	RivuletTools.heatmap_data(dataH, t=ts)
 end
 
 # ╔═╡ ab5b4c7c-ae24-4aae-a528-1dc427a7f1f1
@@ -1148,7 +565,7 @@ Luckily one of the features is the number of clusters which equivalent to the nu
 In the image below we do this analysis for a single state and colorate each feature with a random color."
 
 # ╔═╡ c945050f-3ddc-4d0e-80dd-af909c3f4ab5
-segment_image(dataH, ts)
+RivuletTools.segment_image(dataH, ts)
 
 # ╔═╡ 7e2fd675-28ba-4412-9c56-4b40b3380576
 md"
@@ -1175,9 +592,9 @@ Considering these two setups we observe the following processes:
 
 # ╔═╡ 03bf6a75-a98c-4641-9939-2336c78e1be7
 begin
-	# slice_gif = read_data(R=180, r=40, kbT=0.0, month=11, day=3, hour=23, minute=34, θ=40 ,nm=32, arrested=false)
+	# slice_gif = RivuletTools.read_data(R=180, r=40, kbT=0.0, month=11, day=3, hour=23, minute=34, θ=40 ,nm=32, arrested=false)
 	# (180, 40, 0.0,    11, 3, 23, 34, 40
-	# do_gif_slice(slice_gif, "slice_R180_r40_t40"; timeMax=2500000)
+	# RivuletTools.do_gif_slice(slice_gif, "slice_R180_r40_t40"; timeMax=2500000)
 end
 
 # ╔═╡ a58ec747-09cb-4cba-a9f0-4de683c80052
@@ -1254,8 +671,8 @@ The actual height field is just a 512 by 512 matrix with height values at every 
 
 # ╔═╡ 289205ad-0bd3-473c-b076-fab42e1643c3
 begin
-	fft_try = read_data(R=data[fftset][1], r=data[fftset][2], kbT=data[fftset][3], month=data[fftset][4], day=data[fftset][5], hour=data[fftset][6], minute=data[fftset][7], θ=data[fftset][8], nm=32)
-	fft_data = heatmap_data(fft_try, t=time_here, just_data=true)
+	fft_try = RivuletTools.read_data(R=data[fftset][1], r=data[fftset][2], kbT=data[fftset][3], month=data[fftset][4], day=data[fftset][5], hour=data[fftset][6], minute=data[fftset][7], θ=data[fftset][8], nm=32)
+	fft_data = RivuletTools.heatmap_data(fft_try, t=time_here, just_data=true)
 	# fft_data[fft_data .< 0.055] .= 0.0
 end
 
@@ -1267,7 +684,7 @@ This height field, `fft_data` can then be used to compute a spectrum as shown be
 "
 
 # ╔═╡ 29f4022e-28dc-4ef8-8e83-11d466437813
-spectrumH= fftshift(fft(Float64.(Gray.(fft_data))))
+spectrumH= fftshift(fft(fft_data ./ maximum(fft_data)))
 
 # ╔═╡ a1f13b96-fbd3-40ab-aa3f-9af14d55ed55
 md"`spectrumH` is a two dimensional *FFT* of the height which is shown in the plot three cells above.
@@ -1276,12 +693,7 @@ Radial averaging of this data should correspond to the growth of a dominate wave
 "
 
 # ╔═╡ ef66b620-cfa3-47b4-bc2b-6cc77427764f
-funFFT = heatmap(log.(abs.(spectrumH .* spectrumH)) .+ 1, aspect_ratio=1, 
-	#clim=(0.1, 1000)
-	)
-
-# ╔═╡ 9b76fce9-3219-417f-83db-faa55c39694f
-savefig(funFFT, "../assets/someFFT.png")
+RivuletTools.data2fft(whichdata=RivuletTools.data, dataset=fftset, time=250000, quater=false, output=false)
 
 # ╔═╡ 010e2c3b-f66a-411b-b819-3d37448c4087
 md"
@@ -1292,79 +704,41 @@ If we would take a annulus that is just retracting we would see an isotropic ann
 "
 
 # ╔═╡ 8d0b7517-1be8-41c4-8a4b-716bcad169fb
-heatmap(fft_data, c=:viridis, aspect_ratio=1)
-
-# ╔═╡ 4b31ba28-8d45-4e81-bf71-ab17424cab15
-# ╠═╡ disabled = true
-#=╠═╡
-plot(fft_data[256, :])
-  ╠═╡ =#
+RivuletTools.heatmap(fft_data, c=:viridis, aspect_ratio=1)
 
 # ╔═╡ 19deee02-5fb7-400c-a853-74bd44a8deaf
 md"The *FFT* is as far as I know symmetric and does only contain information for wave lengths up to $L/2$, which in our case is $256\Delta x$.
 That is why a quater of the above image should be enough for further analysis."
 
 # ╔═╡ 608b2a67-b34b-4440-9282-3f225e5714be
-heatmap(log.(abs.(spectrumH[256:end, 256:end] .* spectrumH[256:end, 256:end])) .+ 1, aspect_ratio=1, xlims=(1,256), ylims=(1,256))
+RivuletTools.data2fft(whichdata=RivuletTools.data, dataset=fftset, time=250000, quater=true, output=false)
 
-# ╔═╡ 45f2bff6-5edb-47ac-8db5-7adefe2d7960
-512/(50)
+# ╔═╡ 72270f78-01c5-4ce5-aac4-901fd9a5143f
+hmmm = RivuletTools.simpleRadialAverage(spectrumH, abssqrt=true) .+ 1
 
-# ╔═╡ 28d6e267-117b-491f-8756-bf2d7fb06aec
-"""
-	distanceArray(; X=512, Y=512, center=(256,256))
-
-Computes the euclidian distance and returns a `X` time `Y` matrix with distances
-"""
-function distanceArray(; X=512, Y=512, center=(256,256))
-	distances = zeros(X,Y)
-	for x in 1:X
-		for y in 1:Y
-			distances[x,y] = Int(round(sqrt((x-center[1])^2 + (y-center[2])^2))) + 1
-		end
-	end
-	return distances
-end
-
-# ╔═╡ af7fa2dc-3e0e-420e-82fc-1451ae0afa67
-"""
-	simpleAverage(array)
-
-Simple radial averagering with Chebyshev distance.
-"""
-function simpleAverage(array)
-	Lx = size(array,1)
-	Ly = size(array,2)
-	fft_stuff = abs.(array .* array)
-	d = distanceArray(X=Lx, Y=Ly, center=(Lx÷2, Ly÷2))
-	averageRadialChebyshev = zeros(Lx÷2+1)
-	for i in 1:Lx÷2
-		toAverage = fft_stuff[d .== i]
-		averageRadialChebyshev[i] = sum(toAverage) / length(toAverage)
-	end
-	return averageRadialChebyshev
-end
+# ╔═╡ 783e9476-a0a8-4427-b929-9f7c0faa6b59
+plot(hmmm, yscale=:log10)
 
 # ╔═╡ a59cefd2-27c4-4332-943e-1fbd79ae2481
 begin
 	someset = 26
 	# Retraction
-	fft_anim1 = read_data(R=data[someset][1], r=data[someset][2], kbT=data[someset][3], month=data[someset][4], day=data[someset][5], hour=data[someset][6], minute=data[someset][7], θ=data[someset][8], nm=32)
+	fft_anim1 = RivuletTools.read_data(R=data[someset][1], r=data[someset][2], kbT=data[someset][3], month=data[someset][4], day=data[someset][5], hour=data[someset][6], minute=data[someset][7], θ=data[someset][8], nm=32)
 	# Breakup
-	fft_anim2 = read_data(R=data[someset-1][1], r=data[someset-1][2], kbT=data[someset-1][3], month=data[someset-1][4], day=data[someset-1][5], hour=data[someset-1][6], minute=data[someset-1][7], θ=data[someset-1][8], nm=32)
+	fft_anim2 = RivuletTools.read_data(R=data[someset-1][1], r=data[someset-1][2], kbT=data[someset-1][3], month=data[someset-1][4], day=data[someset-1][5], hour=data[someset-1][6], minute=data[someset-1][7], θ=data[someset-1][8], nm=32)
 	anim = Animation()
-	dataEnd1 = heatmap_data(fft_anim1, t=2500000, just_data=true)
-	dataEnd2 = heatmap_data(fft_anim2, t=2500000, just_data=true)
+	dataEnd1 = RivuletTools.heatmap_data(fft_anim1, t=2500000, just_data=true)
+	dataEnd2 = RivuletTools.heatmap_data(fft_anim2, t=2500000, just_data=true)
 	max1 = maximum(dataEnd1)
 	max2 = maximum(dataEnd2)
 	for t in 25000:25000:2500000
-		fftdata1 = heatmap_data(fft_anim1, t=t, just_data=true) ./ max1
-		fftdata2 = heatmap_data(fft_anim2, t=t, just_data=true) ./ max2
-		spec1= fftshift(fft(Float64.(Gray.(fftdata1))))
-		spec2= fftshift(fft(Float64.(Gray.(fftdata2))))
+		fftdata1 = RivuletTools.heatmap_data(fft_anim1, t=t, just_data=true) ./ max1
+		fftdata2 = RivuletTools.heatmap_data(fft_anim2, t=t, just_data=true) ./ max2
+		spec1= fftshift(fft(fftdata1))
+		spec2= fftshift(fft(fftdata2))
 		# specH[256, 256] = 1.0
-		averagedPSD1 = simpleAverage(spec1)
-		averagedPSD2 = simpleAverage(spec2)
+		averagedPSD1 = RivuletTools.simpleRadialAverage(spec1, abssqrt=true)
+		averagedPSD2 = RivuletTools.simpleRadialAverage(spec2, abssqrt=true)
 		plot(averagedPSD1 .+ 1,
 			title="t=$(t)Δt",
 			label="Retraction", 
@@ -1382,64 +756,7 @@ begin
     	)
 		frame(anim)
 	end
-	gif(anim, "../assets/spectrum_try.gif")
-end
-
-# ╔═╡ 72270f78-01c5-4ce5-aac4-901fd9a5143f
-hmmm = simpleAverage(spectrumH)
-
-# ╔═╡ 17f29f46-0463-4604-8783-b9c1057a7001
-plot(hmmm .+1, yaxis=:log)
-
-# ╔═╡ 4e7487ad-b8e6-43f7-aff1-99d826ee1963
-"""
-	measure_data(data, label::String, remeasure::Bool, pat::Bool, gam::String)
-
-Generates a dataframe of dynamic measurements for a set of `data` and writes it to a `.csv` or reads it from a `.csv`.
-"""
-function measure_data(data, label::String, remeasure::Bool, pat::Bool, gam::String)
-	measurements = DataFrame()
-	dpath = joinpath("/home/zitz", "Ring_rivulets/data/")
-	if remeasure
-		measurements = DataFrame()
-		for i in eachindex(data)
-			# println(i)
-			someFrame = DataFrame()
-			h = read_data(R=data[i][1], r=data[i][2], kbT=data[i][3], month=data[i][4], day=data[i][5], hour=data[i][6], minute=data[i][7], θ=data[i][8] ,nm=32, arrested=pat, gamma=gam)
-			R = Float64[]
-			rr = Float64[]
-			beta = Float64[]
-			allr = Float64[]
-			deltaH = Float64[]
-			clusters = Int64[]
-			for j in 25000:25000:2500000
-				R_measure = measure_diameter(h, t=j)
-				# Push the radii not the diameters
-				push!(R, R_measure[1]/2)
-				push!(rr, R_measure[2]/2)
-				push!(allr, R_measure[3]/2)
-				push!(beta, (R_measure[2]/2)/(R_measure[1]/2 + R_measure[2]/2))
-				push!(deltaH, measure_Δh(h, t=j))
-				push!(clusters, measure_cluster(h, t=j))
-			end
-			someFrame.major = R
-			someFrame.minor = rr
-			someFrame.outerR = allr
-			someFrame.beta = beta
-			someFrame.dH = deltaH
-			someFrame.clusters = clusters
-			someFrame.R = fill(data[i][1],100)
-			someFrame.rr = fill(data[i][2],100)
-			someFrame.kbt = fill(data[i][3],100)
-			someFrame.theta = fill(data[i][8],100)
-			someFrame.time = 25000:25000:2500000
-			measurements = vcat(measurements, someFrame)
-			println("done with $(i) of $(length(data))")
-		end
-		CSV.write("$(dpath)$(label).csv", measurements)
-	else
-		println("No data analysis is performed because remasure is set false")
-	end
+	gif(anim, "../assets/spectrum_difference.gif")
 end
 
 # ╔═╡ 38345378-66ee-42c1-b37f-6691119ecc60
@@ -1457,13 +774,13 @@ There is data on
 # ╔═╡ df519afa-309a-4633-860d-2fe40a384fa9
 for to_analyse in [(data_arrested, "dynamics_patterned", true)]
 	run_me = false
-	measure_data(to_analyse[1], to_analyse[2], run_me, to_analyse[3], "arrested_more")
+	RivuletTools.measure_data(to_analyse[1], to_analyse[2], run_me, to_analyse[3], "arrested_more")
 end
 
 # ╔═╡ 3273792c-41fb-4225-a4f7-2f1c9d58be4a
 for to_analyse in [(data_gamma05, "gamma05_uniform", "gamma05_"), (data_gamma20, "gamma20_uniform", "gamma20_")]
 	run_me = false
-	measure_data(to_analyse[1], to_analyse[2], run_me, false, to_analyse[3])
+	RivuletTools.measure_data(to_analyse[1], to_analyse[2], run_me, false, to_analyse[3])
 end
 
 # ╔═╡ 144e23e9-ce3d-4ed6-be2c-dff1fed39e59
@@ -3813,45 +3130,21 @@ version = "1.4.1+1"
 # ╠═f075f19a-81b6-47b7-9104-57d2e51e7241
 # ╟─1b26468c-b4f7-4252-b891-4f95bc04c869
 # ╟─6d3c1725-75fa-412e-9b30-8f8df4e7874b
-# ╟─0acf9712-b27c-40c8-9bec-64d6389ce2c4
-# ╠═eadae383-6b5b-4e4e-80b9-5eb2fc4a5ead
-# ╟─789e9f0e-863a-4cd5-8f99-f830120e8960
-# ╠═2df8c833-7ca7-4d7a-ade5-0df083a013a1
-# ╟─81d255ea-1ab3-4635-ab4c-66100a820b28
-# ╟─fae89add-5036-44d7-b4f4-0d9e9fad0966
-# ╟─6e82547e-c935-4a3e-b736-a0dae07bfb50
-# ╟─9da027de-9ee2-487c-b978-cbfd77e35fef
-# ╟─f25c4971-572f-41e2-be87-ad513c86e737
-# ╠═04e344a3-3d5b-449e-9222-481df24015c7
-# ╠═974c334e-38fb-436e-842b-bb016854d136
-# ╟─0dd77f66-ec27-4cdf-81e8-bcecfbcfcf29
-# ╟─20d68b97-40d4-41a4-b4df-bde6a3abb587
-# ╟─34042674-6eaf-46ea-84ca-8f0a7b6d1bff
-# ╟─d140fb71-f7bd-4b7e-91df-bba58474ff27
+# ╟─2df8c833-7ca7-4d7a-ade5-0df083a013a1
+# ╟─04e344a3-3d5b-449e-9222-481df24015c7
+# ╟─974c334e-38fb-436e-842b-bb016854d136
 # ╟─5aad6dcc-8400-4a7a-a2bc-69105b32e09f
-# ╟─0dcaae09-b57b-49b4-b924-537e59ac777b
-# ╟─7429ac5f-5f38-4461-b11c-bc1a6c14c706
-# ╟─3a17c4be-9d17-427b-9c9b-3faf22db4e9d
-# ╟─0598d3b1-4be3-4df3-83d0-785ae7e6c446
-# ╟─0297792d-eec8-4a9a-82e1-06b8fe579f64
 # ╟─351d01de-7225-40e0-b650-0ef40b1a1cf7
-# ╟─dad911c1-c8b2-4315-9c3b-b1859d44719b
 # ╟─7cf4ce88-33de-472c-99c6-5b3ae258f3d1
 # ╟─8b2c77d3-f743-4840-a9d9-9308e05be28d
 # ╟─0361d281-4a64-4792-812f-7eb9d268d2ae
 # ╟─60ce933e-4335-4190-a7b0-5c86d0326a35
 # ╟─3eaf9941-d510-4a91-99bf-2084bbe3ea40
 # ╟─70da13b0-6111-4d5d-a6f5-49fcc0499738
-# ╟─5baa1023-db81-4374-913d-1e88bacdb2ac
-# ╟─b3ae647b-1de9-4f56-b786-8719705c1e09
-# ╠═37756334-7859-499d-b355-658349aa1805
-# ╟─063757cb-b822-44e3-8a2b-57808c6f30cf
-# ╟─5a733a9a-759c-4e31-9bb6-ad9d62425f45
-# ╟─4476c046-db75-4e22-9701-04d68c357198
 # ╟─4fb1d7ad-47f2-4adf-a2ba-0ecc0fc8eeb0
 # ╟─41aee571-9016-4759-859a-c99eb143a410
 # ╟─13ce2bea-889f-4727-a126-71a5006a86ab
-# ╟─c9572357-8d97-47a7-914a-91c0b452eb6b
+# ╠═c9572357-8d97-47a7-914a-91c0b452eb6b
 # ╟─a1ee76ab-bf27-466e-8324-01ecde09931c
 # ╟─846ebcbe-34d6-48a4-bc23-cbd04bacf526
 # ╟─dc5ab038-569e-4603-95af-0549c6e4ee76
@@ -3859,12 +3152,12 @@ version = "1.4.1+1"
 # ╟─93e8f4ee-7558-4178-8f06-96a422528c48
 # ╟─05715ba9-fdd3-43c8-b6fc-ee32d225cdf0
 # ╟─24fde296-5a6f-4a92-bf16-855df4c99227
-# ╟─b3be394c-5997-4494-ad40-ced2f10fd364
-# ╟─6ee87ada-668c-4d1b-aa55-e35b7b475f2a
+# ╠═b3be394c-5997-4494-ad40-ced2f10fd364
+# ╠═6ee87ada-668c-4d1b-aa55-e35b7b475f2a
 # ╟─0f204a06-71b2-438a-bb49-4af8ebda0001
-# ╟─d5152b67-bc1d-4cc0-b73e-90d79dbadcb4
+# ╠═d5152b67-bc1d-4cc0-b73e-90d79dbadcb4
 # ╟─ab5b4c7c-ae24-4aae-a528-1dc427a7f1f1
-# ╟─c945050f-3ddc-4d0e-80dd-af909c3f4ab5
+# ╠═c945050f-3ddc-4d0e-80dd-af909c3f4ab5
 # ╟─7e2fd675-28ba-4412-9c56-4b40b3380576
 # ╟─89045ff9-bfb2-43e7-865b-235181cdf9f7
 # ╠═03bf6a75-a98c-4641-9939-2336c78e1be7
@@ -3884,19 +3177,13 @@ version = "1.4.1+1"
 # ╠═29f4022e-28dc-4ef8-8e83-11d466437813
 # ╟─a1f13b96-fbd3-40ab-aa3f-9af14d55ed55
 # ╠═ef66b620-cfa3-47b4-bc2b-6cc77427764f
-# ╠═9b76fce9-3219-417f-83db-faa55c39694f
 # ╟─010e2c3b-f66a-411b-b819-3d37448c4087
 # ╠═8d0b7517-1be8-41c4-8a4b-716bcad169fb
-# ╠═4b31ba28-8d45-4e81-bf71-ab17424cab15
 # ╟─19deee02-5fb7-400c-a853-74bd44a8deaf
 # ╠═608b2a67-b34b-4440-9282-3f225e5714be
-# ╠═17f29f46-0463-4604-8783-b9c1057a7001
-# ╠═45f2bff6-5edb-47ac-8db5-7adefe2d7960
-# ╠═a59cefd2-27c4-4332-943e-1fbd79ae2481
-# ╠═28d6e267-117b-491f-8756-bf2d7fb06aec
-# ╠═af7fa2dc-3e0e-420e-82fc-1451ae0afa67
 # ╠═72270f78-01c5-4ce5-aac4-901fd9a5143f
-# ╟─4e7487ad-b8e6-43f7-aff1-99d826ee1963
+# ╠═783e9476-a0a8-4427-b929-9f7c0faa6b59
+# ╟─a59cefd2-27c4-4332-943e-1fbd79ae2481
 # ╟─38345378-66ee-42c1-b37f-6691119ecc60
 # ╠═df519afa-309a-4633-860d-2fe40a384fa9
 # ╠═3273792c-41fb-4225-a4f7-2f1c9d58be4a
