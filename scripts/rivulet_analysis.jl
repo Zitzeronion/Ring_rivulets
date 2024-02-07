@@ -389,6 +389,32 @@ savefig(radial_plot, "../assets/height_line.png")
 # ╔═╡ cb4a302c-fb04-4362-95d5-7680d8fb2983
 RivuletTools.do_ringgif(data[25], "firstRingAnimation")
 
+# ╔═╡ 0489cd43-a451-435e-9024-7b9ff3432761
+begin
+	time1d = 500000
+
+	ll1, spec1 = RivuletTools.height2fft(data[26], time1d, output=true)
+	ll2, spec2 = RivuletTools.height2fft(data[25], time1d, output=true)
+	shifted_k1 = fftshift(fftfreq(length(ll1))*length(ll1))
+	shifted_k2 = fftshift(fftfreq(length(ll2))*length(ll2))
+	k_pi1 = shifted_k1 .* 2π/length(ll1)
+	k_pi2 = shifted_k2 .* 2π/length(ll2)
+	plot(k_pi1, log.(abs.(spec1 .* spec1)) .+ 1, 
+			# aspect_ratio=1, 
+			xlims=(0,π), 
+			xlabel = "q",
+			ylabel = "log(S(q))",
+			label="R=$(data[26][1]) r=$(data[26][2])",
+			#clim=(0.1, 1000) # Limits for heatmap
+		)
+	plot!(k_pi2, log.(abs.(spec2 .* spec2)) .+ 1,
+		label="R=$(data[25][1]) r=$(data[25][2])",
+		xlims=(0.01, pi),
+		xscale = :log10,
+		# ylims=(-10, 10),
+		)
+end
+
 # ╔═╡ 1c6b09bb-9809-411d-8ddd-2095256d0601
 md"
 In the following we work with the hight data only, we don't measure but simply transform it with a **FFT**.
@@ -2943,6 +2969,7 @@ version = "1.4.1+1"
 # ╠═044b6cab-06cf-405e-864c-3e040faa602d
 # ╟─c5949c51-d3f5-40b1-9415-7c40ae596b1b
 # ╠═cb4a302c-fb04-4362-95d5-7680d8fb2983
+# ╠═0489cd43-a451-435e-9024-7b9ff3432761
 # ╠═1c6b09bb-9809-411d-8ddd-2095256d0601
 # ╠═2a66eee4-be06-43a2-a9be-fc2e0c4a0f32
 # ╟─a86d30c5-03f0-4e11-ba25-1f08ba0998b7

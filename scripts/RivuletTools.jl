@@ -787,7 +787,7 @@ end
 
 # Spectral analysis and fft things
 """
-	plot_fft(;whichdata=data, dataset=25, time=25000, quater=false, output=false)
+	data2fft(;whichdata=data, dataset=25, time=25000, quater=false, output=false)
 
 Computes the `fft` of a height field an
 """
@@ -824,6 +824,31 @@ function data2fft(;whichdata=data, dataset=25, time=25000, quater=false, output=
 	end
 	if output
 		return heightField, spectrumH
+	end
+	p
+end
+
+function height2fft(data, t; output = false)
+	initial_data = t0_data()
+	h_drop = initial_data[(initial_data.angle .== data[9]) .& (initial_data.R0 .== data[1]) .& (initial_data.rr0 .== data[2]), :].hdrop[1]
+	height1D, _ = getRingCurve(data, t)
+	hNorm = height1D ./ h_drop
+	L = length(height1D)
+	spectrumH= fftshift(fft(hNorm))
+	shifted_k = fftshift(fftfreq(L)*L)
+	k_pi = shifted_k .* 2π/L
+	
+	p = plot(k_pi, log.(abs.(spectrumH .* spectrumH)) .+ 1, 
+			# aspect_ratio=1, 
+			xlims=(0,π), 
+			xlabel = "q",
+			ylabel = "log(S(q))"
+			#ylims=(-π, π),
+			#clim=(0.1, 1000) # Limits for heatmap
+		)
+	
+	if output
+		return height1D, spectrumH
 	end
 	p
 end
