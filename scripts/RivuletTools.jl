@@ -98,6 +98,8 @@ function heatmap_data(data; t=25000,  just_data=false)
 	heatmap(h, 
 		aspect_ratio=1, 
 		c=:viridis, 
+		xlims=(1, 512),
+		ylims=(1, 512),
 		# colorbar_title=" \nheight" # Actually the good way, but Pluto cuts for whatever reason
 		colorbar_title="height" # Now numbers and labels are too close
 		)
@@ -159,6 +161,40 @@ function do_gif(data, filename::String; timeMax=5000000)
 		frame(anim)
 	end
 	gif(anim, "../assets/$(filename).gif")
+end
+
+"""
+	do_ringgif(data, filename::String; timeMax=5000000)
+
+Generates a gif for a circular cut along the rivulet.
+
+# Example
+```julia-repl
+juli> do_ringgif(data[25], "ringGif")
+```
+"""
+function do_ringgif(data, filename::String; timeMax=2500000)
+	ringanim = Animation()
+	initial_data = t0_data()
+	h_drop = initial_data[(initial_data.angle .== data[9]) .& (initial_data.R0 .== data[1]) .& (initial_data.rr0 .== data[2]), :].hdrop[1]
+	for t in 25000:25000:timeMax
+		hCirc, Radius = RivuletTools.getRingCurve(data, t)
+		Radelements = length(hCirc)
+		normX = 0:2π/(Radelements-1):2π 
+		plot(normX, 
+			hCirc ./ h_drop, 
+			label="R=$(data[1]) r=$(data[2])", 
+			xlabel="x\\(\\phi\\)", 
+			ylabel="h/h_d", 
+			xticks = ([0:π/2:2*π;], ["0", "\\pi/2", "\\pi", "3\\pi/2", "2\\pi"]),
+			title="Radius: $(Radius) time: $(t)",
+			grid=false,
+			ylims=(0, 1),
+			xlims=(0, 2π),
+			)
+		frame(ringanim)
+	end
+	gif(ringanim, "../assets/$(filename).gif")
 end
 
 """
@@ -329,6 +365,68 @@ end
 
 # Measurements and data analysis
 """
+	ringCurve(data; R=(false, 180))
+
+Returns the height field along a circle.
+"""
+function getRingCurve(data, tcut; CircRad=(false, 180), center=(256,256))
+	# Create a distance array, needed later
+	dd = distanceArray()
+	# Read in the data that we use for the cut
+	dataCut = read_data(R=data[1], 
+						r=data[2], 
+						kbT=data[3], 
+						month=data[5], 
+						day=data[6], 
+						hour=data[7], 
+						minute=data[8], 
+						θ=data[9], nm=32)
+	# Return the height field of that data at time `tcut`
+	hh = heatmap_data(dataCut, t=tcut, just_data=true)
+	# Extract the coordinates of the maximum, so that we can compute a distance
+	maxHeight = findmax(hh)
+	if CircRad[1]
+		distCut = CircRad[2]
+	else
+		distCut = Int(round(sqrt((maxHeight[2][1] - center[1])^2 + (maxHeight[2][2] - center[2])^2)))
+	end
+	# Now some coding to get the job done
+	# Get the cartesian indices of all points for a given distance.
+	cutMax = findall(dd .== distCut)
+	# The result should be a simple connected curve
+	# A naive solution for this problem is to separte the point finding into quadrants
+	firstquad = CartesianIndex{2}[]
+	secondquad = CartesianIndex{2}[]
+	thirdquad = CartesianIndex{2}[]
+	fourthquad = CartesianIndex{2}[]
+	# Based on distance of the maximum we find upper and lower limits for the quadrants
+	lxMax = maximum(cutMax)[1]
+	lyMax = maximum(cutMax)[2]
+	lxMin = minimum(cutMax)[1]
+	lyMin = minimum(cutMax)[2]
+	# Then we iterate through the quadrants and save the indices which are on the cut
+	# First qudrant
+	for quad in [(firstquad, 256:-1:lxMin, lyMax:-1:256), 
+				(secondquad, lxMin:256, 256:-1:lyMin), 
+				(thirdquad, 256:lxMax, lyMin:256), 
+				(fourthquad, lxMax:-1:256, 256:lyMax)]
+		for j in quad[2]
+			for k in quad[3]
+				if CartesianIndex(j, k) in cutMax
+					push!(quad[1], CartesianIndex(j, k))
+				else 
+					continue
+				end
+			end
+		end
+	end
+	# We glue them together and have a nice connected one dimensional representation of the height along a circle
+	curve = vcat(firstquad, secondquad[2:end], thirdquad[2:end], fourthquad[2:end-1])
+	# The first and last points of consecutive quadrants overlap that is why we use [2:end] and [2:end-1]
+	return hh[curve], distCut
+end
+
+"""
 	measure_diameter(data)
 
 Measures the diameter of the fluid torus at a single time step.
@@ -493,7 +591,7 @@ function simpleRadialAverage(array; abssqrt=false)
 		dummy .= array
 	end
 	d = distanceArray(X=Lx, Y=Ly, center=(Lx÷2, Ly÷2))
-	averageRadialChebyshev = zeros(Lx÷2+1)
+	averageRadialChebyshev = zeros(Lx÷2)
 	for i in 1:Lx÷2
 		toAverage = dummy[d .== i]
 		averageRadialChebyshev[i] = sum(toAverage) / length(toAverage)
@@ -705,19 +803,22 @@ function data2fft(;whichdata=data, dataset=25, time=25000, quater=false, output=
 						θ=whichdata[dataset][9], 
 						nm=32)
 	heightField = heatmap_data(input, t=time, just_data=true)
+	L = size(heightField)[1]
 	maxH = maximum(heightField)
 	spectrumH= fftshift(fft(heightField ./ maxH))
+	shifted_k = fftshift(fftfreq(L)*L)
+	k_pi = shifted_k .* 2π/L
 	if quater
-		p = heatmap(log.(abs.(spectrumH[256:end, 256:end] .* spectrumH[256:end, 256:end])) .+ 1, 
+		p = heatmap(k_pi[256:end], k_pi[256:end], log.(abs.(spectrumH[256:end, 256:end] .* spectrumH[256:end, 256:end])) .+ 1, 
 			aspect_ratio=1, 
-			xlims=(1,256), 
-			ylims=(1,256)
+			xlims=(0,π), 
+			ylims=(0,π)
 		)
 	else
-		p = heatmap(log.(abs.(spectrumH .* spectrumH)) .+ 1, 
+		p = heatmap(k_pi, k_pi, log.(abs.(spectrumH .* spectrumH)) .+ 1, 
 			aspect_ratio=1, 
-			xlims=(1,512), 
-			ylims=(1,512),
+			xlims=(-π,π), 
+			ylims=(-π, π),
 			#clim=(0.1, 1000) # Limits for heatmap
 		)
 	end

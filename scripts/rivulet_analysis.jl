@@ -211,89 +211,13 @@ Every entry in the `data` and `data_arrested` array points towards one such file
 ### Unpatterned Substrate
 "
 
-# ╔═╡ c9572357-8d97-47a7-914a-91c0b452eb6b
-data = [
-	(80,  40, 0.0,    11, 1, 19, 6,  20), 	#
-	(120, 40, 0.0,    11, 2, 6,  43, 20), 	#
-	(120, 80, 0.0,    11, 2, 9,  37, 20), 	#
-	(150, 20, 0.0,    11, 2, 13, 0,  20), 	#
-	(150, 40, 0.0,    11, 2, 14, 26, 20), 	#
-	(150, 80, 0.0,    11, 2, 15, 54, 20), 	#
-	(180, 20, 0.0,    11, 2, 17, 23, 20), 	# little smaller little larger
-	(180, 40, 0.0,    11, 2, 18, 49, 20), 	#
-	(180, 80, 0.0,    11, 2, 20, 16, 20), 	#
-	(200, 20, 0.0,    11, 2, 21, 43, 20), 	#
-	(200, 40, 0.0,    11, 2, 23, 8,  20), 	#
-	(200, 80, 0.0,    11, 3, 0,  34, 20), 	#
-	(150, 20, 1.0e-6, 11, 3, 1,  59, 20), 	#
-	(150, 40, 1.0e-6, 11, 3, 3,  25, 20), 	#
-	(150, 80, 1.0e-6, 11, 3, 4,  50, 20), 	#
-	(180, 20, 1.0e-6, 11, 3, 6,  16, 20), 	#
-	(180, 40, 1.0e-6, 11, 3, 7,  41, 20), 	#
-	(180, 80, 1.0e-6, 11, 3, 9,  7,  20), 	#
-	(200, 20, 1.0e-6, 11, 3, 10, 32, 20), 	#
-	(200, 40, 1.0e-6, 11, 3, 15, 17, 20), 	#
-	(200, 80, 1.0e-6, 11, 3, 16, 44, 20), 	#
-	(150, 20, 0.0,    11, 3, 17, 49, 40), 	#
-	(150, 40, 0.0,    11, 3, 19, 13, 40), 	#
-	(150, 80, 0.0,    11, 3, 20, 39, 40), 	#
-	(180, 20, 0.0,    11, 3, 22, 6,  40), 	#
-	(180, 40, 0.0,    11, 3, 23, 34, 40), 	#
-	(180, 80, 0.0,    11, 4, 1,  1,  40), 	#
-	(200, 20, 0.0,    11, 4, 2,  27, 40), 	#
-	(200, 40, 0.0,    11, 4, 3,  54, 40), 	#
-	(200, 80, 0.0,    11, 4, 5,  20, 40), 	#
-	(150, 20, 1.0e-6, 11, 4, 6,  46, 40), 	#
-	(150, 40, 1.0e-6, 11, 4, 8,  11, 40), 	#
-	(150, 80, 1.0e-6, 11, 4, 9,  37, 40), 	#
-	(180, 20, 1.0e-6, 11, 4, 11, 3,  40), 	#
-	(180, 40, 1.0e-6, 11, 4, 12, 30, 40), 	#
-	(180, 80, 1.0e-6, 11, 4, 13, 58, 40), 	#
-	(200, 20, 1.0e-6, 11, 4, 15, 26, 40), 	#
-	(200, 40, 1.0e-6, 11, 4, 16, 54, 40), 	#
-	(200, 80, 1.0e-6, 11, 4, 18, 21, 40), 	#
-	(150, 20, 0.0,    11, 4, 19, 46, 30), 	#
-	(150, 40, 0.0,    11, 4, 21, 11, 30), 	#
-	(150, 80, 0.0,    11, 4, 22, 36, 30), 	#
-	(180, 20, 0.0,    11, 5, 0,  2,  30), 	#
-	(180, 40, 0.0,    11, 5, 1,  28, 30), 	#
-	(180, 80, 0.0,    11, 5, 2,  56, 30), 	#
-	(200, 20, 0.0,    11, 5, 4,  24, 30), 	#
-	(200, 40, 0.0,    11, 5, 5,  51, 30), 	#
-	(200, 80, 0.0,    11, 5, 7,  19, 30), 	#
-	(150, 20, 1.0e-6, 11, 5, 8,  47, 30), 	#
-	(150, 40, 1.0e-6, 11, 5, 10, 14, 30), 	#
-	(150, 80, 1.0e-6, 11, 5, 11, 42, 30), 	#
-	(180, 20, 1.0e-6, 11, 5, 13, 10, 30), 	#
-	(180, 40, 1.0e-6, 11, 5, 14, 38, 30), 	#
-	(180, 80, 1.0e-6, 11, 5, 16, 7,  30), 	#
-	(200, 20, 1.0e-6, 11, 5, 17, 35, 30), 	#
-	(200, 40, 1.0e-6, 11, 5, 19, 3,  30), 	#
-	(200, 80, 1.0e-6, 11, 5, 20, 30, 30), 	#
-	(150, 20, 0.0,    11, 5, 21, 58, 10), 	#
-	(150, 40, 0.0,    11, 5, 23, 26, 10), 	#
-	(150, 80, 0.0,    11, 6, 0,  54, 10), 	#
-	(180, 20, 0.0,    11, 6, 2,  22, 10), 	#
-	(180, 40, 0.0,    11, 6, 3,  50, 10), 	#
-	(180, 80, 0.0,    11, 6, 5,  17, 10), 	#
-	(200, 20, 0.0,    11, 6, 6,  45, 10), 	#
-	(200, 40, 0.0,    11, 6, 8,  13, 10), 	#
-	(200, 80, 0.0,    11, 6, 9,  40, 10), 	#
-	(150, 20, 1.0e-6, 11, 6, 11, 7,  10), 	#
-	(150, 40, 1.0e-6, 11, 6, 12, 32, 10), 	#
-	(150, 80, 1.0e-6, 11, 6, 13, 58, 10), 	#
-	(180, 20, 1.0e-6, 11, 6, 15, 24, 10), 	#
-	(180, 40, 1.0e-6, 11, 6, 16, 51, 10), 	#
-	(180, 80, 1.0e-6, 11, 6, 18, 17, 10), 	#
-	(200, 20, 1.0e-6, 11, 6, 19, 42, 10), 	#
-	(200, 40, 1.0e-6, 11, 6, 21, 7,  10), 	#
-	(200, 80, 1.0e-6, 11, 6, 22, 32, 10), 	#
-]
+# ╔═╡ 0efbcab7-4a58-400a-84af-f1a6703c7ec9
+data = RivuletTools.data
 
 # ╔═╡ 8b2c77d3-f743-4840-a9d9-9308e05be28d
 begin
 	set = 8
-	data0 = RivuletTools.read_data(R=data[set][1], r=data[set][2], kbT=data[set][3], month=data[set][4], day=data[set][5], hour=data[set][6], minute=data[set][7], θ=data[set][8], nm=32)
+	data0 = RivuletTools.read_data(R=data[set][1], r=data[set][2], kbT=data[set][3], year=data[set][4], month=data[set][5], day=data[set][6], hour=data[set][7], minute=data[set][8], θ=data[set][9], nm=32)
 	# println(typeof(dataH), " ", typeof(dataH) == Dict{String, Any})
 	RivuletTools.heatmap_data(data0, t=25000)
 end
@@ -303,108 +227,8 @@ md"
 ### Patterned Substrate
 "
 
-# ╔═╡ 846ebcbe-34d6-48a4-bc23-cbd04bacf526
-data_arrested = [
-	(160, 20, 0.0,    11,24, 13, 24, 40), 	#
-	(160, 30, 0.0,    11,24, 14, 47, 40), 	#
-	(160, 40, 0.0,    11,24, 16,  9, 40), 	#
-	(180, 20, 0.0,    11,24, 17, 32, 40), 	#
-	(180, 30, 0.0,    11,24, 18, 55, 40), 	#
-	(180, 40, 0.0,    11,24, 20, 18, 40), 	#
-	(200, 20, 0.0,    11,24, 21, 41, 40), 	#
-	(200, 30, 0.0,    11,24, 23,  5, 40), 	#
-	(200, 40, 0.0,    11,25,  0, 28, 40), 	#
-	(160, 20, 1.0e-6, 11,25,  1, 51, 40), 	#
-	(160, 30, 1.0e-6, 11,25,  3, 14, 40), 	#
-	(160, 40, 1.0e-6, 11,25,  4, 37, 40), 	#
-	(180, 20, 1.0e-6, 11,25,  6,  0, 40), 	#
-	(180, 30, 1.0e-6, 11,25,  7, 23, 40), 	#
-	(180, 40, 1.0e-6, 11,25,  8, 47, 40), 	#
-	(200, 20, 1.0e-6, 11,25, 10, 10, 40), 	#
-	(200, 30, 1.0e-6, 11,25, 11, 33, 40), 	#
-	(200, 40, 1.0e-6, 11,25, 12, 56, 40), 	#
-	(160, 20, 0.0,    11,25, 14, 19, 30), 	#
-	(160, 30, 0.0,    11,25, 15, 42, 30), 	#
-	(160, 40, 0.0,    11,25, 17,  4, 30), 	#
-	(160, 60, 0.0,    12,23,  0, 32, 30), 	#
-	(160, 80, 0.0,    12,23,  1, 53, 30), 	#
-	(160, 100,0.0,    12,23,  3, 13, 30), 	#
-	(180, 20, 0.0,    11,25, 18, 27, 30), 	#
-	(180, 30, 0.0,    11,25, 19, 48, 30), 	#
-	(180, 40, 0.0,    11,25, 21,  7, 30), 	#
-	(180, 60, 0.0,    12,23,  4, 34, 30), 	#
-	(180, 80, 0.0,    12,23,  5, 55, 30), 	#
-	(180, 100,0.0,    12,23,  7, 15, 30), 	#
-	(200, 20, 0.0,    11,25, 22, 23, 30), 	#
-	(200, 30, 0.0,    11,25, 23, 40, 30), 	#
-	(200, 40, 0.0,    11,26,  1,  2, 30), 	#
-	(200, 60, 0.0,    12,23,  8, 36, 30), 	#
-	(200, 80, 0.0,    12,23,  9, 57, 30), 	#
-	(200, 100,0.0,    12,23, 11, 19, 30), 	#
-	(160, 20, 1.0e-6, 11,26,  2, 24, 30), 	#
-	(160, 30, 1.0e-6, 11,26,  3, 45, 30), 	#
-	(160, 40, 1.0e-6, 11,26,  5,  7, 30), 	#
-	(180, 20, 1.0e-6, 11,26,  6, 28, 30), 	#
-	(180, 30, 1.0e-6, 11,26,  7, 50, 30), 	#
-	(180, 40, 1.0e-6, 11,26,  9, 12, 30), 	#
-	(200, 20, 1.0e-6, 11,26, 10, 33, 30), 	#
-	(200, 30, 1.0e-6, 11,26, 11, 55, 30), 	#
-	(200, 40, 1.0e-6, 11,26, 13, 16, 30), 	#
-	(160, 20, 0.0,    11,27, 14, 51, 20), 	#
-	(160, 30, 0.0,    11,27, 16, 12, 20), 	#
-	(160, 40, 0.0,    11,27, 17, 33, 20), 	#
-	(160, 60, 0.0,    12,22, 12, 25, 20), 	#
-	(160, 80, 0.0,    12,22, 13, 44, 20), 	#
-	(160, 100,0.0,    12,22, 15,  5, 20), 	#
-	(180, 20, 0.0,    11,27, 18, 54, 20), 	#
-	(180, 30, 0.0,    11,27, 20, 15, 20), 	#
-	(180, 40, 0.0,    11,27, 21, 36, 20), 	#
-	(180, 60, 0.0,    12,22, 16, 25, 20), 	#
-	(180, 80, 0.0,    12,22, 17, 47, 20), 	#
-	(180,100, 0.0,    12,22, 19,  8, 20), 	#
-	(200, 20, 0.0,    11,27, 22, 57, 20), 	#
-	(200, 30, 0.0,    11,28,  0, 18, 20), 	#
-	(200, 40, 0.0,    11,28,  1, 39, 20), 	#
-	(200, 60, 0.0,    12,22, 20, 29, 20), 	#
-	(200, 80, 0.0,    12,22, 21, 50, 20), 	#
-	(200,100, 0.0,    12,22, 23, 11, 20), 	#
-	(160, 20, 1.0e-6, 11,28,  3,  0, 20), 	#
-	(160, 30, 1.0e-6, 11,28,  4, 22, 20), 	#
-	(160, 40, 1.0e-6, 11,28,  5, 42, 20), 	#
-	(180, 20, 1.0e-6, 11,28,  7,  3, 20), 	#
-	(180, 30, 1.0e-6, 11,28,  8, 24, 20), 	#
-	(180, 40, 1.0e-6, 11,28,  9, 45, 20), 	#
-	(200, 20, 1.0e-6, 11,28, 11,  6, 20), 	#
-	(200, 30, 1.0e-6, 11,28, 12, 27, 20), 	#
-	(200, 40, 1.0e-6, 11,28, 13, 47, 20), 	#
-	(160, 20, 0.0,    11,26, 14, 38, 10), 	#
-	(160, 30, 0.0,    11,26, 15, 59, 10), 	#
-	(160, 40, 0.0,    11,26, 17, 21, 10), 	#
-	(160, 60, 0.0,    12,23, 12, 40, 10), 	#
-	(160, 80, 0.0,    12,23, 14,  1, 10), 	#
-	(160, 100,0.0,    12,23, 15, 22, 10), 	#
-	(180, 20, 0.0,    11,26, 18, 42, 10), 	#
-	(180, 30, 0.0,    11,26, 20,  3, 10), 	#
-	(180, 40, 0.0,    11,26, 21, 24, 10), 	#
-	(180, 60, 0.0,    12,23, 16, 42, 10), 	#
-	(180, 80, 0.0,    12,23, 18,  2, 10), 	#
-	(180, 100,0.0,    12,23, 19, 21, 10), 	#
-	(200, 20, 0.0,    11,26, 22, 45, 10), 	#
-	(200, 30, 0.0,    11,27,  0,  5, 10), 	#
-	(200, 40, 0.0,    11,27,  1, 26, 10), 	#
-	(200, 60, 0.0,    12,23, 20, 35, 10), 	#
-	(200, 80, 0.0,    12,23, 21, 51, 10), 	#
-	(200, 100,0.0,    12,23, 23, 10, 10), 	#
-	(160, 20, 1.0e-6, 11,27,  2, 47, 10), 	#
-	(160, 30, 1.0e-6, 11,27,  4,  8, 10), 	#
-	(160, 40, 1.0e-6, 11,27,  5, 25, 10), 	#
-	(180, 20, 1.0e-6, 11,27,  6, 39, 10), 	#
-	(180, 30, 1.0e-6, 11,27,  7, 56, 10), 	#
-	(180, 40, 1.0e-6, 11,27,  9, 17, 10), 	#
-	(200, 20, 1.0e-6, 11,27, 10, 38, 10), 	#
-	(200, 30, 1.0e-6, 11,27, 11, 59, 10), 	#
-	(200, 40, 1.0e-6, 11,27, 13, 20, 10), 	#
-]
+# ╔═╡ 74590e82-5e2b-4a88-afde-3b2992d9b001
+data_arrested = RivuletTools.data_arrested
 
 # ╔═╡ dc5ab038-569e-4603-95af-0549c6e4ee76
 md"
@@ -416,85 +240,11 @@ For even more data we varied the surface tension γ and reduced it by a factor o
 - data_gamma20 double surface tension
 "
 
-# ╔═╡ 9070e432-d2ae-4633-9ad6-637b3eca9bce
-data_gamma05 = [
-	(160, 20, 0.0,    12, 7, 17,  8, 20), 	#
-	(160, 30, 0.0,    12, 7, 18, 22, 20), 	#
-	(160, 40, 0.0,    12, 7, 19, 38, 20), 	#
-	(180, 20, 0.0,    12, 7, 20, 58, 20), 	#
-	(180, 30, 0.0,    12, 7, 22, 18, 20), 	#
-	(180, 40, 0.0,    12, 7, 23, 38, 20), 	#
-	(200, 20, 0.0,    12, 8,  0, 58, 20), 	#
-	(200, 30, 0.0,    12, 8,  2, 18, 20), 	#
-	(200, 40, 0.0,    12, 8,  3, 39, 20), 	#
-	(160, 20, 0.0,    12, 8, 17,  0, 40), 	#
-	(160, 30, 0.0,    12, 8, 18, 20, 40), 	#
-	(160, 40, 0.0,    12, 8, 19, 40, 40), 	#
-	(180, 20, 0.0,    12, 8, 21,  0, 40), 	#
-	(180, 30, 0.0,    12, 8, 22, 20, 40), 	#
-	(180, 40, 0.0,    12, 8, 23, 39, 40), 	#
-	(200, 20, 0.0,    12, 9,  0, 55, 40), 	#
-	(200, 30, 0.0,    12, 9,  2, 10, 40), 	#
-	(200, 40, 0.0,    12, 9,  3, 26, 40), 	#
-	(160, 20, 0.0,    12, 9, 16, 46, 30), 	#
-	(160, 30, 0.0,    12, 9, 18,  6, 30), 	#
-	(160, 40, 0.0,    12, 9, 19, 26, 30), 	#
-	(180, 20, 0.0,    12, 9, 20, 46, 30), 	#
-	(180, 30, 0.0,    12, 9, 22,  6, 30), 	#
-	(180, 40, 0.0,    12, 9, 23, 26, 30), 	#
-	(200, 20, 0.0,    12,10,  0, 46, 30), 	#
-	(200, 30, 0.0,    12,10,  2,  6, 30), 	#
-	(200, 40, 0.0,    12,10,  3, 26, 30), 	#
-	(160, 20, 0.0,    12,10, 16, 31, 10), 	#
-	(160, 30, 0.0,    12,10, 17, 52, 10), 	#
-	(160, 40, 0.0,    12,10, 19, 12, 10), 	#
-	(180, 20, 0.0,    12,10, 20, 32, 10), 	#
-	(180, 30, 0.0,    12,10, 21, 53, 10), 	#
-	(180, 40, 0.0,    12,10, 23, 13, 10), 	#
-	(200, 20, 0.0,    12,11,  0, 34, 10), 	#
-	(200, 30, 0.0,    12,11,  1, 54, 10), 	#
-	(200, 40, 0.0,    12,11,  3, 14, 10), 	#
-	]
+# ╔═╡ 90bd4975-315d-4a55-9af4-5b40ceda4eb3
+data_gamma05 = RivuletTools.data_gamma05
 
 # ╔═╡ 93e8f4ee-7558-4178-8f06-96a422528c48
-data_gamma20 = [
-	(160, 20, 0.0,    12, 8,  4, 59, 20), 	#
-	(160, 30, 0.0,    12, 8,  6, 19, 20), 	#
-	(160, 40, 0.0,    12, 8,  7, 39, 20), 	#
-	(180, 20, 0.0,    12, 8,  8, 59, 20), 	#
-	(180, 30, 0.0,    12, 8, 10, 19, 20), 	#
-	(180, 40, 0.0,    12, 8, 11, 39, 20), 	#
-	(200, 20, 0.0,    12, 8, 12, 59, 20), 	#
-	(200, 30, 0.0,    12, 8, 14, 20, 20), 	#
-	(200, 40, 0.0,    12, 8, 15, 40, 20), 	#
-	(160, 20, 0.0,    12, 9,  4, 46, 40), 	#
-	(160, 30, 0.0,    12, 9,  6,  6, 40), 	#
-	(160, 40, 0.0,    12, 9,  7, 26, 40), 	#
-	(180, 20, 0.0,    12, 9,  8, 46, 40), 	#
-	(180, 30, 0.0,    12, 9, 10,  6, 40), 	#
-	(180, 40, 0.0,    12, 9, 11, 26, 40), 	#
-	(200, 20, 0.0,    12, 9, 12, 46, 40), 	#
-	(200, 30, 0.0,    12, 9, 14,  6, 40), 	#
-	(200, 40, 0.0,    12, 9, 15, 26, 40), 	#
-	(160, 20, 0.0,    12,10,  4, 46, 30), 	#
-	(160, 30, 0.0,    12,10,  6,  6, 30), 	#
-	(160, 40, 0.0,    12,10,  7, 26, 30), 	#
-	(180, 20, 0.0,    12,10,  8, 42, 30), 	#
-	(180, 30, 0.0,    12,10,  9, 55, 30), 	#
-	(180, 40, 0.0,    12,10, 11, 11, 30), 	#
-	(200, 20, 0.0,    12,10, 12, 31, 30), 	#
-	(200, 30, 0.0,    12,10, 13, 51, 30), 	#
-	(200, 40, 0.0,    12,10, 15, 11, 30), 	#
-	(160, 20, 0.0,    12,11,  4, 34, 10), 	#
-	(160, 30, 0.0,    12,11,  5, 54, 10), 	#
-	(160, 40, 0.0,    12,11,  7, 14, 10), 	#
-	(180, 20, 0.0,    12,11,  8, 34, 10), 	#
-	(180, 30, 0.0,    12,11,  9, 55, 10), 	#
-	(180, 40, 0.0,    12,11, 11, 15, 10), 	#
-	(200, 20, 0.0,    12,11, 12, 35, 10), 	#
-	(200, 30, 0.0,    12,11, 13, 55, 10), 	#
-	(200, 40, 0.0,    12,11, 15, 14, 10), 	#
-]
+data_gamma20 = RivuletTools.data_gamma20
 
 # ╔═╡ 05715ba9-fdd3-43c8-b6fc-ee32d225cdf0
 md"
@@ -510,21 +260,7 @@ thus a similar approach as in the surface tension case.
 "
 
 # ╔═╡ 24fde296-5a6f-4a92-bf16-855df4c99227
-data_slip= [
-	# R, rr, kbt, year, month, day, hour, min, theta, slip
-	(180, 20, 0.0, 2024, 1, 25, 11, 40, 20, 5), 	# 1
-	(180, 40, 0.0, 2024, 1, 25, 12, 57, 20, 5), 	# 2
-	(180, 20, 0.0, 2024, 1, 25, 14, 16, 20, 25), 	# 3
-	(180, 40, 0.0, 2024, 1, 25, 15, 36, 20, 25), 	# 4
-	(180, 20, 0.0, 2024, 1, 25, 16, 55, 30, 5), 	# 5
-	(180, 40, 0.0, 2024, 1, 25, 18, 14, 30, 5), 	# 6
-	(180, 20, 0.0, 2024, 1, 25, 19, 34, 30, 25), 	# 7
-	(180, 40, 0.0, 2024, 1, 25, 20, 53, 30, 25), 	# 8 
-	(180, 20, 0.0, 2024, 1, 25, 22, 13, 40, 5), 	# 9
-	(180, 40, 0.0, 2024, 1, 25, 23, 32, 40, 5), 	# 10
-	(180, 20, 0.0, 2024, 1, 26,  0, 51, 40, 25), 	# 11
-	(180, 40, 0.0, 2024, 1, 26,  2, 11, 40, 25), 	# 12
-]
+data_slip= RivuletTools.data_slip
 
 # ╔═╡ b3be394c-5997-4494-ad40-ced2f10fd364
 RivuletTools.renderGifs()
@@ -552,7 +288,7 @@ Clearly the rivulet has broken into droplets.
 begin
 	nmset = 10
 	ts = 1000000
-	dataH = RivuletTools.read_data(R=data[nmset][1], r=data[nmset][2], kbT=data[nmset][3], month=data[nmset][4], day=data[nmset][5], hour=data[nmset][6], minute=data[nmset][7], θ=data[nmset][8], nm=32)
+	dataH = RivuletTools.read_data(R=data[nmset][1], r=data[nmset][2], kbT=data[nmset][3], month=data[nmset][5], day=data[nmset][6], hour=data[nmset][7], minute=data[nmset][8], θ=data[nmset][9], nm=32)
 	RivuletTools.heatmap_data(dataH, t=ts)
 end
 
@@ -627,10 +363,34 @@ For a better grip on the dynamics we take all our simulations and perform some s
 We are, for example, interested in the growth of the instability on the rivulet. 
 That is why we measure the maximum height difference along the rivulet at every time step.
 On the other hand we want to know if the rivulet has ruptured, thus we use the image analysis introduced in `measure_clusters()`. 
-Often stability can be calculated using a so-called **linear-stability analysis**. 
+Often stability can be adressed using a so-called **linear-stability analysis**. 
 I still have to find a way to compute that however what I readily can do is to analyse the spectra.
 
+For now we stay in real space and try to get one dimensional circuluar cuts of the rivulet.
+The first part to do is to create a distance matrix, which can be accessed with `RivuletTools.distanceArray()`.
+This matrix contains radial distances from the center using Chebyshev distances.
+We are especially interested in the evolution of the center of the rivulet, where we assume for the moment that the center of the rivulet also contains the thickest part of the rivulet.
+We can then use this information to get a circular cut.
 
+It is in fact not as easy as I hoped to, because the distance matrix is not ordered.
+However with an inefficient trick we get the circular cut to be simple connected and have a somewhat smooth curve.
+The details of this can be found in `RivuletTools.getRingCurve()`.
+"
+
+# ╔═╡ 7e8e31b9-15fd-4d34-b447-4440ea805811
+hCirc, Radius = RivuletTools.getRingCurve(data[25], 150000)
+
+# ╔═╡ 044b6cab-06cf-405e-864c-3e040faa602d
+radial_plot = plot(0:2π/(length(hCirc)-1):2π, hCirc, label="Circular cut", l=(1.5, :solid), ylabel="height", grid=false, xlabel="x\\(\\phi\\)", xticks = ([0:π/2:2*π;], ["0", "\\pi/2", "\\pi", "3\\pi/2", "2\\pi"]))
+
+# ╔═╡ c5949c51-d3f5-40b1-9415-7c40ae596b1b
+savefig(radial_plot, "../assets/height_line.png")
+
+# ╔═╡ cb4a302c-fb04-4362-95d5-7680d8fb2983
+RivuletTools.do_ringgif(data[25], "firstRingAnimation")
+
+# ╔═╡ 1c6b09bb-9809-411d-8ddd-2095256d0601
+md"
 In the following we work with the hight data only, we don't measure but simply transform it with a **FFT**.
 This way we can compute dominate wavelengths. 
 We also get a dispertion relation, showing (hopefully) growth and damping of different wave modes.
@@ -640,10 +400,6 @@ This information should differ between the arrested rivulets and the contracting
 
 So let's get started and compute some spectra.
 First let's introduce the fft method.
-"
-
-# ╔═╡ 1c6b09bb-9809-411d-8ddd-2095256d0601
-md"
 
 ## Reciprocal space
 Using `Image.jl` is in fact only one way to look at this issue, because we can also **Fourier transform** the data and analyse the spectrum in reciprocal space.
@@ -671,9 +427,9 @@ The actual height field is just a 512 by 512 matrix with height values at every 
 
 # ╔═╡ 289205ad-0bd3-473c-b076-fab42e1643c3
 begin
-	fft_try = RivuletTools.read_data(R=data[fftset][1], r=data[fftset][2], kbT=data[fftset][3], month=data[fftset][4], day=data[fftset][5], hour=data[fftset][6], minute=data[fftset][7], θ=data[fftset][8], nm=32)
+	fft_try = RivuletTools.read_data(R=data[fftset][1], r=data[fftset][2], kbT=data[fftset][3], year=data[fftset][4], month=data[fftset][5], day=data[fftset][6], hour=data[fftset][7], minute=data[fftset][8], θ=data[fftset][9], nm=32)
 	fft_data = RivuletTools.heatmap_data(fft_try, t=time_here, just_data=true)
-	# fft_data[fft_data .< 0.055] .= 0.0
+	shifted_k = fftshift(fftfreq(512)*512)
 end
 
 # ╔═╡ fc37abf6-6acd-4b11-bdab-ddee379d8d72
@@ -687,7 +443,10 @@ This height field, `fft_data` can then be used to compute a spectrum as shown be
 spectrumH= fftshift(fft(fft_data ./ maximum(fft_data)))
 
 # ╔═╡ a1f13b96-fbd3-40ab-aa3f-9af14d55ed55
-md"`spectrumH` is a two dimensional *FFT* of the height which is shown in the plot three cells above.
+md"
+### Spectra
+
+`spectrumH` is a two dimensional *FFT* of the height which is shown in the plot three cells above.
 The *FFT* itself has all the information we need to know for a dispertion relation.
 Radial averaging of this data should correspond to the growth of a dominate wave number and to the damping of wave numbers which are too large to be resolved. 
 "
@@ -704,7 +463,7 @@ If we would take a annulus that is just retracting we would see an isotropic ann
 "
 
 # ╔═╡ 8d0b7517-1be8-41c4-8a4b-716bcad169fb
-RivuletTools.heatmap(fft_data, c=:viridis, aspect_ratio=1)
+RivuletTools.heatmap(fft_data, c=:viridis, xlims=(1,512), ylims=(1, 512), aspect_ratio=1)
 
 # ╔═╡ 19deee02-5fb7-400c-a853-74bd44a8deaf
 md"The *FFT* is as far as I know symmetric and does only contain information for wave lengths up to $L/2$, which in our case is $256\Delta x$.
@@ -713,19 +472,30 @@ That is why a quater of the above image should be enough for further analysis."
 # ╔═╡ 608b2a67-b34b-4440-9282-3f225e5714be
 RivuletTools.data2fft(whichdata=RivuletTools.data, dataset=fftset, time=250000, quater=true, output=false)
 
+# ╔═╡ e370f645-d408-4d7f-8c48-0f9e05522b5f
+md"
+### Power Spectral density
+
+Text here
+"
+
 # ╔═╡ 72270f78-01c5-4ce5-aac4-901fd9a5143f
 hmmm = RivuletTools.simpleRadialAverage(spectrumH, abssqrt=true) .+ 1
 
 # ╔═╡ 783e9476-a0a8-4427-b929-9f7c0faa6b59
-plot(hmmm, yscale=:log10)
+plot(0:π/255:π, 
+	hmmm[1:256], 
+	yscale=:log10, 
+	xlims=(0, π)
+)
 
 # ╔═╡ a59cefd2-27c4-4332-943e-1fbd79ae2481
 begin
 	someset = 26
 	# Retraction
-	fft_anim1 = RivuletTools.read_data(R=data[someset][1], r=data[someset][2], kbT=data[someset][3], month=data[someset][4], day=data[someset][5], hour=data[someset][6], minute=data[someset][7], θ=data[someset][8], nm=32)
+	fft_anim1 = RivuletTools.read_data(R=data[someset][1], r=data[someset][2], kbT=data[someset][3], year=data[someset][4], month=data[someset][5], day=data[someset][6], hour=data[someset][7], minute=data[someset][8], θ=data[someset][9], nm=32)
 	# Breakup
-	fft_anim2 = RivuletTools.read_data(R=data[someset-1][1], r=data[someset-1][2], kbT=data[someset-1][3], month=data[someset-1][4], day=data[someset-1][5], hour=data[someset-1][6], minute=data[someset-1][7], θ=data[someset-1][8], nm=32)
+	fft_anim2 = RivuletTools.read_data(R=data[someset-1][1], r=data[someset-1][2], kbT=data[someset-1][3], year=data[someset-1][4], month=data[someset-1][5], day=data[someset-1][6], hour=data[someset-1][7], minute=data[someset-1][8], θ=data[someset-1][9], nm=32)
 	anim = Animation()
 	dataEnd1 = RivuletTools.heatmap_data(fft_anim1, t=2500000, just_data=true)
 	dataEnd2 = RivuletTools.heatmap_data(fft_anim2, t=2500000, just_data=true)
@@ -739,18 +509,20 @@ begin
 		# specH[256, 256] = 1.0
 		averagedPSD1 = RivuletTools.simpleRadialAverage(spec1, abssqrt=true)
 		averagedPSD2 = RivuletTools.simpleRadialAverage(spec2, abssqrt=true)
-		plot(averagedPSD1 .+ 1,
-			title="t=$(t)Δt",
-			label="Retraction", 
-			xlabel="k/[Δx⁻¹]", 
-			ylabel="S(k)",
-			yscale=:log10,
-			xscale=:log10,
-			grid=false,
-			minorticks=true,
+		plot(0:π/255:π, 			# x-axis from 0 to pi 
+			averagedPSD1 .+ 1,  	# y-axis averaged FFT
+			title="t=$(t)Δt", 		# Titel
+			label="Retraction",  	# Label
+			xlabel="q/[Δx⁻¹]",  	# x-label
+			ylabel="S(q)", 			# y-label
+			yscale=:log10, 			# y-axis scaling
+			# xscale=:log10, 		# x-axis scaling
+			grid=false, 			# No grid
+			minorticks=true, 		# Minorticks for log
 			# xlims = (1, 10)
     	)
-		plot!(averagedPSD2 .+ 1, 
+		plot!(0:π/255:π, 
+			averagedPSD2 .+ 1, 
 			label="Breakup", 
 			# xlims = (1, 10)
     	)
@@ -808,7 +580,7 @@ function combined_df(name::String; remeasure=false)
 		CSV.write("data/$(name).csv", combined)
 		return combined
 	else
-		all_df = csv2df(name)
+		all_df = RivuletTools.csv2df(name)
 		return all_df
 	end
 end
@@ -3132,26 +2904,26 @@ version = "1.4.1+1"
 # ╟─6d3c1725-75fa-412e-9b30-8f8df4e7874b
 # ╟─2df8c833-7ca7-4d7a-ade5-0df083a013a1
 # ╟─04e344a3-3d5b-449e-9222-481df24015c7
-# ╟─974c334e-38fb-436e-842b-bb016854d136
+# ╠═974c334e-38fb-436e-842b-bb016854d136
 # ╟─5aad6dcc-8400-4a7a-a2bc-69105b32e09f
 # ╟─351d01de-7225-40e0-b650-0ef40b1a1cf7
 # ╟─7cf4ce88-33de-472c-99c6-5b3ae258f3d1
-# ╟─8b2c77d3-f743-4840-a9d9-9308e05be28d
+# ╠═8b2c77d3-f743-4840-a9d9-9308e05be28d
 # ╟─0361d281-4a64-4792-812f-7eb9d268d2ae
 # ╟─60ce933e-4335-4190-a7b0-5c86d0326a35
 # ╟─3eaf9941-d510-4a91-99bf-2084bbe3ea40
 # ╟─70da13b0-6111-4d5d-a6f5-49fcc0499738
 # ╟─4fb1d7ad-47f2-4adf-a2ba-0ecc0fc8eeb0
-# ╟─41aee571-9016-4759-859a-c99eb143a410
+# ╠═41aee571-9016-4759-859a-c99eb143a410
 # ╟─13ce2bea-889f-4727-a126-71a5006a86ab
-# ╠═c9572357-8d97-47a7-914a-91c0b452eb6b
+# ╠═0efbcab7-4a58-400a-84af-f1a6703c7ec9
 # ╟─a1ee76ab-bf27-466e-8324-01ecde09931c
-# ╟─846ebcbe-34d6-48a4-bc23-cbd04bacf526
+# ╠═74590e82-5e2b-4a88-afde-3b2992d9b001
 # ╟─dc5ab038-569e-4603-95af-0549c6e4ee76
-# ╟─9070e432-d2ae-4633-9ad6-637b3eca9bce
-# ╟─93e8f4ee-7558-4178-8f06-96a422528c48
+# ╠═90bd4975-315d-4a55-9af4-5b40ceda4eb3
+# ╠═93e8f4ee-7558-4178-8f06-96a422528c48
 # ╟─05715ba9-fdd3-43c8-b6fc-ee32d225cdf0
-# ╟─24fde296-5a6f-4a92-bf16-855df4c99227
+# ╠═24fde296-5a6f-4a92-bf16-855df4c99227
 # ╠═b3be394c-5997-4494-ad40-ced2f10fd364
 # ╠═6ee87ada-668c-4d1b-aa55-e35b7b475f2a
 # ╟─0f204a06-71b2-438a-bb49-4af8ebda0001
@@ -3167,6 +2939,10 @@ version = "1.4.1+1"
 # ╟─7f8b5fe8-f5d1-46eb-a30e-8f0a6e9707bc
 # ╟─2e7b7b97-f4b9-4ef8-b360-e086ffc0a025
 # ╟─dc37fa99-ceb5-40cb-846a-6cdf9d33c2f3
+# ╠═7e8e31b9-15fd-4d34-b447-4440ea805811
+# ╠═044b6cab-06cf-405e-864c-3e040faa602d
+# ╟─c5949c51-d3f5-40b1-9415-7c40ae596b1b
+# ╠═cb4a302c-fb04-4362-95d5-7680d8fb2983
 # ╠═1c6b09bb-9809-411d-8ddd-2095256d0601
 # ╠═2a66eee4-be06-43a2-a9be-fc2e0c4a0f32
 # ╟─a86d30c5-03f0-4e11-ba25-1f08ba0998b7
@@ -3181,9 +2957,10 @@ version = "1.4.1+1"
 # ╠═8d0b7517-1be8-41c4-8a4b-716bcad169fb
 # ╟─19deee02-5fb7-400c-a853-74bd44a8deaf
 # ╠═608b2a67-b34b-4440-9282-3f225e5714be
+# ╟─e370f645-d408-4d7f-8c48-0f9e05522b5f
 # ╠═72270f78-01c5-4ce5-aac4-901fd9a5143f
 # ╠═783e9476-a0a8-4427-b929-9f7c0faa6b59
-# ╟─a59cefd2-27c4-4332-943e-1fbd79ae2481
+# ╠═a59cefd2-27c4-4332-943e-1fbd79ae2481
 # ╟─38345378-66ee-42c1-b37f-6691119ecc60
 # ╠═df519afa-309a-4633-860d-2fe40a384fa9
 # ╠═3273792c-41fb-4225-a4f7-2f1c9d58be4a
