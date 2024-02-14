@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.37
+# v0.19.38
 
 using Markdown
 using InteractiveUtils
@@ -148,6 +148,26 @@ where the two $\kappa$'s correspond to the two radii.
 One problem could in fact be that all our simulations have the same $\kappa_0$.
 Therefore let us have a look at the initial conditions:
 "
+
+# ╔═╡ a9601fe8-6321-4ad7-a950-c7354290aed6
+begin
+	r = 40
+	θ = π/9
+	h = RivuletTools.torus(512, 512, 40, 180, 1/9, (256,256))
+	w = 31 - 3 
+	thetaC = 2*asin(13.68/(2*r))
+	Ar = θ*r^2- 0.5*r*w*cos(θ)
+	Ar2 = (r^2/2)*(thetaC - sin(thetaC))
+	Ar3 = (2/3)*w*maximum(h[256, 61:91])
+	As = sum(h[256, 61:91])
+	println("Computed: $(Ar) Simulated: $(As)")
+	println("Computed 2: $(Ar2) Simulated: $(As)")
+	println("Computed 3: $(Ar3) Simulated: $(As)")
+	println(sqrt(maximum(h[256, 61:91])*(2*r-maximum(h[256, 61:91]))))
+	println(thetaC, " ",  θ, " ", 2*r*sin(θ))
+	plot(h[256, 61:91], minorticks=true, aspect_ratio=1)
+	
+end
 
 # ╔═╡ 3eaf9941-d510-4a91-99bf-2084bbe3ea40
 begin
@@ -2937,7 +2957,8 @@ version = "1.4.1+1"
 # ╠═8b2c77d3-f743-4840-a9d9-9308e05be28d
 # ╟─0361d281-4a64-4792-812f-7eb9d268d2ae
 # ╟─60ce933e-4335-4190-a7b0-5c86d0326a35
-# ╟─3eaf9941-d510-4a91-99bf-2084bbe3ea40
+# ╠═a9601fe8-6321-4ad7-a950-c7354290aed6
+# ╠═3eaf9941-d510-4a91-99bf-2084bbe3ea40
 # ╟─70da13b0-6111-4d5d-a6f5-49fcc0499738
 # ╟─4fb1d7ad-47f2-4adf-a2ba-0ecc0fc8eeb0
 # ╠═41aee571-9016-4759-859a-c99eb143a410
