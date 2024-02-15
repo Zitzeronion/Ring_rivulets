@@ -442,14 +442,62 @@ Measures the circular cuts for a whole simulation and returns a `dict[time => hC
 julia> hrings = ringOverTime(data[44])   
 ``` 
 """
-function ringOverTime(data; arr=false, tEnd=2500000)
+function ringOverTime(data; arr=false, tEnd=2500000, curves=true, savedataframe=true)
+	dpath = joinpath("/home/zitz", "Ring_rivulets/data/")
+	ringData = DataFrame()
 	hRing = Dict()
-	# RRing = Dict()
+	hmax = Float64[]
+	hmin = Float64[]
+	hdelta = Float64[]
+	Rt = Int64[]
 	for t in 25000:25000:tEnd
-		hRing["t_$(t)"] = getRingCurve(data, t; CircRad=(false, 180), center=(256,256), arr=arr)[1]
-		# RRing["t_$(t)"] = getRingCurve(data, t; CircRad=(false, 180), center=(256,256), arr=arr)[2]
+		heightRing = getRingCurve(data, t; CircRad=(false, 180), center=(256,256), arr=arr)
+		hx = maximum(heightRing[1])
+		hi = minimum(heightRing[1])
+		hRing["t_$(t)"] = heightRing[1]
+		push!(hmax, hx)
+		push!(hmin, hi)
+		push!(hdelta, hx - hi)
+		push!(Rt, heightRing[2])
 	end
-	return hRing
+	ringData.time = 25000:25000:tEnd
+	ringData.R_t = Rt
+	ringData.hmax = hmax
+	ringData.hmin = hmin
+	ringData.deltaH = hdelta	
+	ringData.R0 = fill(data[1], length(hmax))	
+	ringData.rr0 = fill(data[2], length(hmax))	
+	ringData.theta = fill(data[9], length(hmax))
+	# Add substrate flavor
+	if arr
+		ringData.substrate = fill("pattern", length(hmax))
+	else	
+		ringData.substrate = fill("uniform", length(hmax))
+	end
+	# Save CSV 
+	if savedataframe
+		CSV.write("$(dpath)ring_sim_R_$(data[1])_rr_$(data[2])_theta_$(data[9]).csv", ringData)
+	else
+		if curves
+			# Return height data and dataframe
+			return hRing, ringData
+		end
+		# Return dataframe only
+		return ringData
+	end
+end
+
+function combine_ring_data()
+	dpath = joinpath("/home/zitz", "Ring_rivulets/data/")
+	df = DataFrame()
+	for i in data_arrested
+		if i[3] == 0.0
+			somedf = ringOverTime(i, arr=true, curves=false, savedataframe=false)
+			println("Analysing simulation R=$(i[1]) r=$(i[2]) theta=$(i[9])")
+			df = vcat(df, somedf)
+		end
+	end
+	CSV.write("$(dpath)ring_all_sims_patterned_nokBT.csv", df)
 end
 
 """
