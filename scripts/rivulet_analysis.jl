@@ -212,6 +212,8 @@ The three dataframes host:
 - Simulation data on patterned substrates: `data_arrested`
 - Simulation data with different surface tension: `data_gammaX`
 - Simulation data with different slip length: `data_slip`
+
+### Initial conditions
 "
 
 # ╔═╡ 41aee571-9016-4759-859a-c99eb143a410
@@ -383,7 +385,9 @@ For a better grip on the dynamics we take all our simulations and perform some s
 We are, for example, interested in the growth of the instability on the rivulet. 
 That is why we measure the maximum height difference along the rivulet at every time step.
 On the other hand we want to know if the rivulet has ruptured, thus we use the image analysis introduced in `measure_clusters()`. 
-Often stability can be adressed using a so-called **linear-stability analysis**. 
+Often stability can be adressed using a so-called **linear-stability analysis**.
+Some papers have been found in the mean time!
+
 I still have to find a way to compute that however what I readily can do is to analyse the spectra.
 
 For now we stay in real space and try to get one dimensional circuluar cuts of the rivulet.
@@ -393,7 +397,7 @@ We are especially interested in the evolution of the center of the rivulet, wher
 We can then use this information to get a circular cut.
 
 It is in fact not as easy as I hoped to, because the distance matrix is not ordered.
-However with an inefficient trick we get the circular cut to be simple connected and have a somewhat smooth curve.
+However with an inefficient trick we get the circular cut to be simple connected and have a somewhat smooth curve as depicted below.
 The details of this can be found in `RivuletTools.getRingCurve()`.
 "
 
@@ -401,13 +405,78 @@ The details of this can be found in `RivuletTools.getRingCurve()`.
 hCirc, Radius = RivuletTools.getRingCurve(data[25], 150000)
 
 # ╔═╡ 044b6cab-06cf-405e-864c-3e040faa602d
-radial_plot = plot(0:2π/(length(hCirc)-1):2π, hCirc, label="Circular cut", l=(1.5, :solid), ylabel="height", grid=false, xlabel="x\\(\\phi\\)", xticks = ([0:π/2:2*π;], ["0", "\\pi/2", "\\pi", "3\\pi/2", "2\\pi"]))
+radial_plot = plot(0:2π/(length(hCirc)-1):2π, hCirc, label="Cut at R=$(Radius)Δx", l=(1.5, :solid), ylabel="height", grid=false, xlabel="x\\(\\phi\\)", xticks = ([0:π/2:2*π;], ["0", "\\pi/2", "\\pi", "3\\pi/2", "2\\pi"]))
 
 # ╔═╡ c5949c51-d3f5-40b1-9415-7c40ae596b1b
 savefig(radial_plot, "../assets/height_line.png")
 
+# ╔═╡ cfb78bf5-9f06-4557-a777-c34d908f0e67
+md"
+Similar to above we can turn the time series of the profiles into an animation.
+We have normalized the y-axis with the equal volume single droplet height
+```math
+	h_d = r_d(1-\cos(\theta)),
+```
+where $r_d$ is the radius of the sphere from which the cap is cut and given by
+```math
+	r_d = \sqrt[3]{\frac{3V}{\pi(2+\cos(\theta))(1-cos(\theta))^2}},
+```
+and $V$ is the volume of the rivulet at $t=0$.
+The x-axis is normalized using 
+```math
+	x(\phi) = \frac{2\pi x_i}{N-1},
+```
+where $N$ is the number of elements $x_i$ that are contained by the 
+circular cut.
+"
+
 # ╔═╡ cb4a302c-fb04-4362-95d5-7680d8fb2983
 RivuletTools.do_ringgif(data[25], "firstRingAnimation")
+
+# ╔═╡ 30220b96-8154-4ca2-a016-9258860323a5
+md"
+### Growth rates
+
+One rather straight question we can address using the height data is that of growth rates.
+Or put it slightly differentely how does the quantity
+```math
+	\Delta h = h_{max} - h_{min}
+```
+evolve with time.
+This measure has however the downside that $h_{min}$ is more or less constant because it is set by the disjoining pressure $\Pi(h)$ which reads
+```math
+	\Pi(h) = Kf(h),
+```
+with 
+```math
+	K = \frac{2(1-\cos(\theta))}{h_{\ast}},
+```
+and
+```math
+	f(h) = \left(\frac{h_{\ast}}{h}\right)^3 - \left(\frac{h_{\ast}}{h}\right)^2, 
+```
+with $h_{\ast}$ being the precursor film height that is assumed to be $h_{\ast} \ll h$.
+We therefore have 
+```math
+	h_{min} \propto h_{\ast}
+```
+independent of time.
+
+This data is already precompiled and can be found in `all_data_rivulets.csv`.
+To get this data we run the function `RivuletTools.measure_data()` that collects data on $R(t)$, $r(t)$ and $\Delta h(t)$
+"
+
+# ╔═╡ df519afa-309a-4633-860d-2fe40a384fa9
+for to_analyse in [(data, "dynamics_uniform", false), (data_arrested, "dynamics_patterned", true)]
+	run_me = true
+	RivuletTools.measure_data(to_analyse[1], to_analyse[2], run_me, to_analyse[3], "")
+end
+
+# ╔═╡ c1b3e29b-51b6-4bbd-8793-ece13bfb5a70
+measureDF = CSV.read("../data/data_all_rivulets.csv", DataFrame)
+
+# ╔═╡ f12c1925-cf29-41e5-9499-87efe1a96528
+
 
 # ╔═╡ 0489cd43-a451-435e-9024-7b9ff3432761
 begin
@@ -556,21 +625,22 @@ begin
 		averagedPSD1 = RivuletTools.simpleRadialAverage(spec1, abssqrt=true)
 		averagedPSD2 = RivuletTools.simpleRadialAverage(spec2, abssqrt=true)
 		plot(0:π/255:π, 			# x-axis from 0 to pi 
-			averagedPSD1 .+ 1,  	# y-axis averaged FFT
+			log.(averagedPSD1) .+ 1,  	# y-axis averaged FFT
 			title="t=$(t)Δt", 		# Titel
 			label="Retraction",  	# Label
 			xlabel="q/[Δx⁻¹]",  	# x-label
-			ylabel="S(q)", 			# y-label
-			yscale=:log10, 			# y-axis scaling
+			xticks = ([0:π/4:π;], ["0", "\\pi/4", "\\pi/2", "3\\pi/4", "\\pi"]),
+			ylabel="log(S(q))", 			# y-label
+			# yscale=:log10, 			# y-axis scaling
 			# xscale=:log10, 		# x-axis scaling
 			grid=false, 			# No grid
 			minorticks=true, 		# Minorticks for log
 			# xlims = (1, 10)
     	)
 		plot!(0:π/255:π, 
-			averagedPSD2 .+ 1, 
+			log.(averagedPSD2) .+ 1, 
 			label="Breakup", 
-			# xlims = (1, 10)
+			xlims = (0, π)
     	)
 		frame(anim)
 	end
@@ -588,12 +658,6 @@ There is data on
 
 # Lets get some graphs tomorrow!
 "
-
-# ╔═╡ df519afa-309a-4633-860d-2fe40a384fa9
-for to_analyse in [(data_arrested, "dynamics_patterned", true)]
-	run_me = false
-	RivuletTools.measure_data(to_analyse[1], to_analyse[2], run_me, to_analyse[3], "arrested_more")
-end
 
 # ╔═╡ 3273792c-41fb-4225-a4f7-2f1c9d58be4a
 for to_analyse in [(data_gamma05, "gamma05_uniform", "gamma05_"), (data_gamma20, "gamma20_uniform", "gamma20_")]
@@ -2974,7 +3038,7 @@ version = "1.4.1+1"
 # ╠═b3be394c-5997-4494-ad40-ced2f10fd364
 # ╠═6ee87ada-668c-4d1b-aa55-e35b7b475f2a
 # ╟─0f204a06-71b2-438a-bb49-4af8ebda0001
-# ╠═d5152b67-bc1d-4cc0-b73e-90d79dbadcb4
+# ╟─d5152b67-bc1d-4cc0-b73e-90d79dbadcb4
 # ╟─ab5b4c7c-ae24-4aae-a528-1dc427a7f1f1
 # ╠═c945050f-3ddc-4d0e-80dd-af909c3f4ab5
 # ╟─7e2fd675-28ba-4412-9c56-4b40b3380576
@@ -2989,9 +3053,14 @@ version = "1.4.1+1"
 # ╠═7e8e31b9-15fd-4d34-b447-4440ea805811
 # ╠═044b6cab-06cf-405e-864c-3e040faa602d
 # ╟─c5949c51-d3f5-40b1-9415-7c40ae596b1b
+# ╟─cfb78bf5-9f06-4557-a777-c34d908f0e67
 # ╠═cb4a302c-fb04-4362-95d5-7680d8fb2983
+# ╠═30220b96-8154-4ca2-a016-9258860323a5
+# ╠═df519afa-309a-4633-860d-2fe40a384fa9
+# ╠═c1b3e29b-51b6-4bbd-8793-ece13bfb5a70
+# ╠═f12c1925-cf29-41e5-9499-87efe1a96528
 # ╠═0489cd43-a451-435e-9024-7b9ff3432761
-# ╠═1c6b09bb-9809-411d-8ddd-2095256d0601
+# ╟─1c6b09bb-9809-411d-8ddd-2095256d0601
 # ╠═2a66eee4-be06-43a2-a9be-fc2e0c4a0f32
 # ╟─a86d30c5-03f0-4e11-ba25-1f08ba0998b7
 # ╠═ea5f58f9-5394-4536-9458-0484e85fdc85
@@ -3010,7 +3079,6 @@ version = "1.4.1+1"
 # ╠═783e9476-a0a8-4427-b929-9f7c0faa6b59
 # ╠═a59cefd2-27c4-4332-943e-1fbd79ae2481
 # ╟─38345378-66ee-42c1-b37f-6691119ecc60
-# ╠═df519afa-309a-4633-860d-2fe40a384fa9
 # ╠═3273792c-41fb-4225-a4f7-2f1c9d58be4a
 # ╟─144e23e9-ce3d-4ed6-be2c-dff1fed39e59
 # ╠═f7521761-e9f1-43df-a95c-57aec7c83011

@@ -183,7 +183,7 @@ function do_ringgif(data, filename::String; timeMax=2500000)
 		normX = 0:2π/(Radelements-1):2π 
 		plot(normX, 
 			hCirc ./ h_drop, 
-			label="R=$(data[1]) r=$(data[2])", 
+			label="R₀=$(data[1]) r₀=$(data[2])", 
 			xlabel="x\\(\\phi\\)", 
 			ylabel="h/h_d", 
 			xticks = ([0:π/2:2*π;], ["0", "\\pi/2", "\\pi", "3\\pi/2", "2\\pi"]),
@@ -687,32 +687,44 @@ function measure_data(data, label::String, remeasure::Bool, pat::Bool, gam::Stri
 			# println(i)
 			someFrame = DataFrame()
 			h = read_data(R=data[i][1], 
-				r=data[i][2], 
-				kbT=data[i][3],
-				year=data[i][4], 
-				month=data[i][5], 
-				day=data[i][6], 
-				hour=data[i][7], 
-				minute=data[i][8], 
-				θ=data[i][9] ,
-				nm=32, 
-				arrested=pat, 
-				gamma=gam)
+						r=data[i][2], 
+						kbT=data[i][3],
+						year=data[i][4], 
+						month=data[i][5], 
+						day=data[i][6], 
+						hour=data[i][7], 
+						minute=data[i][8], 
+						θ=data[i][9] ,
+						nm=32, 
+						arrested=pat, 
+						gamma=gam
+						)
 			R = Float64[]
 			rr = Float64[]
 			beta = Float64[]
 			allr = Float64[]
 			deltaH = Float64[]
 			clusters = Int64[]
-			for j in 25000:25000:2500000
-				R_measure = measure_diameter(h, t=j)
-				# Push the radii not the diameters
-				push!(R, R_measure[1]/2)
-				push!(rr, R_measure[2]/2)
-				push!(allr, R_measure[3]/2)
-				push!(beta, (R_measure[2]/2)/(R_measure[1]/2 + R_measure[2]/2))
-				push!(deltaH, measure_Δh(h, t=j))
-				push!(clusters, measure_cluster(h, t=j))
+			for j in 0:25000:2500000
+				if j > 0
+					R_measure = measure_diameter(h, t=j)
+					# Push the radii not the diameters
+					push!(R, R_measure[1]/2)
+					push!(rr, R_measure[2]/2)
+					push!(allr, R_measure[3]/2)
+					push!(beta, (R_measure[2]/2)/(R_measure[1]/2 + R_measure[2]/2))
+					push!(deltaH, measure_Δh(h, t=j))
+					push!(clusters, measure_cluster(h, t=j))
+				else 
+					h0 = torus(512, 512, data[i][1], data[i][2], data[i][9], (256,256))
+					R_measure = measure_diameter(h0)
+					push!(R, R_measure[1]/2)
+					push!(rr, R_measure[2]/2)
+					push!(allr, R_measure[3]/2)
+					push!(beta, (R_measure[2]/2)/(R_measure[1]/2 + R_measure[2]/2))
+					push!(deltaH, maximum(h0) - 0.056)
+					push!(clusters, 1)
+				end
 			end
 			someFrame.major = R
 			someFrame.minor = rr
@@ -720,11 +732,11 @@ function measure_data(data, label::String, remeasure::Bool, pat::Bool, gam::Stri
 			someFrame.beta = beta
 			someFrame.dH = deltaH
 			someFrame.clusters = clusters
-			someFrame.R = fill(data[i][1],100)
-			someFrame.rr = fill(data[i][2],100)
-			someFrame.kbt = fill(data[i][3],100)
-			someFrame.theta = fill(data[i][8],100)
-			someFrame.time = 25000:25000:2500000
+			someFrame.R = fill(data[i][1],101)
+			someFrame.rr = fill(data[i][2],101)
+			someFrame.kbt = fill(data[i][3],101)
+			someFrame.theta = fill(data[i][9],101)
+			someFrame.time = 0:25000:2500000
 			measurements = vcat(measurements, someFrame)
 			println("done with $(i) of $(length(data))")
 		end
@@ -807,6 +819,7 @@ function t0_data()
 	m1 = Float64[] 		# measured outer radius
 	m2 = Float64[] 		# measured minor radius
 	m3 = Float64[] 		# measured outer-minor radius 
+	psi0 = Float64[] 	# measured width over r(h_max) González, Diez, Kondic
 	beta = Float64[] 	# measured relation minor/major
 	maxh = Float64[] 	# maximal rivulet height at t=0
 	vols = Float64[] 	# liquid volume of the rivulet
@@ -826,6 +839,7 @@ function t0_data()
 				push!(m1, geometry[1]/2)
 				push!(m2, geometry[2]/2)
 				push!(m3, geometry[3]/2)
+				push!(psi0, (geometry[3] - geometry[1])/(geometry[1] + geometry[2]))
 				push!(beta, (geometry[2]/2)/R)
 				push!(angs, angle)
 				push!(Ohs, compute_Oh(geometry[2]/2))
@@ -845,6 +859,7 @@ function t0_data()
 	initial_data.realR = m3
 	initial_data.realrr = m2
 	initial_data.realOR = m1
+	initial_data.psi0 = psi0
 	initial_data.beta = beta
 	initial_data.maxh0 = maxh
 	initial_data.vol = vols
@@ -896,6 +911,7 @@ function data2fft(;whichdata=data, dataset=25, time=25000, quater=false, output=
 			aspect_ratio=1, 
 			xlims=(-π,π), 
 			ylims=(-π, π),
+			# xlabel="x\\(\\phi\\)", xticks = ([0:π/2:2*π;], ["0", "\\pi/2", "\\pi", "3\\pi/2", "2\\pi"])
 			#clim=(0.1, 1000) # Limits for heatmap
 		)
 	end
@@ -920,6 +936,7 @@ function height2fft(data, t; output = false)
 			xlims=(0,π), 
 			xlabel = "q",
 			ylabel = "log(S(q))"
+			# xlabel="x\\(\\phi\\)", xticks = ([0:π/2:2*π;], ["0", "\\pi/2", "\\pi", "3\\pi/2", "2\\pi"])
 			#ylims=(-π, π),
 			#clim=(0.1, 1000) # Limits for heatmap
 		)
