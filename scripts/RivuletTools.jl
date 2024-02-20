@@ -820,6 +820,7 @@ function t0_data()
 	m2 = Float64[] 		# measured minor radius
 	m3 = Float64[] 		# measured outer-minor radius 
 	psi0 = Float64[] 	# measured width over r(h_max) González, Diez, Kondic
+	nmax = Float64[] 	# number of droplets predicted by González, Diez, Kondic
 	beta = Float64[] 	# measured relation minor/major
 	maxh = Float64[] 	# maximal rivulet height at t=0
 	vols = Float64[] 	# liquid volume of the rivulet
@@ -840,6 +841,7 @@ function t0_data()
 				push!(m2, geometry[2]/2)
 				push!(m3, geometry[3]/2)
 				push!(psi0, (geometry[3] - geometry[1])/(geometry[1] + geometry[2]))
+				push!(nmax, π/(2((geometry[3] - geometry[1])/(geometry[1] + geometry[2]))))
 				push!(beta, (geometry[2]/2)/R)
 				push!(angs, angle)
 				push!(Ohs, compute_Oh(geometry[2]/2))
@@ -860,6 +862,7 @@ function t0_data()
 	initial_data.realrr = m2
 	initial_data.realOR = m1
 	initial_data.psi0 = psi0
+	initial_data.nmax = nmax
 	initial_data.beta = beta
 	initial_data.maxh0 = maxh
 	initial_data.vol = vols

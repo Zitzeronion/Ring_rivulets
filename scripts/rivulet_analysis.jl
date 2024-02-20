@@ -5,7 +5,7 @@ using Markdown
 using InteractiveUtils
 
 # ╔═╡ f268582b-0756-41cf-910d-7a57b698451d
-using FileIO, PlutoUI, Plots, DataFrames, CSV, JLD2, Images, ImageSegmentation, Random, FFTW
+using FileIO, PlutoUI, Plots, DataFrames, CSV, JLD2, Images, ImageSegmentation, Random, FFTW, LaTeXStrings
 
 # ╔═╡ f075f19a-81b6-47b7-9104-57d2e51e7241
 begin
@@ -468,15 +468,126 @@ To get this data we run the function `RivuletTools.measure_data()` that collects
 
 # ╔═╡ df519afa-309a-4633-860d-2fe40a384fa9
 for to_analyse in [(data, "dynamics_uniform", false), (data_arrested, "dynamics_patterned", true)]
-	run_me = true
+	run_me = false
 	RivuletTools.measure_data(to_analyse[1], to_analyse[2], run_me, to_analyse[3], "")
 end
 
+# ╔═╡ c7590419-c3d0-41f7-8777-227fcc7b1ba8
+md"
+### Linear Stability Analysis (LSA)
+
+The starting point for this analysis is the equation that we numerically approximate
+```math
+	\partial_t h + \nabla (M(h)\nabla p) = 0,
+```
+where $M(h)$ is a mobility given by 
+```math
+	M(h) = \frac{2h^2+6h\delta +3\delta}{6\mu},
+```
+and the pressure 
+```math
+	p = \Delta h - \Pi(h).
+```
+
+For a complet and thorough derivation of this LSA we point towards the paper by [Gonzalez, Diez, Kondic](https://www.cambridge.org/core/product/identifier/S0022112012006076/type/journal_article).
+They go into every detail that one can think of.
+
+When we insert all the terms into the first equation and multiply with $6\mu$ we have
+```math
+	6\mu\partial_t h + \nabla[(2h^2+6h\delta +3\delta)\nabla(\Delta h - \Pi(h))]
+```
+Let
+```math
+	h = h_0(r,\phi) + \epsilon h_1(r, \phi, t),
+```
+with $\epsilon \ll 1$ and insert this in the above equation then we get at $O(1)$
+```math
+	\nabla[M(h_0)\nabla(\Delta h_0 - \Pi(h_0))] = 0.
+```
+At first order $O(\epsilon)$ we find the equality $\partial_t h_1 +\mathcal{L}_1 h_1 = 0$ where
+```math
+	\mathcal{L}_1 h_1 = \nabla[M(h_0)\nabla(\Delta h_1 - \Pi(h_0)) + 3h_1(2h_0^2 + 4h_0\delta + \delta)\nabla (\Delta h_0 - \Pi(h_0))]
+```
+"
+
 # ╔═╡ c1b3e29b-51b6-4bbd-8793-ece13bfb5a70
-measureDF = CSV.read("../data/data_all_rivulets.csv", DataFrame)
+measureDF = CSV.read("../data/dynamics_uniform_and_patterned.csv", DataFrame)
 
 # ╔═╡ f12c1925-cf29-41e5-9499-87efe1a96528
+md"
+A result of the LSA done by [Gonzalez, Diez, Kondic](https://www.cambridge.org/core/product/identifier/S0022112012006076/type/journal_article) is an maximal unstable wavenumber and thus a prediction for the number of droplet $n_{max}$ after rivulet breakup.
 
+This number can be approximated using
+```math
+	n_{max,app} = \frac{\pi}{2\psi_0},
+```
+where $\psi_0 = w/R$ with $w$ being the width of the rivulet and $R$ is the radius of the position of the maximum.
+To compute $\psi_0$ we simply look it up in `t0_data()`. 
+Now let's have a look at $n_{max,app}$
+"
+
+# ╔═╡ a41cab07-f8f1-4b24-bd15-5fd29651fe36
+plot(collect(0.001:0.001:1), π ./ (2 .* collect(0.001:0.001:1)), 
+	xlabel = L"\psi_0",
+	ylabel = L"n_{max}",
+	label = L"LSA",
+	xlims= (0, 1),
+	ylims = (0, 30),
+	minorticks = true,
+	grid = false)
+
+# ╔═╡ 695bd289-a4b3-4154-ab49-6229de133164
+md"
+Clearly the number of droplets scales very visible with the geometric initial conditions of the rivulet.
+In a next step we can our data from both the uniform and patterned substrates."
+
+# ╔═╡ 538694ea-a0b1-4f09-b7b4-4af64d7ec10b
+begin 
+	dfLSA = DataFrame()
+	maxDropsData = Int[]
+	angles = Int[]
+	Rs = Int[]
+	rrs = Int[]
+	psi0 = Float64[]
+	pattern = String[]
+	for angle in [10, 20, 30, 40]
+		for R in [150, 160, 180, 200]
+			for rr in [20, 30, 40, 60, 80, 100]
+				ndrops = maximum(measureDF[(measureDF.R .== R) .& (measureDF.rr .== rr) .& (measureDF.theta .== angle) .& (measureDF.kbt .== 0), :].clusters, init=0)
+				pat = maximum(measureDF[(measureDF.R .== R) .& (measureDF.rr .== rr) .& (measureDF.theta .== angle) .& (measureDF.kbt .== 0), :].substrate, init="")
+				push!(maxDropsData, ndrops)
+				push!(angles, angle)
+				push!(Rs, R)
+				push!(rrs, rr)
+				psi = initial_data[(initial_data.R0 .== R) .& (initial_data.rr0 .== rr) .& (initial_data.angle .== angle), :].psi0[1]
+				push!(psi0, psi)
+				push!(pattern, pat)
+			end
+		end
+	end
+	dfLSA.ndrops = maxDropsData
+	dfLSA.theta = angles
+	dfLSA.R = Rs
+	dfLSA.rr = rrs
+	dfLSA.psi0 = psi0
+	dfLSA.substrate = pattern
+
+	dfLSA
+end
+
+# ╔═╡ 427f76fe-ff57-4d1a-a8dd-c8f4a6976505
+begin
+	maxdropplot = plot(collect(0.001:0.001:1), π ./ (2 .* collect(0.001:0.001:1)), 
+	xlabel = L"\psi_0",
+	ylabel = L"n_{max}",
+	label = L"LSA",
+	xlims= (0, 1),
+	ylims = (0, 30),
+	minorticks = true,
+	grid = false)
+	
+	scatter!(dfLSA[dfLSA.ndrops > 0, :].psi0, dfLSA[dfLSA.ndrops > 0, :].ndrops)
+end
 
 # ╔═╡ 0489cd43-a451-435e-9024-7b9ff3432761
 begin
@@ -1200,6 +1311,7 @@ FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
 ImageSegmentation = "80713f31-8817-5129-9cf8-209ff8fb23e1"
 Images = "916415d5-f1e6-5110-898d-aaa5f9f070e0"
 JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
+LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
@@ -1212,6 +1324,7 @@ FileIO = "~1.16.1"
 ImageSegmentation = "~1.8.2"
 Images = "~0.26.0"
 JLD2 = "~0.4.38"
+LaTeXStrings = "~1.3.1"
 Plots = "~1.39.0"
 PlutoUI = "~0.7.53"
 """
@@ -1222,7 +1335,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.9.3"
 manifest_format = "2.0"
-project_hash = "5286f60fecff71f8146b066f29c133ecd063211a"
+project_hash = "4f1bca9b9b6f0b7d0fcf3148589f1886de68864c"
 
 [[deps.AbstractFFTs]]
 deps = ["LinearAlgebra"]
@@ -3055,10 +3168,15 @@ version = "1.4.1+1"
 # ╟─c5949c51-d3f5-40b1-9415-7c40ae596b1b
 # ╟─cfb78bf5-9f06-4557-a777-c34d908f0e67
 # ╠═cb4a302c-fb04-4362-95d5-7680d8fb2983
-# ╠═30220b96-8154-4ca2-a016-9258860323a5
+# ╟─30220b96-8154-4ca2-a016-9258860323a5
 # ╠═df519afa-309a-4633-860d-2fe40a384fa9
+# ╠═c7590419-c3d0-41f7-8777-227fcc7b1ba8
 # ╠═c1b3e29b-51b6-4bbd-8793-ece13bfb5a70
 # ╠═f12c1925-cf29-41e5-9499-87efe1a96528
+# ╠═a41cab07-f8f1-4b24-bd15-5fd29651fe36
+# ╠═695bd289-a4b3-4154-ab49-6229de133164
+# ╠═538694ea-a0b1-4f09-b7b4-4af64d7ec10b
+# ╠═427f76fe-ff57-4d1a-a8dd-c8f4a6976505
 # ╠═0489cd43-a451-435e-9024-7b9ff3432761
 # ╟─1c6b09bb-9809-411d-8ddd-2095256d0601
 # ╠═2a66eee4-be06-43a2-a9be-fc2e0c4a0f32
