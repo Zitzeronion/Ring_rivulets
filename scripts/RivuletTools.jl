@@ -1,6 +1,6 @@
 module RivuletTools
 
-using CSV, JLD2, FileIO, Plots, Images, DataFrames, ImageSegmentation, Random, FFTW
+using CSV, JLD2, FileIO, Plots, Images, DataFrames, ImageSegmentation, Random, FFTW, CategoricalArrays, StatsPlots
 
 # Raw data
 """
@@ -364,6 +364,59 @@ function segment_image(h_data, t)
 end
 
 # Measurements and data analysis
+function dropletFrame(; saveme=false)
+	measureDF = CSV.read("../data/dynamics_uniform_and_patterned.csv", DataFrame)
+	initial_data = t0_data()
+	dfLSA = DataFrame()
+	maxDropsData = Int[]
+	angles = Int[]
+	Rs = Int[]
+	rrs = Int[]
+	widths = Int[]
+	heights = Float64[]
+	psi0 = Float64[]
+	pattern = String[]
+	for angle in [10, 20, 30, 40]
+		for R in [150, 160, 180, 200]
+			for rr in [20, 30, 40, 60, 80, 100]
+				ndrops = maximum(measureDF[(measureDF.R .== R) .& (measureDF.rr .== rr) .& (measureDF.theta .== angle) .& (measureDF.kbt .== 0), :].clusters, init=0)
+				pat = maximum(measureDF[(measureDF.R .== R) .& (measureDF.rr .== rr) .& (measureDF.theta .== angle) .& (measureDF.kbt .== 0), :].substrate, init="")
+				push!(pattern, pat)
+				
+				push!(maxDropsData, ndrops)
+				push!(angles, angle)
+				push!(Rs, R)
+				push!(rrs, rr)
+				
+				psi = initial_data[(initial_data.R0 .== R) .& (initial_data.rr0 .== rr) .& (initial_data.angle .== angle), :].psi0[1]
+				push!(psi0, psi)
+				
+				wRing = 2*initial_data[(initial_data.R0 .== R) .& (initial_data.rr0 .== rr) .& (initial_data.angle .== angle), :].realrr[1]
+				push!(widths, wRing)
+
+				hRing = initial_data[(initial_data.R0 .== R) .& (initial_data.rr0 .== rr) .& (initial_data.angle .== angle), :].maxh0[1]
+				push!(heights, hRing)
+			end
+		end
+	end
+	cpattern = categorical(pattern)
+	dfLSA.ndrops = maxDropsData
+	dfLSA.theta = angles
+	dfLSA.R = Rs
+	dfLSA.rr = rrs
+	dfLSA.width = widths
+	dfLSA.height = heights
+	dfLSA.psi0 = psi0
+	dfLSA.substrate = cpattern
+
+	dfLSAclean = dfLSA[dfLSA.ndrops .> 0, :]
+	if saveme
+		CSV.write("../data/maxdroplets.csv", dfLSAclean)
+	end
+	return dfLSAclean
+end
+
+
 """
 	ringCurve(data; R=(false, 180))
 
@@ -622,7 +675,7 @@ function measure_cluster(data; t=25000)
 	markers = label_components(dist .< -5)
 	segments = watershed(dist, markers)
 	if length(segments.segment_labels) >= 1
-		clusters = segments.segment_labels[end]
+		clusters = segments.segment_labels[end] - 1
 	else 
 		clusters = 0
 	end
@@ -830,7 +883,7 @@ function t0_data()
 	Ohs = Float64[] 	# Ohnesorge number
 	# Loop through initial conditions
 	for angle in [2/9, 1/6, 1/9, 1/18]
-		for R in [150, 160, 180, 200]
+		for R in [80, 120, 150, 160, 180, 200]
 			for rr in [20, 30, 40, 60, 80, 100]
 				# Create initial condition
 				h = RivuletTools.torus(512, 512, rr, R, angle, (256, 256))
