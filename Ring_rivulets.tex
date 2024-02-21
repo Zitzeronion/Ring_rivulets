@@ -20,7 +20,7 @@
 
 % {\MakeUppercase{\romannumeral #1}}
 
-\title{The contraction and breakup of a ring rivulet on a partially wettable substrate}
+\title{Instabilities of ring rivulets: Impact of wettability gradients}
 
 \author{Stefan Zitz\aff{1}
   \corresp{\email{zitz@ruc.dk}},
@@ -35,26 +35,31 @@
 \maketitle
 
 \begin{abstract}
-This file contains information for authors planning to submit a paper to the {\it Journal of Fluid Mechanics}. The document was generated in {\LaTeX} using the JFM class file and supporting files provided on the JFM website \href{https://www.cambridge.org/core/journals/journal-of-fluid-mechanics/information/author-instructions/preparing-your-materials}{here}, and the source files can be used as a template for submissions (please note that this is mandatory for {\it JFM Rapids}). Full author instructions can be found on the \href{https://www.cambridge.org/core/journals/journal-of-fluid-mechanics/information/author-instructions}{JFM website}. The present paragraph appears in the \verb}abstract} environment. All papers should feature a single-paragraph abstract of no more than 250 words which must not spill onto the seond page of the manuscript. Dummy text of abstract dummy text of abstract dummy text of abstract dummy text of abstract dummy text of abstract. Dummy text of abstract dummy text of abstract dummy text of abstract dummy text of abstract dummy text of abstract. Dummy text of abstract dummy text of abstract dummy text of abstract dummy text of abstract dummy text of abstract. Dummy text of abstract dummy text of abstract dummy text of abstract dummy text of abstract dummy text of abstract. Dummy text of abstract dummy text of abstract dummy text of abstract dummy text of abstract dummy text of abstract. Dummy text of abstract dummy text of abstract dummy text of abstract dummy text of abstract dummy text of abstract. Dummy text of abstract dummy text of abstract dummy text of abstract dummy text of abstract dummy text of abstract. 
+Rivulets and droplets are naturally appearing shapes when small amounts of liquid are brought into contact with a partially wettable substrate.
+Here we study, by the means of numerical simulations, the stability of a ring-rivulet placed on a solid substrate.
+We consider two different scenarios one where the rivulet is free to move and the substrate is uniform and one where the substrate is patterned.
+
+
 \end{abstract}
 
 \begin{keywords}
-Authors should not enter keywords on the manuscript, as these must be chosen by the author during the online submission process and will then be added during the typesetting process (see \href{https://www.cambridge.org/core/journals/journal-of-fluid-mechanics/information/list-of-keywords}{Keyword PDF} for the full list).  Other classifications will be added at the same time.
+% Authors should not enter keywords on the manuscript, as these must be chosen by the author during the online submission process and will then be added during the typesetting process (see \href{https://www.cambridge.org/core/journals/journal-of-fluid-mechanics/information/list-of-keywords}{Keyword PDF} for the full list).  Other classifications will be added at the same time.
 \end{keywords}
 
-{\bf MSC Codes }  {\it(Optional)} Please enter your MSC Codes here
+% {\bf MSC Codes }  {\it(Optional)} Please enter your MSC Codes here
 
-\section{First-order heading}
-\label{sec:headings}
+\section{Introduction}
+\label{sec:intro}
 
- This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. 
-
-\subsection {Second-order Heading}
- This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text.  This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. 
-
- \subsubsection {Third-order Heading}
- This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text.
-\section{Figures and Tables}\label{sec:Figures_Tables}
+\begin{figure}
+    \centerline{\includegraphics[width=0.8\textwidth]{ringrivulet_shema}}% Images in 100% size
+  \caption{Schematic setup of our initial conditions.}
+\label{fig:intro}
+\end{figure}
+This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. 
+ 
+\section{Problem setup and methodology}
+\label{sec:problem-methodology}
 
 \begin{figure}
   \centerline{\includegraphics{Fig1}}% Images in 100% size
@@ -81,8 +86,6 @@ Authors should not enter keywords on the manuscript, as these must be chosen by 
  Tables, however small, must be numbered sequentially in the order in which they are mentioned in the text. Words \textit {table 1, table 2} should be lower case throughout.
  See table \ref{tab:kd} for an example.
  
- This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. This is an example of dummy text. 
-
 \begin{table}
   \begin{center}
 \def~{\hphantom{0}}
@@ -99,10 +102,7 @@ Authors should not enter keywords on the manuscript, as these must be chosen by 
   \end{center}
 \end{table}
 
-\section{Notation and style}\label{notstyle}
- Generally any queries concerning notation and journal style can be answered by viewing recent pages in the Journal. However, the following guide provides the key points to note. It is expected that Journal style and mathematical notation will be followed, and authors should take care to define all variables or entities upon first use. Also note that footnotes are not normally accepted.  Abbreviations must be defined at first use, glossaries or lists/tables of abbreviations are not permitted.
-
-\subsection{Mathematical notation}
+\section{Results: patterned substrate}
 \subsubsection{Setting variables, functions, vectors, matrices etc}
 \begin{itemize} \label{sec:MathNot}
 \item {\bf Italic font} should be used for denoting variables, with multiple-letter symbols avoided except in the case of dimensionless numbers such as $\Rey$, $\Pran$ and $\Pen$ (Reynolds, Prandtl, and P\'eclet numbers respectively, which are defined as \verb}\Rey}, \verb}\Pran} and \verb}\Pen} in the template).\\
