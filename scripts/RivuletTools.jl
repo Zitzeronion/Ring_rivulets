@@ -19,6 +19,9 @@ Read data from a well defined path based on parameters
 - hour : Hour at which the simulation finished
 - minute : Minute at which the simulation ended
 - arrested : Rivulet limited by contact angle field
+- gamma: Different surface tension simulations
+- slip: Simulations with different slip length
+- gradient: Simulations with wettability gradient
 
 # Example
 ```julia-repl
@@ -37,7 +40,8 @@ function read_data(;R=50,
 		minute=5, 
 		arrested=false, 
 		gamma="", 
-		slip=0)
+		slip=0,
+		gradient=(false, 10, 40))
 	dpath = joinpath("/home/zitz", "Swalbe.jl/data/Rivulets")
 	file_name = "$(dpath)/height_R_$(R)_r_$(r)_ang_$(θ)_kbt_$(kbT)_nm_3-2_runDate_$(year)$(month)$(day)$(hour)$(minute).jld2"
 	if arrested
@@ -46,6 +50,8 @@ function read_data(;R=50,
 		file_name = "$(dpath)/$(gamma)height_R_$(R)_r_$(r)_ang_$(θ)_kbt_$(kbT)_nm_3-2_runDate_$(year)$(month)$(day)$(hour)$(minute).jld2"
 	elseif slip != 0
 		file_name = "$(dpath)/slip_$(slip)_height_R_$(R)_r_$(r)_ang_$(θ)_kbt_$(kbT)_nm_3-2_runDate_$(year)$(month)$(day)$(hour)$(minute).jld2"
+	elseif gradient[1]
+		file_name = "$(dpath)/wet_grad_lin_$(gradient[2])$(gradient[3])_height_R_$(R)_r_$(r)_ang_$(θ)_kbt_$(kbT)_nm_3-2_runDate_$(year)$(month)$(day)$(hour)$(minute).jld2"
 	end
 
 	if isfile(file_name) 
