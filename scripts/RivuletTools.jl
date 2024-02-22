@@ -31,7 +31,7 @@ julia>  data = RivuletTools.read_data(R=160, r=20, kbT=0.0, month=11, day=27, ho
 function read_data(;R=50, 
 		r=80, 
 		kbT=0.0, 
-		nm=93, 
+		nm=(3,2), 
 		θ=20, 
 		year=2023, 
 		month=10, 
@@ -43,15 +43,15 @@ function read_data(;R=50,
 		slip=0,
 		gradient=(false, 10, 40))
 	dpath = joinpath("/home/zitz", "Swalbe.jl/data/Rivulets")
-	file_name = "$(dpath)/height_R_$(R)_r_$(r)_ang_$(θ)_kbt_$(kbT)_nm_3-2_runDate_$(year)$(month)$(day)$(hour)$(minute).jld2"
+	file_name = "$(dpath)/height_R_$(R)_r_$(r)_ang_$(θ)_kbt_$(kbT)_nm_$(nm[1])-$(nm[2])_runDate_$(year)$(month)$(day)$(hour)$(minute).jld2"
 	if arrested
-		file_name = "$(dpath)/arrested_height_R_$(R)_r_$(r)_ang_$(θ)_kbt_$(kbT)_nm_3-2_runDate_$(year)$(month)$(day)$(hour)$(minute).jld2"
+		file_name = "$(dpath)/arrested_height_R_$(R)_r_$(r)_ang_$(θ)_kbt_$(kbT)_nm_$(nm[1])-$(nm[2])_runDate_$(year)$(month)$(day)$(hour)$(minute).jld2"
 	elseif gamma != ""
-		file_name = "$(dpath)/$(gamma)height_R_$(R)_r_$(r)_ang_$(θ)_kbt_$(kbT)_nm_3-2_runDate_$(year)$(month)$(day)$(hour)$(minute).jld2"
+		file_name = "$(dpath)/$(gamma)height_R_$(R)_r_$(r)_ang_$(θ)_kbt_$(kbT)_nm_$(nm[1])-$(nm[2])_runDate_$(year)$(month)$(day)$(hour)$(minute).jld2"
 	elseif slip != 0
-		file_name = "$(dpath)/slip_$(slip)_height_R_$(R)_r_$(r)_ang_$(θ)_kbt_$(kbT)_nm_3-2_runDate_$(year)$(month)$(day)$(hour)$(minute).jld2"
+		file_name = "$(dpath)/slip_$(slip)_height_R_$(R)_r_$(r)_ang_$(θ)_kbt_$(kbT)_nm_$(nm[1])-$(nm[2])_runDate_$(year)$(month)$(day)$(hour)$(minute).jld2"
 	elseif gradient[1]
-		file_name = "$(dpath)/wet_grad_lin_$(gradient[2])$(gradient[3])_height_R_$(R)_r_$(r)_ang_$(θ)_kbt_$(kbT)_nm_3-2_runDate_$(year)$(month)$(day)$(hour)$(minute).jld2"
+		file_name = "$(dpath)/wet_grad_lin_$(gradient[2])$(gradient[3])_height_R_$(R)_r_$(r)_ang_$(θ)_kbt_$(kbT)_nm_$(nm[1])-$(nm[2])_runDate_$(year)$(month)$(day)$(hour)$(minute).jld2"
 	end
 
 	if isfile(file_name) 
@@ -160,9 +160,8 @@ julia> do_gif(h, filename, timeMax=maxtimestep)  # Use that data and supply a fi
 ```
 """
 function do_gif(data, filename::String; timeMax=5000000)
-	p = heatmap_data(data, t=25000)
 	anim = Animation()
-	for x in 50000:25000:timeMax
+	for x in 25000:25000:timeMax
 		plot(heatmap_data(data, t=x))
 		frame(anim)
 	end
@@ -441,7 +440,7 @@ function getRingCurve(data, tcut; CircRad=(false, 180), center=(256,256), arr=fa
 						minute=data[8], 
 						θ=data[9],
 						arrested=arr, 
-						nm=32)
+						nm=(3,2))
 	# Return the height field of that data at time `tcut`
 	hh = heatmap_data(dataCut, t=tcut, just_data=true)
 	# Extract the coordinates of the maximum, so that we can compute a distance
@@ -955,7 +954,7 @@ function data2fft(;whichdata=data, dataset=25, time=25000, quater=false, output=
 						hour=whichdata[dataset][7], 
 						minute=whichdata[dataset][8], 
 						θ=whichdata[dataset][9], 
-						nm=32)
+						nm=(3,2))
 	heightField = heatmap_data(input, t=time, just_data=true)
 	L = size(heightField)[1]
 	maxH = maximum(heightField)

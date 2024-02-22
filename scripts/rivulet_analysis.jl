@@ -29,6 +29,9 @@ In the above paper the discussion on curved rivulets is quite limited.
 Their results showed that a ring shaped rivulet does have in fact an overall flow that towards the center. 
 Thus the rivulet is retracting to a droplet."
 
+# ╔═╡ 92eecd6e-86bd-42c2-98a6-69f69d84db4f
+
+
 # ╔═╡ 1b26468c-b4f7-4252-b891-4f95bc04c869
 @recipe function f(::Type{Val{:samplemarkers}}, x, y, z; step = 10)
     n = length(y)
@@ -69,14 +72,14 @@ Below we define a few functions that will help us extracting relevant findings."
 # ╔═╡ 2df8c833-7ca7-4d7a-ade5-0df083a013a1
 begin
 	h_some = 
-	RivuletTools.plot_slice(RivuletTools.read_data(R=180, r=40, kbT=0.0, month=11, day=5, hour=1, minute=28, θ=30, nm=32, arrested=false), t=25000)
+	RivuletTools.plot_slice(RivuletTools.read_data(R=180, r=40, kbT=0.0, month=11, day=5, hour=1, minute=28, θ=30, arrested=false), t=25000)
 	
 end
 
 # ╔═╡ 04e344a3-3d5b-449e-9222-481df24015c7
 # (160, 20, 0.0,    11,27, 14, 51, 20
 begin
-	hja = RivuletTools.read_data(R=160, r=20, kbT=0.0, month=11, day=27, hour=14, minute=51, θ=20 ,nm=32, arrested=true)
+	hja = RivuletTools.read_data(R=160, r=20, kbT=0.0, month=11, day=27, hour=14, minute=51, θ=20, arrested=true)
 	RivuletTools.measure_cluster(hja, t=2500000)
 end
 
@@ -239,7 +242,7 @@ data = RivuletTools.data
 # ╔═╡ 8b2c77d3-f743-4840-a9d9-9308e05be28d
 begin
 	set = 8
-	data0 = RivuletTools.read_data(R=data[set][1], r=data[set][2], kbT=data[set][3], year=data[set][4], month=data[set][5], day=data[set][6], hour=data[set][7], minute=data[set][8], θ=data[set][9], nm=32)
+	data0 = RivuletTools.read_data(R=data[set][1], r=data[set][2], kbT=data[set][3], year=data[set][4], month=data[set][5], day=data[set][6], hour=data[set][7], minute=data[set][8], θ=data[set][9])
 	# println(typeof(dataH), " ", typeof(dataH) == Dict{String, Any})
 	RivuletTools.heatmap_data(data0, t=25000)
 end
@@ -310,7 +313,7 @@ Clearly the rivulet has broken into droplets.
 begin
 	nmset = 10
 	ts = 1000000
-	dataH = RivuletTools.read_data(R=data[nmset][1], r=data[nmset][2], kbT=data[nmset][3], month=data[nmset][5], day=data[nmset][6], hour=data[nmset][7], minute=data[nmset][8], θ=data[nmset][9], nm=32)
+	dataH = RivuletTools.read_data(R=data[nmset][1], r=data[nmset][2], kbT=data[nmset][3], month=data[nmset][5], day=data[nmset][6], hour=data[nmset][7], minute=data[nmset][8], θ=data[nmset][9])
 	RivuletTools.heatmap_data(dataH, t=ts)
 end
 
@@ -565,27 +568,32 @@ begin
     	# title = "",
     	xlabel = L"\psi_0",
     	ylabel = L"n_{max}",
+		legendfontsize = 12,
+		guidefont = (16, :black),
+		tickfont = (12, :black),
     	m = (0.5, [:circle :star], 12),
     	# bg = RGB(0.2, 0.2, 0.2)
 	)
-
+	
 	psis = collect(0.001:0.001:1)
-	plot!(psis, π ./ (2 .* psis), 
+	LSA_drops = plot!(psis, π ./ (2 .* psis), 
 	# xlabel = L"\psi_0",
 	# ylabel = L"n_{max}",
 	label = "LSA",
-	xlims= (0, 1),
-	ylims = (0, 35),
+	xlims= (0, 1.02),
+	ylims = (0, 30),
 	minorticks = true,
 	l = (:black, 2),
 	grid = false)
-
-	plot!(psis, π ./ (2 .* psis) .- exp.(-psis), 
+	
+	# plot!(psis, π ./ (2 .* psis) .- exp.(-psis), 
 	# xlabel = L"\psi_0",
 	# ylabel = L"n_{max}",
-	label = "LSA - better",
-	l = (:black, :dash, 2),
-	)
+	# label = "LSA - better",
+	# l = (:black, :dash, 2),
+	# )
+	savefig(LSA_drops, "../assets/LSA_droplets.pdf")
+	LSA_drops
 end
 
 # ╔═╡ b9cf9e47-d8da-4416-b67d-7c806595ceb9
@@ -593,7 +601,7 @@ begin
 	@df dfLSAcleancorrected scatter(
     	:psi0,
     	:ndrops,
-    	group = :theta,
+    	group = :width,
     	# title = "",
     	xlabel = L"\psi_0",
     	ylabel = L"n_{max}",
@@ -606,35 +614,21 @@ begin
 	# ylabel = L"n_{max}",
 	label = "LSA",
 	xlims= (0, 1),
-	ylims = (0, 35),
+	ylims = (0, 30),
 	minorticks = true,
 	l = (:black, 2),
 	grid = false)
 end
 
-# ╔═╡ 7af81b68-23f4-4a71-aaf8-152c366cb53a
-begin
-	@df dfLSAcleancorrected scatter(
-    	:psi0,
-    	:ndrops,
-    	group = :substrate,
-    	# title = "",
-    	xlabel = L"\psi_0",
-    	ylabel = L"n_{max}",
-    	m = (0.5, [:circle :star :hex :ut], 12),
-    	# bg = RGB(0.2, 0.2, 0.2)
-	)
+# ╔═╡ 5d722b85-4e5b-4dc3-9b8d-eb3b6cf33941
+md"
+## Wettability gradient
 
-	plot!(psis, π ./ (2 .* psis), 
-	# xlabel = L"\psi_0",
-	# ylabel = L"n_{max}",
-	label = "LSA",
-	xlims= (0, 1),
-	ylims = (0, 35),
-	minorticks = true,
-	l = (:black, 2),
-	grid = false)
-end
+Test me
+"
+
+# ╔═╡ 8bdffe16-02af-46bd-a568-0e238cc76b6c
+RivuletTools.do_gif(RivuletTools.read_data(R=180, r=20, kbT=0.0, year=2024, month=2, day=22, hour=13, minute=5, θ=40, gradient=(true, 10, 40), nm=(3,2)), "gradient_first", timeMax=2500000)
 
 # ╔═╡ 8886f394-ff90-4fbd-8dec-874f6a4ded83
 dropset = 44
@@ -644,11 +638,11 @@ begin
 	tend = 2500000
 	arrhere = false
 	if arrhere
-		checkH = RivuletTools.read_data(R=data_arrested[dropset][1], r=data_arrested[dropset][2], kbT=data_arrested[dropset][3], month=data_arrested[dropset][5], day=data_arrested[dropset][6], hour=data_arrested[dropset][7], minute=data_arrested[dropset][8], θ=data_arrested[dropset][9], nm=32, arrested=true)
+		checkH = RivuletTools.read_data(R=data_arrested[dropset][1], r=data_arrested[dropset][2], kbT=data_arrested[dropset][3], month=data_arrested[dropset][5], day=data_arrested[dropset][6], hour=data_arrested[dropset][7], minute=data_arrested[dropset][8], θ=data_arrested[dropset][9], nm=(3,2), arrested=true)
 		println("Dataset: $(data_arrested[dropset])")
 		println("width: $(2*initial_data[(initial_data.R0 .== data_arrested[dropset][1]) .& (initial_data.rr0 .== data_arrested[dropset][2]) .& (initial_data.angle .== data_arrested[dropset][9]), :].realrr[1]), h: $(initial_data[(initial_data.R0 .== data_arrested[dropset][1]) .& (initial_data.rr0 .== data_arrested[dropset][2]) .& (initial_data.angle .== data_arrested[dropset][9]), :].maxh0[1])")
 	else
-		checkH = RivuletTools.read_data(R=data[dropset][1], r=data[dropset][2], kbT=data[dropset][3], month=data[dropset][5], day=data[dropset][6], hour=data[dropset][7], minute=data[dropset][8], θ=data[dropset][9], nm=32)
+		checkH = RivuletTools.read_data(R=data[dropset][1], r=data[dropset][2], kbT=data[dropset][3], month=data[dropset][5], day=data[dropset][6], hour=data[dropset][7], minute=data[dropset][8], θ=data[dropset][9], nm=(3,2))
 		println("Dataset: $(data[dropset])")
 		println("width: $(2*initial_data[(initial_data.R0 .== data[dropset][1]) .& (initial_data.rr0 .== data[dropset][2]) .& (initial_data.angle .== data[dropset][9]), :].realrr[1]), h: $(initial_data[(initial_data.R0 .== data[dropset][1]) .& (initial_data.rr0 .== data[dropset][2]) .& (initial_data.angle .== data[dropset][9]), :].maxh0[1])")
 	end
@@ -722,7 +716,7 @@ The actual height field is just a 512 by 512 matrix with height values at every 
 
 # ╔═╡ 289205ad-0bd3-473c-b076-fab42e1643c3
 begin
-	fft_try = RivuletTools.read_data(R=data[fftset][1], r=data[fftset][2], kbT=data[fftset][3], year=data[fftset][4], month=data[fftset][5], day=data[fftset][6], hour=data[fftset][7], minute=data[fftset][8], θ=data[fftset][9], nm=32)
+	fft_try = RivuletTools.read_data(R=data[fftset][1], r=data[fftset][2], kbT=data[fftset][3], year=data[fftset][4], month=data[fftset][5], day=data[fftset][6], hour=data[fftset][7], minute=data[fftset][8], θ=data[fftset][9], nm=(3,2))
 	fft_data = RivuletTools.heatmap_data(fft_try, t=time_here, just_data=true)
 	shifted_k = fftshift(fftfreq(512)*512)
 end
@@ -788,9 +782,9 @@ plot(0:π/255:π,
 begin
 	someset = 26
 	# Retraction
-	fft_anim1 = RivuletTools.read_data(R=data[someset][1], r=data[someset][2], kbT=data[someset][3], year=data[someset][4], month=data[someset][5], day=data[someset][6], hour=data[someset][7], minute=data[someset][8], θ=data[someset][9], nm=32)
+	fft_anim1 = RivuletTools.read_data(R=data[someset][1], r=data[someset][2], kbT=data[someset][3], year=data[someset][4], month=data[someset][5], day=data[someset][6], hour=data[someset][7], minute=data[someset][8], θ=data[someset][9], nm=(3,2))
 	# Breakup
-	fft_anim2 = RivuletTools.read_data(R=data[someset-1][1], r=data[someset-1][2], kbT=data[someset-1][3], year=data[someset-1][4], month=data[someset-1][5], day=data[someset-1][6], hour=data[someset-1][7], minute=data[someset-1][8], θ=data[someset-1][9], nm=32)
+	fft_anim2 = RivuletTools.read_data(R=data[someset-1][1], r=data[someset-1][2], kbT=data[someset-1][3], year=data[someset-1][4], month=data[someset-1][5], day=data[someset-1][6], hour=data[someset-1][7], minute=data[someset-1][8], θ=data[someset-1][9], nm=(3,2))
 	anim = Animation()
 	dataEnd1 = RivuletTools.heatmap_data(fft_anim1, t=2500000, just_data=true)
 	dataEnd2 = RivuletTools.heatmap_data(fft_anim2, t=2500000, just_data=true)
@@ -3359,6 +3353,7 @@ version = "1.4.1+1"
 # ╟─94b9bdb0-73ee-11ee-10e9-e93688ea4523
 # ╠═f268582b-0756-41cf-910d-7a57b698451d
 # ╠═f075f19a-81b6-47b7-9104-57d2e51e7241
+# ╠═92eecd6e-86bd-42c2-98a6-69f69d84db4f
 # ╟─1b26468c-b4f7-4252-b891-4f95bc04c869
 # ╟─6d3c1725-75fa-412e-9b30-8f8df4e7874b
 # ╟─2df8c833-7ca7-4d7a-ade5-0df083a013a1
@@ -3408,15 +3403,16 @@ version = "1.4.1+1"
 # ╠═df519afa-309a-4633-860d-2fe40a384fa9
 # ╟─c7590419-c3d0-41f7-8777-227fcc7b1ba8
 # ╠═c1b3e29b-51b6-4bbd-8793-ece13bfb5a70
-# ╠═f12c1925-cf29-41e5-9499-87efe1a96528
+# ╟─f12c1925-cf29-41e5-9499-87efe1a96528
 # ╠═a41cab07-f8f1-4b24-bd15-5fd29651fe36
-# ╠═695bd289-a4b3-4154-ab49-6229de133164
+# ╟─695bd289-a4b3-4154-ab49-6229de133164
 # ╠═538694ea-a0b1-4f09-b7b4-4af64d7ec10b
 # ╟─a0239801-eb9a-4648-b164-15013fc3c445
 # ╠═068f3e73-ed23-4210-b739-ccaadc9f2ba8
 # ╠═5c8e3e0c-3344-431e-a370-625b467e2ea9
 # ╠═b9cf9e47-d8da-4416-b67d-7c806595ceb9
-# ╠═7af81b68-23f4-4a71-aaf8-152c366cb53a
+# ╠═5d722b85-4e5b-4dc3-9b8d-eb3b6cf33941
+# ╠═8bdffe16-02af-46bd-a568-0e238cc76b6c
 # ╠═8886f394-ff90-4fbd-8dec-874f6a4ded83
 # ╟─d9556b99-ac13-4278-8fc2-085728a2cfa9
 # ╠═543dea77-0aea-49e6-811a-5a87218d6632
