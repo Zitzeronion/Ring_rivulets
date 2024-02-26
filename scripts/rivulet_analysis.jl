@@ -476,7 +476,30 @@ end
 growthDF = CSV.read("../data/ring_all_sims_nokBT.csv", DataFrame)
 
 # ╔═╡ 103063b6-c5a9-4c5d-829b-4587813bfaf4
-plot()
+begin
+	incond = (180, 20, 40, "pattern", "uniform")
+	subdata = growthDF[(growthDF.R0 .== incond[1]) .& (growthDF.rr0 .== incond[2]) .& (growthDF.theta .== incond[3]) .& (growthDF.substrate .== incond[4]), :]
+	psi0 = initial_data[(initial_data.R0 .== incond[1]) .& (initial_data.rr0 .== incond[2]) .& (initial_data.angle .== incond[3]), :].psi0[1]	
+	plot(subdata.time[2:end], subdata.deltaH[2:end], 
+		label="band",
+		xlabel = L"t/\Delta t",
+		ylabel = L"\Delta h",
+		xaxis=:log10,
+		yaxis=:log10,
+		title = latexstring("\$\\psi_0 = {$(round(psi0, digits=3))}\$"),
+		grid = false,
+		w = 2,
+		ylims = (0.1, 10))
+	subdata2 = growthDF[(growthDF.R0 .== incond[1]) .& (growthDF.rr0 .== incond[2]) .& (growthDF.theta .== incond[3]) .& (growthDF.substrate .== incond[5]), :]
+	plot!(subdata2.time[2:end], subdata2.deltaH[2:end], 
+		label="unifrom",
+		l = (2, :dash))
+	plot!(subdata2.time[2:end], 0.16 .* exp.(0.00001 .* subdata2.time[2:end]) .+ 0.01, 
+		label="Exponential fit",
+		l = (2,  :dashdot))
+
+	savefig("../assets/growthRate_R180_r20_th40.pdf")
+end
 
 # ╔═╡ c7590419-c3d0-41f7-8777-227fcc7b1ba8
 md"
