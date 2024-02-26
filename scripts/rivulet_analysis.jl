@@ -486,17 +486,26 @@ begin
 		ylabel = L"\Delta h",
 		xaxis=:log10,
 		yaxis=:log10,
-		title = latexstring("\$\\psi_0 = {$(round(psi0, digits=3))}\$"),
+		# title = latexstring("\$\\psi_0 = {$(round(psi0, digits=3))}\$"),
 		grid = false,
+		legendfontsize = 12,
+		guidefont = (16, :black),
+		tickfont = (12, :black),
+		minorticks = true,
+		legend = :topleft,
 		w = 2,
 		ylims = (0.1, 10))
 	subdata2 = growthDF[(growthDF.R0 .== incond[1]) .& (growthDF.rr0 .== incond[2]) .& (growthDF.theta .== incond[3]) .& (growthDF.substrate .== incond[5]), :]
 	plot!(subdata2.time[2:end], subdata2.deltaH[2:end], 
 		label="unifrom",
 		l = (2, :dash))
-	plot!(subdata2.time[2:end], 0.16 .* exp.(0.00001 .* subdata2.time[2:end]) .+ 0.01, 
+	plot!(subdata2.time[2:end], 0.16 .* exp.(0.0000105 .* subdata2.time[2:end]) .+ 0.01, 
 		label="Exponential fit",
-		l = (2,  :dashdot))
+		l = (2,  :dashdot, :black))
+
+	plot!(subdata2.time[2:end], 0.002 .* exp.(0.000007 .* subdata2.time[2:end]) .+ 0.14, 
+		label="",
+		l = (2,  :dashdot, :black))
 
 	savefig("../assets/growthRate_R180_r20_th40.pdf")
 end
