@@ -34,6 +34,10 @@
 \usepackage{epstopdf}%This line makes .eps figures into .pdf - please comment out if not required.
 
 \definecolor{cream}{RGB}{222,217,201}
+\definecolor{jlblue}{rgb}{0.0,0.6056031611752245,0.9786801175696073}
+\definecolor{jlorange}{rgb}{0.8888735002725198,0.43564919034818994,0.2781229361419438}
+\definecolor{jlgreen}{rgb}{0.2422242978521988,0.6432750931576305,0.3044486515341153}
+\definecolor{jlviolet}{rgb}{0.7644401754934356,0.4441117794687767,0.8242975359232758}
 
 \begin{document}
 
@@ -205,7 +209,7 @@ The center of the torus is at $(x_0,y_0)$ and $h_t$ is the height of the torus.
 We only consider the upper half with $h<0$ as shown in Fig.~\ref{fgr:ringschema}. 
 The resulting fluid structure is a half-torus with $90^{\circ}$ contact angle.
 This contact angle violates the long wave approximation $\theta \ll 1$, therefore we perform another cut to a smaller contact angle using
-\begin{equation}
+\begin{equation}\label{eq:cut_torus}
     h(x,y,t=0) = h_t(x,y) - r\cos(\theta)
 \end{equation}
 and set all $h < 0$ to $h = h_{\ast}$ which is the thickness of the precursor film.
@@ -213,12 +217,12 @@ and set all $h < 0$ to $h = h_{\ast}$ which is the thickness of the precursor fi
 Our main interest is focused on the impact of a pattern on the evolution of the ring-rivulet. 
 As indicated in Fig.~\ref{fgr:ringschema} we use different contact angle configurations $\theta(x,y)$.
 First we use 
-\begin{equation}
+\begin{equation}\label{eq:theta_const}
     \theta(x,y) = \theta_0,
 \end{equation}
 where $\theta_0$ is a constant.
 Next we consider a banded case, where the ring-rivulet has the same contact angle as its immediate surrounding and the rest of the substrate has a higher contact angle
-\begin{equation}
+\begin{equation}\label{eq:theta_band}
     \theta(r_i) =\begin{cases}
         \theta_a,\quad \text{if}~h(\xi\pm \delta\xi) > 0\\
         \theta_b,\quad \text{else}
@@ -226,7 +230,7 @@ Next we consider a banded case, where the ring-rivulet has the same contact angl
 \end{equation}
 The addition of $\delta\xi$ widens the band and allow the ring-rivulet to contract a bit.  
 Lastly, we consider a linear wettability gradient with decreasing contact angle towards the middle
-\begin{equation}
+\begin{equation}\label{eq:theta_grad}
     \theta(\xi) = \frac{\theta_{max}-\theta_{min}}{R} \xi + \theta_{min},
 \end{equation}
 where $\theta_{max}, \theta_{min}$ are the maximal, minimal contact angle respectively.
@@ -234,9 +238,19 @@ where $\theta_{max}, \theta_{min}$ are the maximal, minimal contact angle respec
 \section{Dynamics of ring rivulets}
 \label{sec:dynamics}
 
-The \texttt{mhchem} package can also be used so that formulae are easy to input: \texttt{\textbackslash ce\{H2SO4\}} gives \ce{H2SO4}. 
+The dynamics of this fluid structure is surprisingly rich. 
+Straight rivulet~\cite{diezBreakupFluidRivulets2009, diezInstabilityTransverseLiquid2012}.
+Ring Rivulet~\cite{gonzalezStabilityLiquidRing2013, nguyenCompetitionCollapseBreakup2012}.
+\begin{figure}
+    \centering
+    \includegraphics[width=0.45\textwidth]{assets/LSA_droplets.pdf}
+    \caption{Number of maximal droplets $n_{max}$ over reduced aspect ratio $\psi_0$.
+    Different symbols show different substrates, where Eq.~(\ref{eq:theta_const}) is shown by blue bullets (\textcolor{jlblue}{$\bullet$}) and Eq.~(\ref{eq:theta_band}) by orange stars (\textcolor{jlorange}{$\star$}).
+    We compare our results to the linear stability analysis (LSA) from Gonz{\'a}lez et al.~\cite{gonzalezStabilityLiquidRing2013}}
+    \label{fig:max_drops}
+\end{figure}
 
-For footnotes in the main text of the article please number the footnotes to avoid duplicate symbols. \textit{e.g.}\ \texttt{\textbackslash footnote[num]\{your text\}}. The corresponding author $\ast$ counts as footnote 1, ESI as footnote 2, \textit{e.g.}\ if there is no ESI, please start at [num]=[2], if ESI is cited in the title please start at [num]=[3] \textit{etc.} Please also cite the ESI within the main body of the text using \dag. For the reference section, the style file \texttt{rsc.bst} can be used to generate the correct reference style.
+
 
 \section{Conclusions}
 The conclusions section should come in this section at the end of the article, before the Conflicts of interest statement.
@@ -249,6 +263,8 @@ In accordance with our policy on \href{https://www.rsc.org/journals-books-databa
 
 \section*{Acknowledgements}
 The authors acknowledge financial support from the Independent Research Fund Denmark through a DFF Sapere Aude Research Leader grant (grant number 9063-00018B).
+
+For footnotes in the main text of the article please number the footnotes to avoid duplicate symbols. \textit{e.g.}\ \texttt{\textbackslash footnote[num]\{your text\}}. The corresponding author $\ast$ counts as footnote 1, ESI as footnote 2, \textit{e.g.}\ if there is no ESI, please start at [num]=[2], if ESI is cited in the title please start at [num]=[3] \textit{etc.} Please also cite the ESI within the main body of the text using \dag. For the reference section, the style file \texttt{rsc.bst} can be used to generate the correct reference style.
 
 %%%END OF MAIN TEXT%%%
 
