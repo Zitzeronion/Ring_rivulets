@@ -480,7 +480,7 @@ begin
 	incond = (180, 20, 40, "pattern", "uniform")
 	subdata = growthDF[(growthDF.R0 .== incond[1]) .& (growthDF.rr0 .== incond[2]) .& (growthDF.theta .== incond[3]) .& (growthDF.substrate .== incond[4]), :]
 	psi0 = initial_data[(initial_data.R0 .== incond[1]) .& (initial_data.rr0 .== incond[2]) .& (initial_data.angle .== incond[3]), :].psi0[1]	
-	plot(subdata.time[2:end], subdata.deltaH[2:end], 
+	growth_plot = plot(subdata.time[2:end], subdata.deltaH[2:end], 
 		label="band",
 		xlabel = L"t/\Delta t",
 		ylabel = L"\Delta h",
@@ -506,9 +506,10 @@ begin
 	plot!(subdata2.time[2:end], 0.002 .* exp.(0.000007 .* subdata2.time[2:end]) .+ 0.14, 
 		label="",
 		l = (2,  :dashdot, :black))
-
-	savefig("../assets/growthRate_R180_r20_th40.pdf")
 end
+
+# ╔═╡ 41762f92-2017-4059-87b7-dce0bf061de9
+savefig(growth_plot, "../assets/growthRate_R180_r20_th40.pdf")
 
 # ╔═╡ c7590419-c3d0-41f7-8777-227fcc7b1ba8
 md"
@@ -3437,6 +3438,7 @@ version = "1.4.1+1"
 # ╠═df519afa-309a-4633-860d-2fe40a384fa9
 # ╠═3128d6eb-375d-4770-8215-6ed7e3ac5b5a
 # ╠═103063b6-c5a9-4c5d-829b-4587813bfaf4
+# ╠═41762f92-2017-4059-87b7-dce0bf061de9
 # ╟─c7590419-c3d0-41f7-8777-227fcc7b1ba8
 # ╠═c1b3e29b-51b6-4bbd-8793-ece13bfb5a70
 # ╟─f12c1925-cf29-41e5-9499-87efe1a96528
