@@ -29,9 +29,6 @@ In the above paper the discussion on curved rivulets is quite limited.
 Their results showed that a ring shaped rivulet does have in fact an overall flow that towards the center. 
 Thus the rivulet is retracting to a droplet."
 
-# ╔═╡ 92eecd6e-86bd-42c2-98a6-69f69d84db4f
-
-
 # ╔═╡ 1b26468c-b4f7-4252-b891-4f95bc04c869
 @recipe function f(::Type{Val{:samplemarkers}}, x, y, z; step = 10)
     n = length(y)
@@ -474,6 +471,12 @@ for to_analyse in [(data, "dynamics_uniform", false), (data_arrested, "dynamics_
 	run_me = false
 	RivuletTools.measure_data(to_analyse[1], to_analyse[2], run_me, to_analyse[3], "")
 end
+
+# ╔═╡ 3128d6eb-375d-4770-8215-6ed7e3ac5b5a
+growthDF = CSV.read("../data/ring_all_sims_nokBT.csv", DataFrame)
+
+# ╔═╡ 103063b6-c5a9-4c5d-829b-4587813bfaf4
+plot()
 
 # ╔═╡ c7590419-c3d0-41f7-8777-227fcc7b1ba8
 md"
@@ -3353,7 +3356,6 @@ version = "1.4.1+1"
 # ╟─94b9bdb0-73ee-11ee-10e9-e93688ea4523
 # ╠═f268582b-0756-41cf-910d-7a57b698451d
 # ╠═f075f19a-81b6-47b7-9104-57d2e51e7241
-# ╠═92eecd6e-86bd-42c2-98a6-69f69d84db4f
 # ╟─1b26468c-b4f7-4252-b891-4f95bc04c869
 # ╟─6d3c1725-75fa-412e-9b30-8f8df4e7874b
 # ╟─2df8c833-7ca7-4d7a-ade5-0df083a013a1
@@ -3401,6 +3403,8 @@ version = "1.4.1+1"
 # ╠═cb4a302c-fb04-4362-95d5-7680d8fb2983
 # ╟─30220b96-8154-4ca2-a016-9258860323a5
 # ╠═df519afa-309a-4633-860d-2fe40a384fa9
+# ╠═3128d6eb-375d-4770-8215-6ed7e3ac5b5a
+# ╠═103063b6-c5a9-4c5d-829b-4587813bfaf4
 # ╟─c7590419-c3d0-41f7-8777-227fcc7b1ba8
 # ╠═c1b3e29b-51b6-4bbd-8793-ece13bfb5a70
 # ╟─f12c1925-cf29-41e5-9499-87efe1a96528

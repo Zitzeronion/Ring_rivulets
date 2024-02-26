@@ -427,28 +427,41 @@ end
 
 Returns the height field along a circular cut.
 """
-function getRingCurve(data, tcut; CircRad=(false, 180), center=(256,256), arr=false)
+function getRingCurve(data, tcut::Int; CircRad=(false, 180), center=(256,256), arr=false, grad=(false, 10, 40))
 	# Create a distance array, needed later
 	dd = distanceArray()
+	# Contact angle dict
+	thetaDict = Dict(10 => 1/18, 20 => 1/9, 30 => 1/6, 40 => 2/9)
 	# Read in the data that we use for the cut
 	dataCut = read_data(R=data[1], 
 						r=data[2], 
-						kbT=data[3], 
+						kbT=data[3],
+						year=data[4], 
 						month=data[5], 
 						day=data[6], 
 						hour=data[7], 
 						minute=data[8], 
 						θ=data[9],
 						arrested=arr, 
+						gradient=grad,
 						nm=(3,2))
 	# Return the height field of that data at time `tcut`
-	hh = heatmap_data(dataCut, t=tcut, just_data=true)
+	if tcut == 0
+		if data[9] > π/2
+			theta = thetaDict[data[9]]
+			hh = torus(512, 512, data[2], data[1], theta, (256,256), noise=0.01)
+		else
+			hh = torus(512, 512, data[2], data[1], data[9], (256,256))
+		end
+	else
+		hh = heatmap_data(dataCut, t=tcut, just_data=true)
+	end
 	# Extract the coordinates of the maximum, so that we can compute a distance
 	maxHeight = findmax(hh)
 	if CircRad[1]
 		distCut = CircRad[2]
 	else
-		distCut = Int(round(sqrt((maxHeight[2][1] - center[1])^2 + (maxHeight[2][2] - center[2])^2)))
+		distCut = round(Int, sqrt((maxHeight[2][1] - center[1])^2 + (maxHeight[2][2] - center[2])^2))
 	end
 	# No need to compute when there is a single droplet
 	if distCut == 0
@@ -500,7 +513,7 @@ Measures the circular cuts for a whole simulation and returns a `dict[time => hC
 julia> hrings = ringOverTime(data[44])   
 ``` 
 """
-function ringOverTime(data; arr=false, tEnd=2500000, curves=true, savedataframe=true)
+function ringOverTime(data; arr=false, grad=(false, 10, 40), tEnd=2500000, curves=true, savedataframe=true)
 	dpath = joinpath("/home/zitz", "Ring_rivulets/data/")
 	ringData = DataFrame()
 	hRing = Dict()
@@ -508,8 +521,8 @@ function ringOverTime(data; arr=false, tEnd=2500000, curves=true, savedataframe=
 	hmin = Float64[]
 	hdelta = Float64[]
 	Rt = Int64[]
-	for t in 25000:25000:tEnd
-		heightRing = getRingCurve(data, t; CircRad=(false, 180), center=(256,256), arr=arr)
+	for t in 0:25000:tEnd
+		heightRing = getRingCurve(data, t, arr=arr, grad=grad)
 		hx = maximum(heightRing[1])
 		hi = minimum(heightRing[1])
 		hRing["t_$(t)"] = heightRing[1]
@@ -518,7 +531,7 @@ function ringOverTime(data; arr=false, tEnd=2500000, curves=true, savedataframe=
 		push!(hdelta, hx - hi)
 		push!(Rt, heightRing[2])
 	end
-	ringData.time = 25000:25000:tEnd
+	ringData.time = 0:25000:tEnd
 	ringData.R_t = Rt
 	ringData.hmax = hmax
 	ringData.hmin = hmin
@@ -529,7 +542,9 @@ function ringOverTime(data; arr=false, tEnd=2500000, curves=true, savedataframe=
 	# Add substrate flavor
 	if arr
 		ringData.substrate = fill("pattern", length(hmax))
-	else	
+	elseif grad[1]
+		ringData.substrate = fill("grad_$(grad[2])$(grad[3])", length(hmax))		
+	else
 		ringData.substrate = fill("uniform", length(hmax))
 	end
 	# Save CSV 
@@ -548,14 +563,16 @@ end
 function combine_ring_data()
 	dpath = joinpath("/home/zitz", "Ring_rivulets/data/")
 	df = DataFrame()
-	for i in data_arrested
-		if i[3] == 0.0
-			somedf = ringOverTime(i, arr=true, curves=false, savedataframe=false)
-			println("Analysing simulation R=$(i[1]) r=$(i[2]) theta=$(i[9])")
-			df = vcat(df, somedf)
+	for i in [(data, false), (data_arrested, true)]
+		for j in i[1]
+			if j[3] == 0.0
+				somedf = ringOverTime(j, arr=i[2], curves=false, savedataframe=false)
+				println("Analysing simulation R=$(j[1]) r=$(j[2]) theta=$(j[9])")
+				df = vcat(df, somedf)
+			end
 		end
 	end
-	CSV.write("$(dpath)ring_all_sims_patterned_nokBT.csv", df)
+	CSV.write("$(dpath)ring_all_sims_nokBT.csv", df)
 end
 
 """
