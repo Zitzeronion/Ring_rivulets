@@ -126,8 +126,8 @@
 Rivulets and droplets are naturally appearing shapes when small amounts of liquid are brought into contact with a partially wettable substrate.
 Here we study, by the means of numerical simulations, the stability of a ring-rivulet placed on a solid substrate.
 First we consider a ring-rivulet on a uniform substrate, similar to the work of Nguyen \textit{et al. Langmuir}, 2012, \textbf{28}, 13960-13967.
-We then consider different kinds of patterning and show that they affect not only the stability but also the morphology.
-Thus making it possible to translate breakup states into collapsing ones.} \\%The abstrast goes here instead of the text "The abstract should be..."
+We then consider different kinds of patterning and show that they not only affect the stability but also the morphology.
+Thus making it possible to turn ring rivulets which would break up into droplets into collapsing single droplet.} \\%The abstrast goes here instead of the text "The abstract should be..."
 
 \end{tabular}
 
@@ -169,7 +169,7 @@ The outline of the paper is as follows
 \section{Simulation method}
 \label{sec:method}
 For the time resolved simulations of a thin liquid ring-rivulet we use a recently developed lattice Boltzmann method (LBM) for thin films~\cite{zitzLatticeBoltzmannMethod2019, zitzSwalbeJlLattice2022}. 
-Here we just give a short introduction into the method and highlight the relevant modeling approximations.
+Here we just give a short introduction into the method and highlight the relevant modelling approximations.
 The thin film model is build on a class of LBMs originally proposed for shallow water systems~\cite{} 
 \begin{equation}\label{eq:LBE}
 \begin{split}
@@ -187,7 +187,6 @@ depend on the geometry of the lattice and are determined under suitable constrai
 
 
 \subsection{Initial conditions}
-\label{subsec:initialcond}
 \begin{figure}
 \centering
   \includegraphics[width=0.45\textwidth]{ringrivulet_shema}
@@ -197,17 +196,43 @@ depend on the geometry of the lattice and are determined under suitable constrai
   \label{fgr:ringschema}
 \end{figure}
 
+The initial thickness profile $h(x,y)$ of the film at $t=0$ is set by an implicit equation for a torus with radial symmetry along the z-axis and is given by
+\begin{equation}\label{eq:torus}
+    h_t(x,y) = \sqrt{r^2 - \left(R-\xi\right)^2},
+\end{equation}
+where $\xi = \sqrt{(x-x_0)^2+(y-y_0)^2}$, $R$ is the major radius and $r$ is the minor radius of the torus.
+The center of the torus is at $(x_0,y_0)$ and $h_t$ is the height of the torus.
+We only consider the upper half with $h<0$ as shown in Fig.~\ref{fgr:ringschema}. 
+The resulting fluid structure is a half-torus with $90^{\circ}$ contact angle.
+This contact angle violates the long wave approximation $\theta \ll 1$, therefore we perform another cut to a smaller contact angle using
+\begin{equation}
+    h(x,y,t=0) = h_t(x,y) - r\cos(\theta)
+\end{equation}
+and set all $h < 0$ to $h = h_{\ast}$ which is the thickness of the precursor film.
+
+Our main interest is focused on the impact of a pattern on the evolution of the ring-rivulet. 
+As indicated in Fig.~\ref{fgr:ringschema} we use different contact angle configurations $\theta(x,y)$.
+First we use 
+\begin{equation}
+    \theta(x,y) = \theta_0,
+\end{equation}
+where $\theta_0$ is a constant.
+Next we consider a banded case, where the ring-rivulet has the same contact angle as its immediate surrounding and the rest of the substrate has a higher contact angle
+\begin{equation}
+    \theta(r_i) =\begin{cases}
+        \theta_a,\quad \text{if}~h(\xi\pm \delta\xi) > 0\\
+        \theta_b,\quad \text{else}
+    \end{cases}.
+\end{equation}
+The addition of $\delta\xi$ widens the band and allow the ring-rivulet to contract a bit.  
+Lastly, we consider a linear wettability gradient with decreasing contact angle towards the middle
+\begin{equation}
+    \theta(\xi) = \frac{\theta_{max}-\theta_{min}}{R} \xi + \theta_{min},
+\end{equation}
+where $\theta_{max}, \theta_{min}$ are the maximal, minimal contact angle respectively.
+
 \section{Dynamics of ring rivulets}
 \label{sec:dynamics}
-
-
-\begin{figure*}
- \centering
- \includegraphics[height=3cm]{example2}
- \caption{An image from the \textit{Soft Matter} cover gallery, set as a two-column figure.}
- \label{fgr:example2col}
-\end{figure*}
-
 
 The \texttt{mhchem} package can also be used so that formulae are easy to input: \texttt{\textbackslash ce\{H2SO4\}} gives \ce{H2SO4}. 
 
@@ -223,7 +248,7 @@ We strongly encourage authors to include author contributions and recommend usin
 In accordance with our policy on \href{https://www.rsc.org/journals-books-databases/journal-authors-reviewers/author-responsibilities/#code-of-conduct}{Conflicts of interest} please ensure that a conflicts of interest statement is included in your manuscript here.  Please note that this statement is required for all submitted manuscripts.  If no conflicts exist, please state that ``There are no conflicts to declare''.
 
 \section*{Acknowledgements}
-The Acknowledgements come at the end of an article after Conflicts of interest and before the Notes and references.
+The authors acknowledge financial support from the Independent Research Fund Denmark through a DFF Sapere Aude Research Leader grant (grant number 9063-00018B).
 
 %%%END OF MAIN TEXT%%%
 
