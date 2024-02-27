@@ -421,6 +421,39 @@ function dropletFrame(; saveme=false)
 	return dfLSAclean
 end
 
+"""
+	growthEstimate(data; arr=false, grad=(false, 10, 40))
+
+Estimation for the growthrate of an instability, should only work for banded structure.
+"""
+function growthEstimate(data, t; arr=false, grad=(false, 10, 40))
+	dataHere = read_data(R=data[1], 
+						r=data[2], 
+						kbT=data[3],
+						year=data[4], 
+						month=data[5], 
+						day=data[6], 
+						hour=data[7], 
+						minute=data[8], 
+						θ=data[9],
+						arrested=arr, 
+						gradient=grad,
+						nm=(3,2))
+	
+	thetaDict = Dict(10 => 1/18, 20 => 1/9, 30 => 1/6, 40 => 2/9)
+	theta = thetaDict[data[9]]
+	h0 = torus(512, 512, data[2], data[1], theta, (256,256), noise=0.0)
+	h0init = torus(512, 512, data[2], data[1], theta, (256,256), noise=0.01)
+	if t == 0
+		hh = h0init
+	else
+		hh = heatmap_data(dataHere, t=t, just_data=true)
+	end
+	epsHbar = sqrt(sum((hh .- h0).^2))
+	
+	return epsHbar
+end
+
 
 """
 	ringCurve(data; R=(false, 180))
@@ -521,21 +554,25 @@ function ringOverTime(data; arr=false, grad=(false, 10, 40), tEnd=2500000, curve
 	hmin = Float64[]
 	hdelta = Float64[]
 	Rt = Int64[]
+	hdiffh0 = Float64[]
 	for t in 0:25000:tEnd
 		heightRing = getRingCurve(data, t, arr=arr, grad=grad)
 		hx = maximum(heightRing[1])
 		hi = minimum(heightRing[1])
+		growthEst = growthEstimate(data, t, arr=arr, grad=grad)
 		hRing["t_$(t)"] = heightRing[1]
 		push!(hmax, hx)
 		push!(hmin, hi)
 		push!(hdelta, hx - hi)
 		push!(Rt, heightRing[2])
+		push!(hdiffh0, growthEst)
 	end
 	ringData.time = 0:25000:tEnd
 	ringData.R_t = Rt
 	ringData.hmax = hmax
 	ringData.hmin = hmin
 	ringData.deltaH = hdelta	
+	ringData.L2diff = hdiffh0	
 	ringData.R0 = fill(data[1], length(hmax))	
 	ringData.rr0 = fill(data[2], length(hmax))	
 	ringData.theta = fill(data[9], length(hmax))
@@ -1433,6 +1470,12 @@ data_slip= [
 	(180, 40, 0.0, 2024, 1, 25, 23, 32, 40, 5), 	# 10
 	(180, 20, 0.0, 2024, 1, 26,  0, 51, 40, 25), 	# 11
 	(180, 40, 0.0, 2024, 1, 26,  2, 11, 40, 25), 	# 12
+]
+
+data_gradient = [
+	(180, 20, 0.0, 2024, 2, 22, 13,  5, 40, 10, 40)
+	(180, 20, 0.0, 2024, 2, 23, 11, 11, 40, 20, 40)
+	(180, 20, 0.0, 2024, 2, 23, 12, 31, 40, 30, 40)
 ]
 
 # End module

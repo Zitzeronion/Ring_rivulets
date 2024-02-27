@@ -284,11 +284,11 @@ thus a similar approach as in the surface tension case.
 # ╔═╡ 24fde296-5a6f-4a92-bf16-855df4c99227
 data_slip= RivuletTools.data_slip
 
+# ╔═╡ 42094521-c209-4c82-8226-1a0b9b1c0d85
+data_grad = RivuletTools.data_gradient
+
 # ╔═╡ b3be394c-5997-4494-ad40-ced2f10fd364
 RivuletTools.renderGifs()
-
-# ╔═╡ 6ee87ada-668c-4d1b-aa55-e35b7b475f2a
-RivuletTools.render_slip(verbose=true)
 
 # ╔═╡ 0f204a06-71b2-438a-bb49-4af8ebda0001
 md" # Results
@@ -510,6 +510,70 @@ end
 
 # ╔═╡ 41762f92-2017-4059-87b7-dce0bf061de9
 savefig(growth_plot, "../assets/growthRate_R180_r20_th40.pdf")
+
+# ╔═╡ 13c01d35-6267-4be9-b911-74036b91e031
+begin
+	
+	growth_plot2 = plot(subdata.time[2:end], subdata.L2diff[2:end], 
+		label=L"\psi_0 = 1.333",
+		xlabel = L"t/\Delta t",
+		ylabel = L"\epsilon \bar{h}_1",
+		# xaxis=:log10,
+		yticks = ([0.1, 1, 10, 100, 1000], ["0.1", "1", "10", "100", "1000"]),
+		yaxis=:log10,
+		# title = latexstring("\$\\psi_0 = {$(round(psi0, digits=3))}\$"),
+		grid = false,
+		legendfontsize = 12,
+		guidefont = (16, :black),
+		tickfont = (12, :black),
+		minorticks = true,
+		legend = :topleft,
+		w = 2,
+		ylims = (10, 1000)
+		)
+
+				# psi0 = initial_data[(initial_data.R0 .== R) .& (initial_data.rr0 .== rr) .& (initial_data.angle .== th), :].psi0[1]
+				#loop_data = growthDF[(growthDF.R0 .== R) .& (growthDF.rr0 .== rr) .& (growthDF.theta .== th) .& (growthDF.substrate .== "pattern"), :]
+				# plot!(subdata2.time[2:end], subdata2.L2diff[2:end], 
+				#label="unifrom",
+				# l = (2, :dash))
+	# plot!(subdata2.time[2:end], 0.16 .* exp.(0.0000105 .* subdata2.time[2:end]) .+ 0.01, label="Exponential fit",l = (2,  :dashdot, :black))
+
+	# plot!(subdata2.time[2:end], 0.002 .* exp.(0.000007 .* subdata2.time[2:end]) .+ 0.14, label="",l = (2,  :dashdot, :black))
+end
+
+# ╔═╡ a5cac6d9-d113-4acf-b5b1-675fdb900117
+begin
+	growth_plot3 = plot(
+		xlabel = L"t/\Delta t",
+		ylabel = L"\epsilon \bar{h}_1",
+		# xaxis=:log10,
+		yticks = ([0.1, 1, 10, 100, 1000], ["0.1", "1", "10", "100", "1000"]),
+		yaxis=:log10,
+		# title = latexstring("\$\\psi_0 = {$(round(psi0, digits=3))}\$"),
+		grid = false,
+		legendfontsize = 10,
+		guidefont = (16, :black),
+		tickfont = (12, :black),
+		minorticks = true,
+		legend = :outertopright,
+		w = 2,
+		ylims = (10, 1000)
+		)
+	for R in [180]
+		for rr in [20, 40]
+			for th in [20, 30, 40]
+				psiLoop = initial_data[(initial_data.R0 .== R) .& (initial_data.rr0 .== rr) .& (initial_data.angle .== th), :].psi0[1]
+				loop_data = growthDF[(growthDF.R0 .== R) .& (growthDF.rr0 .== rr) .& (growthDF.theta .== th) .& (growthDF.substrate .== "pattern"), :]
+				plot!(loop_data.time[2:end], loop_data.L2diff[2:end], label=latexstring("\$\\psi_0 = {$(round(psiLoop, digits=2))},~\\theta = {$(th)}^{\\circ}\$"), l = (2, :solid))
+			end
+		end
+	end
+	growth_plot3
+	# plot!(subdata2.time[2:end], 0.16 .* exp.(0.0000105 .* subdata2.time[2:end]) .+ 0.01, label="Exponential fit",l = (2,  :dashdot, :black))
+
+	# plot!(subdata2.time[2:end], 0.002 .* exp.(0.000007 .* subdata2.time[2:end]) .+ 0.14, label="",l = (2,  :dashdot, :black))
+end
 
 # ╔═╡ c7590419-c3d0-41f7-8777-227fcc7b1ba8
 md"
@@ -3414,8 +3478,8 @@ version = "1.4.1+1"
 # ╠═93e8f4ee-7558-4178-8f06-96a422528c48
 # ╟─05715ba9-fdd3-43c8-b6fc-ee32d225cdf0
 # ╠═24fde296-5a6f-4a92-bf16-855df4c99227
+# ╠═42094521-c209-4c82-8226-1a0b9b1c0d85
 # ╠═b3be394c-5997-4494-ad40-ced2f10fd364
-# ╠═6ee87ada-668c-4d1b-aa55-e35b7b475f2a
 # ╟─0f204a06-71b2-438a-bb49-4af8ebda0001
 # ╠═d5152b67-bc1d-4cc0-b73e-90d79dbadcb4
 # ╟─ab5b4c7c-ae24-4aae-a528-1dc427a7f1f1
@@ -3439,6 +3503,8 @@ version = "1.4.1+1"
 # ╠═3128d6eb-375d-4770-8215-6ed7e3ac5b5a
 # ╠═103063b6-c5a9-4c5d-829b-4587813bfaf4
 # ╠═41762f92-2017-4059-87b7-dce0bf061de9
+# ╠═13c01d35-6267-4be9-b911-74036b91e031
+# ╠═a5cac6d9-d113-4acf-b5b1-675fdb900117
 # ╟─c7590419-c3d0-41f7-8777-227fcc7b1ba8
 # ╠═c1b3e29b-51b6-4bbd-8793-ece13bfb5a70
 # ╟─f12c1925-cf29-41e5-9499-87efe1a96528
