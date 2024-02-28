@@ -128,10 +128,11 @@
 
 \includegraphics{head_foot/dates} & \noindent\normalsize{
 Rivulets and droplets are naturally appearing shapes when small amounts of liquid are brought into contact with a partially wettable substrate.
-Here we study, by the means of numerical simulations, the stability of a ring-rivulet placed on a solid substrate.
-First we consider a ring-rivulet on a uniform substrate, similar to the work of Nguyen \textit{et al. Langmuir}, 2012, \textbf{28}, 13960-13967.
-We then consider different kinds of patterning and show that they not only affect the stability but also the morphology.
-Thus making it possible to turn ring rivulets which would break up into droplets into collapsing single droplet.} \\%The abstrast goes here instead of the text "The abstract should be..."
+Here we study, by the means of numerical simulations, the dynamics of a ring-rivulet placed on a solid substrate.
+First we consider a uniform substrate, similar to the work of Nguyen \textit{et al. Langmuir}, 2012, \textbf{28}, 13960-13967.
+We then consider different kinds of surface patterns and show that they not only affect the stability but also the morphology.
+Thus making it possible to enhance the probability for a Rayleigh-Plateau type break up into multiple droplets or to accelerate the capillary retraction that stems from the curvature difference of the ring and leads to a single droplet.
+}
 
 \end{tabular}
 
@@ -173,21 +174,42 @@ The outline of the paper is as follows
 \section{Simulation method}
 \label{sec:method}
 For the time resolved simulations of a thin liquid ring-rivulet we use a recently developed lattice Boltzmann method (LBM) for thin films~\cite{zitzLatticeBoltzmannMethod2019, zitzSwalbeJlLattice2022}. 
-Here we just give a short introduction into the method and highlight the relevant modelling approximations.
-The thin film model is build on a class of LBMs originally proposed for shallow water systems~\cite{} 
+Here we quickly introduce the method and highlight the relevant modelling approximations.
+The thin film model is build on a class of LBMs originally proposed for shallow water systems~\cite{salmonLatticeBoltzmannMethod1999, dellarNonhydrodynamicModesPriori2002}.
+The master equation for the evolution of the discrete probability functions $f_l(\mathbf{x},t)$ of a fluid system subject to a forcing $\mathbf{F}_{\mbox{\tiny{tot}}}$ reads
 \begin{equation}\label{eq:LBE}
 \begin{split}
 &f_l(\mathbf{x}+\mathbf{c}^{(l)}\Delta t,t+\Delta t) = \\
 &(1 - \omega) f_l(\mathbf{x},t) + \omega f_l^{(eq)}(\mathbf{x},t) + w_l \frac{\Delta t}{c_s^2} \mathbf{c}^{(l)} \cdot \mathbf{F}_{\mbox{\tiny{tot}}},
 \end{split}
 \end{equation}
-where $l$ labels the lattice velocities $\mathbf{c}_l$ and runs from $0$ to $Q-1$, with $Q$ being the number of velocities characterizing the scheme.
-Algorithmically, this equation can be seen as made up of two steps. 
-A {\it local collision} step where the $f_l(\mathbf{x},t)$ ``relax'' towards the local equilibrium distributions $f^{(eq)}_l(\mathbf{x},t)$ with rate  
-$\omega = \Delta t/\tau$ (where $\tau$, the relaxation time, is proportional to the kinematic viscosity $\nu$): the distribution functions are substituted by their weighted average (with weights $\omega$ and $1-\omega$) with the equilibria, with an added so-called "source" term (the last term on the right hand side of Eq. (\ref{eq:LBE})), when a force is present. 
-A {\it non-local streaming} step where the updated distribution functions are scattered to the nearest neighbouring sites. 
-The parameters $c_s$ (the lattice speed of sound) and $w_l$ (the so called "weights")
-depend on the geometry of the lattice and are determined under suitable constraints on the form of the tensorial moments in the lattice velocities up to fourth order~\cite{krugerLatticeBoltzmannMethod2017}.
+where the discrete lattice velocities $\mathbf{c}_l$ run from $0$ to $8$, for our two-dimensional scheme.
+This equation is build on the idea that there is a local collision step in which the distribution functions are relaxed towards their equilibrium $f_l^{(eq)}(\mathbf{x},t)$ with relaxation rate $\omega = \Delta t/\tau$ and a non-local collision step, where the $f_l(\mathbf{x},t)$ are streamed to their nearest neighbours.
+The relaxation time $\tau$ is set to $1$ and is proportional to the fluid's kinematic viscosity $\nu = 1/6$.  
+The remaining parameters, namely $c_s$ and $w_l$, are the speed of sound and the lattice weights. 
+We use the standard $D2Q9$ (athermal) values, therefore $c_s = 1/\sqrt{3}$, the lattice velocities $\mathbf{c}^{(l)}$~\cite{krugerLatticeBoltzmannMethod2017}   
+\begin{equation}\label{eq:speeds}
+\mathbf{c}^{(l)}  =
+\left\{
+\begin{array}{ll}
+(0,0) & l = 0 \\
+\left[\cos{\frac{(l-1)\pi}{4}}, \sin{\frac{(l-1)\pi}{4}} \right] &  l=1,3,5,7 \\
+\sqrt{2}\left[\cos{\frac{(l-1)\pi}{4}}, \sin{\frac{(l-1)\pi}{4}} \right] & l=2,4,6,8
+\end{array}
+\right.,
+\end{equation}
+and the weights
+\begin{equation}\label{eq:weights}
+    w_l  =
+    \left\{
+    \begin{array}{ll}
+        \frac{4}{9} & l = 0 \\
+        \frac{1}{9} &  l=1,3,5,7 \\
+        \frac{1}{36} & l=2,4,6,8
+    \end{array}
+    \right..
+\end{equation}
+
 
 
 \subsection{Initial conditions}
@@ -247,7 +269,7 @@ Ring Rivulet~\cite{gonzalezStabilityLiquidRing2013, nguyenCompetitionCollapseBre
 \begin{figure}
     \centering
     \includegraphics[width=0.45\textwidth]{assets/growthRate_R180_r20_th40.pdf}
-    \caption{Thickness difference $\Delta h$ along the radius $\xi(h_max)$ over time.
+    \caption{Thickness difference $\Delta h$ along the radius $\xi(h_{\max})$ over time.
     The growth rate of $\Delta h$ depend on the pattern. 
     We show the constant contact angle Eq.~(\ref{eq:theta_const}) in blue and the banded pattern Eq.~(\ref{eq:theta_band}) in orange.
     In green we add a exponential growth as predicted by the LSA.}
@@ -267,10 +289,17 @@ Ring Rivulet~\cite{gonzalezStabilityLiquidRing2013, nguyenCompetitionCollapseBre
 
 
 \section{Conclusions}
-The conclusions section should come in this section at the end of the article, before the Conflicts of interest statement.
+We have presented numerical experiments of a liquid ring-rivulet on a uniform and patterned substrate. 
+The basis of our experiments is the thin film equation with an additional disjoining pressure model.
+First we have confirmed that for small $\psi_0$ values the LSA of Gonz{\'a}lez et al.~\cite{gonzalezStabilityLiquidRing2013} and the measured amount of droplets show good agreement.
+For larger values $\psi_0 > 0.1$ the capillary retraction outpaces the breakup and we observe a collapse towards a single droplet or in case of $\theta(x,y)$ is given by Eq.~(\ref{eq:theta_band}) a stable rivulet.
+
+
 
 \section*{Author Contributions}
 We strongly encourage authors to include author contributions and recommend using \href{https://casrai.org/credit/}{CRediT} for standardised contribution descriptions. Please refer to our general \href{https://www.rsc.org/journals-books-databases/journal-authors-reviewers/author-responsibilities/}{author guidelines} for more information about authorship.
+
+For footnotes in the main text of the article please number the footnotes to avoid duplicate symbols. \textit{e.g.}\ \texttt{\textbackslash footnote[num]\{your text\}}. The corresponding author $\ast$ counts as footnote 1, ESI as footnote 2, \textit{e.g.}\ if there is no ESI, please start at [num]=[2], if ESI is cited in the title please start at [num]=[3] \textit{etc.} Please also cite the ESI within the main body of the text using \dag. For the reference section, the style file \texttt{rsc.bst} can be used to generate the correct reference style.
 
 \section*{Conflicts of interest}
 In accordance with our policy on \href{https://www.rsc.org/journals-books-databases/journal-authors-reviewers/author-responsibilities/#code-of-conduct}{Conflicts of interest} please ensure that a conflicts of interest statement is included in your manuscript here.  Please note that this statement is required for all submitted manuscripts.  If no conflicts exist, please state that ``There are no conflicts to declare''.
@@ -278,7 +307,7 @@ In accordance with our policy on \href{https://www.rsc.org/journals-books-databa
 \section*{Acknowledgements}
 The authors acknowledge financial support from the Independent Research Fund Denmark through a DFF Sapere Aude Research Leader grant (grant number 9063-00018B).
 
-For footnotes in the main text of the article please number the footnotes to avoid duplicate symbols. \textit{e.g.}\ \texttt{\textbackslash footnote[num]\{your text\}}. The corresponding author $\ast$ counts as footnote 1, ESI as footnote 2, \textit{e.g.}\ if there is no ESI, please start at [num]=[2], if ESI is cited in the title please start at [num]=[3] \textit{etc.} Please also cite the ESI within the main body of the text using \dag. For the reference section, the style file \texttt{rsc.bst} can be used to generate the correct reference style.
+
 
 %%%END OF MAIN TEXT%%%
 
