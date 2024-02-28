@@ -925,6 +925,8 @@ Computes different parameters from the initial condition, as such the true radii
 """
 function t0_data()
 	initial_data = DataFrame()
+	γ = 0.01
+	μ = 1/6
 	angs = Float64[] 	# initial condition angle
 	Rs = Float64[] 		# initial condition major radius
 	rrs = Float64[] 	# initial condition minor radius
@@ -939,6 +941,7 @@ function t0_data()
 	dropR = Float64[] 	# radius of a droplet containing all liquid
 	droph = Float64[] 	# maximal height of a droplet containing all liquid
 	charL = Float64[] 	# see paper: "Capillary instabilities in solid thin films: Lines"
+	charT = Float64[] 	# see paper: "Stability of a liquid ring on a substrate"
 	Ohs = Float64[] 	# Ohnesorge number
 	# Loop through initial conditions
 	for angle in [2/9, 1/6, 1/9, 1/18]
@@ -964,6 +967,7 @@ function t0_data()
 				push!(dropR, drop_radius)
 				push!(droph, drop_h)
 				push!(charL, sqrt((rr*rr*(angle*π - sinpi(angle)*cospi(angle)))/π))
+				push!(charT, (3*μ*(geometry[2]/2))/γ)
 			end
 		end
 	end
@@ -981,6 +985,7 @@ function t0_data()
 	initial_data.rdrop = dropR
 	initial_data.hdrop = droph
 	initial_data.charL = charL
+	initial_data.charT = charT
 	initial_data.r0rf = m3 .- dropR
 	initial_data.t0 = round.(t₀.(m2))
 	initial_data.tic = round.(tic.(m2))

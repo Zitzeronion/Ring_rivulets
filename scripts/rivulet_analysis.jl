@@ -480,10 +480,12 @@ begin
 	incond = (180, 20, 40, "pattern", "uniform")
 	subdata = growthDF[(growthDF.R0 .== incond[1]) .& (growthDF.rr0 .== incond[2]) .& (growthDF.theta .== incond[3]) .& (growthDF.substrate .== incond[4]), :]
 	psi0 = initial_data[(initial_data.R0 .== incond[1]) .& (initial_data.rr0 .== incond[2]) .& (initial_data.angle .== incond[3]), :].psi0[1]	
-	growth_plot = plot(subdata.time[2:end], subdata.deltaH[2:end], 
+	T0 = initial_data[(initial_data.R0 .== incond[1]) .& (initial_data.rr0 .== incond[2]) .& (initial_data.angle .== incond[3]), :].charT[1]	
+	H0 = initial_data[(initial_data.R0 .== incond[1]) .& (initial_data.rr0 .== incond[2]) .& (initial_data.angle .== incond[3]), :].hdrop[1]	
+	growth_plot = plot(subdata.time[2:end] ./ T0, subdata.deltaH[2:end] ./ H0, 
 		label="band",
-		xlabel = L"t/\Delta t",
-		ylabel = L"\Delta h",
+		xlabel = L"t/t_c",
+		ylabel = L"\Delta h / h_d",
 		xaxis=:log10,
 		yaxis=:log10,
 		# title = latexstring("\$\\psi_0 = {$(round(psi0, digits=3))}\$"),
@@ -494,16 +496,17 @@ begin
 		minorticks = true,
 		legend = :topleft,
 		w = 2,
-		ylims = (0.1, 10))
+		ylims = (0.003, 1.1)
+		)
 	subdata2 = growthDF[(growthDF.R0 .== incond[1]) .& (growthDF.rr0 .== incond[2]) .& (growthDF.theta .== incond[3]) .& (growthDF.substrate .== incond[5]), :]
-	plot!(subdata2.time[2:end], subdata2.deltaH[2:end], 
+	plot!(subdata2.time[2:end] ./ T0, subdata2.deltaH[2:end] ./ H0, 
 		label="unifrom",
 		l = (2, :dash))
-	plot!(subdata2.time[2:end], 0.16 .* exp.(0.0000105 .* subdata2.time[2:end]) .+ 0.01, 
+	plot!(subdata2.time[2:end] ./ T0, (0.16 .* exp.(0.0000105 .* subdata2.time[2:end]) .+ 0.01) ./ H0, 
 		label="Exponential fit",
 		l = (2,  :dashdot, :black))
 
-	plot!(subdata2.time[2:end], 0.002 .* exp.(0.000007 .* subdata2.time[2:end]) .+ 0.14, 
+	plot!(subdata2.time[2:end] ./ T0, (0.002 .* exp.(0.000007 .* subdata2.time[2:end]) .+ 0.14) ./ H0, 
 		label="",
 		l = (2,  :dashdot, :black))
 end
