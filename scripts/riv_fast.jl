@@ -4,1444 +4,23 @@
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ f268582b-0756-41cf-910d-7a57b698451d
+# ╔═╡ 98443f3c-d712-11ee-0e87-0d4cb8ba0aea
 using FileIO, PlutoUI, Plots, DataFrames, CSV, JLD2, Images, ImageSegmentation, Random, FFTW, LaTeXStrings, CategoricalArrays, StatsPlots
 
-# ╔═╡ f075f19a-81b6-47b7-9104-57d2e51e7241
+# ╔═╡ 265292da-57e8-455e-9093-855069961f3d
 begin
 	# Functions are stored in the local module!
 	include("RivuletTools.jl")
 	import .RivuletTools
 end
 
-# ╔═╡ 569bbd2c-7fae-4e26-afe5-3f4d06f7d505
-TableOfContents()
+# ╔═╡ 947d4e49-8215-4a9b-8e04-589efba72c7b
+initial_data = RivuletTools.t0_data()
 
-# ╔═╡ 94b9bdb0-73ee-11ee-10e9-e93688ea4523
-md"# Rivulet analysis
-
-In the following notebook we study the dynamics of a ring shaped rivulet on a solid substrate.
-From thin film literature we know that rivulets can have all kinds of instabilities.
-Instabilities that lead to breakup and droplet fragmentation, see for example [Diez et al.](https://pubs.aip.org/pof/article/21/8/082105/256873/On-the-breakup-of-fluid-rivulets)
-In the above paper the discussion on curved rivulets is quite limited.
-
-[Mehrabian and Feng](https://www.cambridge.org/core/journals/journal-of-fluid-mechanics/article/abs/capillary-breakup-of-a-liquid-torus/9B0F535D234DB9221EAB5D9E0797AA7D) invested significant time in studing a curved rivulet. 
-Their results showed that a ring shaped rivulet does have in fact an overall flow that towards the center. 
-Thus the rivulet is retracting to a droplet."
-
-# ╔═╡ 1b26468c-b4f7-4252-b891-4f95bc04c869
-@recipe function f(::Type{Val{:samplemarkers}}, x, y, z; step = 10)
-    n = length(y)
-    sx, sy = x[1:step:n], y[1:step:n]
-    # add an empty series with the correct type for legend markers
-    @series begin
-        seriestype := :path
-        markershape --> :auto
-        x := [Inf]
-        y := [Inf]
-    end
-    # add a series for the line
-    @series begin
-        primary := false # no legend entry
-        markershape := :none # ensure no markers
-        seriestype := :path
-        seriescolor := get(plotattributes, :seriescolor, :auto)
-        x := x
-        y := y
-    end
-    # return  a series for the sampled markers
-    primary := false
-    seriestype := :scatter
-    markershape --> :auto
-    x := sx
-    y := sy
-end
-
-# ╔═╡ 6d3c1725-75fa-412e-9b30-8f8df4e7874b
-md"# Functions
-
-At this point the data has been created and is ready to be analyzed.
-But what is it that we actually look for?
-At this stage we don't know where the paper will eventually lead to, but we can ask the data a series of questions.
-
-Below we define a few functions that will help us extracting relevant findings."
-
-# ╔═╡ 2df8c833-7ca7-4d7a-ade5-0df083a013a1
-begin
-	h_some = 
-	RivuletTools.plot_slice(RivuletTools.read_data(R=180, r=40, kbT=0.0, month=11, day=5, hour=1, minute=28, θ=30, arrested=false), t=25000)
-	
-end
-
-# ╔═╡ 04e344a3-3d5b-449e-9222-481df24015c7
-# (160, 20, 0.0,    11,27, 14, 51, 20
-begin
-	hja = RivuletTools.read_data(R=160, r=20, kbT=0.0, month=11, day=27, hour=14, minute=51, θ=20, arrested=true)
-	RivuletTools.measure_cluster(hja, t=2500000)
-end
-
-# ╔═╡ 974c334e-38fb-436e-842b-bb016854d136
-RivuletTools.heatmap_data(hja, t=875000)
-
-# ╔═╡ 5aad6dcc-8400-4a7a-a2bc-69105b32e09f
-md" ### Time scales
-
-All simulations are based on lattice Boltzmann units (l.b.u.) which is an arbitrary unit. 
-To put this results into perspective we need to indentify relevant time and length scales to non-dimensionalize our units.
-While this seem straightforward for the length scale, the minor radius of the rivulet, for the time scale it is more challenging.
-
-The following few functions introduce possible time scales
-- The visco-capillary time scale $t_0$
-``t_0 = \frac{\mu r}{\gamma}``
-- The inertia-capillary time scale $t_{ic}$
-`` t_{ic} = \sqrt{\frac{\rho r^3}{\gamma}} ``
-- Rim retraction time scale $\tau_{rim}$
-``\tau_{rim} = \frac{9(R_0 - R_f)\mu}{\gamma\theta^3}``
-- Capillary time scale for microscopic rivulets $t_s$
-``t_s = \frac{3\mu h_{\ast}}{\gamma}\left[\frac{M}{1-\cos\theta}\right]^2``
-- Spinodial dewetting time $\tau$
-``\tau = \frac{3\mu}{\gamma h_{\ast}^3q_0^4} \\ q_0 = \frac{1}{2\gamma}\partial_h \Pi(h)|_{h=h_0}`` 
-
-"
-
-# ╔═╡ 351d01de-7225-40e0-b650-0ef40b1a1cf7
-md" ### Initial condition
-
-Computational fluid dynamics (CFD) relys heavily on the choice of initial and boundary conditions. 
-For the boundary conditions we put our trust in the good old biperiodic lattice.
-The initial condition is a velocity free donut as shown in the image below.
-
-All our simulations are started with the function `torus()` described below.
-The relevant parameters here are the larger radius `R₂` and the minor radius `r₁` as well as the contact angle `θ`.
-We solve
-
-`` (\sqrt{x^2 + y^2} - R)^2 + z^2 = r^2 ``
-
-for $z$ instead of $r$ such that we have a representation for the thickness.
-In a second step we cut from this structure, which is a half a donut, to make it fit to the chosen contact angle `θ`. 
-"
-
-# ╔═╡ 7cf4ce88-33de-472c-99c6-5b3ae258f3d1
-md" With its visual representation shown below."
-
-# ╔═╡ 0361d281-4a64-4792-812f-7eb9d268d2ae
-# ╠═╡ disabled = true
-#=╠═╡
-a,v = compute_droplet(RivuletTools.torus(512, 512, 20, 180, 1/9, (256,256)), 1/9)
-  ╠═╡ =#
-
-# ╔═╡ 60ce933e-4335-4190-a7b0-5c86d0326a35
-md"### Profile initial conditions
-
-We assume that the simulations will be very sensitive to the ratio of the two radii
-```math
-\beta = \frac{r}{R}.
-```
-
-Another point of view can be that the radii are not the relevant quantity but the curvatures 
-```math
-	\kappa_0 = \frac{1}{r}, \\
-
-	\kappa_1 = \frac{1}{R},
-```
-where the two $\kappa$'s correspond to the two radii.
-One problem could in fact be that all our simulations have the same $\kappa_0$.
-Therefore let us have a look at the initial conditions:
-"
-
-# ╔═╡ a9601fe8-6321-4ad7-a950-c7354290aed6
-begin
-	r = 40
-	θ = π/9
-	h = RivuletTools.torus(512, 512, 40, 180, 1/9, (256,256))
-	w = 31 - 3 
-	thetaC = 2*asin(13.68/(2*r))
-	Ar = θ*r^2- 0.5*r*w*cos(θ)
-	Ar2 = (r^2/2)*(thetaC - sin(thetaC))
-	Ar3 = (2/3)*w*maximum(h[256, 61:91])
-	As = sum(h[256, 61:91])
-	println("Computed: $(Ar) Simulated: $(As)")
-	println("Computed 2: $(Ar2) Simulated: $(As)")
-	println("Computed 3: $(Ar3) Simulated: $(As)")
-	println(sqrt(maximum(h[256, 61:91])*(2*r-maximum(h[256, 61:91]))))
-	println(thetaC, " ",  θ, " ", 2*r*sin(θ))
-	plot(h[256, 61:91], minorticks=true, aspect_ratio=1)
-	
-end
-
-# ╔═╡ 3eaf9941-d510-4a91-99bf-2084bbe3ea40
-begin
-	p = plot()
-	for ang in [1/9, 1/6, 2/9]
-		for R in [180]
-			for rr in [20, 40, 80]
-				h = RivuletTools.torus(512, 512, rr, R, ang, (256,256))
-				plot!(h[256, :], 
-					xlims=(0, 256),
-					ylims=(0, 20),
-					lw = 2,
-					aspect_ratio = 5,
-					xlabel = "x/[Δx]",
-					ylabel = "height",
-					palette = :Paired_10,
-					label="R=$(R)-r=$(rr)-θ=$(Int(round(rad2deg((ang*π)))))",
-				)
-			end
-		end
-	end
-	savefig(p, "../assets/initial_conditions_R180.png")
-	p
-end
-
-# ╔═╡ 1ebb5c9b-df33-4c48-8240-bbff2a06520c
-begin
-	h2 = RivuletTools.torus(512, 512, 20, 180, 2/9, (256,256))
-	slice = h2[256, :]
-	sliceC = slice[slice .> 0.0501]
-	A = sum(sliceC)
-end
-
-# ╔═╡ 70da13b0-6111-4d5d-a6f5-49fcc0499738
-md" ### Data analysis 
-
-The data analysis is usually the most effort.
-Here are some functions that should help with data analysis."
-
-# ╔═╡ 4fb1d7ad-47f2-4adf-a2ba-0ecc0fc8eeb0
-md" # The Data
-
-Below we create three dataframes that hosts a load of information.
-Arguably too much information to have a clear picture what we want to say.
-However, with the steps outlined below we hope to clear up some of the confusion.
-
-The three dataframes host:
-- Initial geometrical data: `initial_data`
-- Simulation data: `data`
-- Simulation data on patterned substrates: `data_arrested`
-- Simulation data with different surface tension: `data_gammaX`
-- Simulation data with different slip length: `data_slip`
-
-### Initial conditions
-"
-
-# ╔═╡ 41aee571-9016-4759-859a-c99eb143a410
-begin
-	initial_data = RivuletTools.t0_data()
-	CSV.write("../data/initial_conditions.csv", initial_data)
-	initial_data
-end
-
-# ╔═╡ 13ce2bea-889f-4727-a126-71a5006a86ab
-md"A single simulation creates one data file, which is about 500mb in size. 
-The data file contains the temporal evolution of the height field. 
-Every 25000Δt we make a snapshot of the system until we reach the end of the time loop at 2500000Δt.
-The file that contains this series is uniquely labeled with date and parameters for the initial condition (`RivuletTools.torus()`).
-Every entry in the `data` and `data_arrested` array points towards one such files.
-
-### Unpatterned Substrate
-"
-
-# ╔═╡ 0efbcab7-4a58-400a-84af-f1a6703c7ec9
-data = RivuletTools.data
-
-# ╔═╡ 8b2c77d3-f743-4840-a9d9-9308e05be28d
-begin
-	set = 8
-	data0 = RivuletTools.read_data(R=data[set][1], r=data[set][2], kbT=data[set][3], year=data[set][4], month=data[set][5], day=data[set][6], hour=data[set][7], minute=data[set][8], θ=data[set][9])
-	# println(typeof(dataH), " ", typeof(dataH) == Dict{String, Any})
-	RivuletTools.heatmap_data(data0, t=25000)
-end
-
-# ╔═╡ a1ee76ab-bf27-466e-8324-01ecde09931c
-md"
-### Patterned Substrate
-"
-
-# ╔═╡ 74590e82-5e2b-4a88-afde-3b2992d9b001
-data_arrested = RivuletTools.data_arrested
-
-# ╔═╡ dc5ab038-569e-4603-95af-0549c6e4ee76
-md"
-### Surface tension variation
-
-For even more data we varied the surface tension γ and reduced it by a factor of 2 as well as increased it by a factor of 2.
-
-- data_gamma05 half surface tension
-- data_gamma20 double surface tension
-"
-
-# ╔═╡ 90bd4975-315d-4a55-9af4-5b40ceda4eb3
-data_gamma05 = RivuletTools.data_gamma05
-
-# ╔═╡ 93e8f4ee-7558-4178-8f06-96a422528c48
-data_gamma20 = RivuletTools.data_gamma20
-
-# ╔═╡ 05715ba9-fdd3-43c8-b6fc-ee32d225cdf0
-md"
-### Slip variation
-
-Very recently we also added another set of simulations.
-This time we varied the slip length, which is an effective parameter for the velocity boundary condition.
-For all other simulations we used a slip length $\delta = 1$, to check if there is an influence at all we now have:
-- δ = 0.5
-- δ = 2
-
-thus a similar approach as in the surface tension case.
-"
-
-# ╔═╡ 24fde296-5a6f-4a92-bf16-855df4c99227
-data_slip= RivuletTools.data_slip
-
-# ╔═╡ 42094521-c209-4c82-8226-1a0b9b1c0d85
-data_grad = RivuletTools.data_gradient
-
-# ╔═╡ b3be394c-5997-4494-ad40-ced2f10fd364
-RivuletTools.renderGifs()
-
-# ╔═╡ 0f204a06-71b2-438a-bb49-4af8ebda0001
-md" # Results
-
-Here comes the actual research part.
-So far we have set up quite a lot of tools to generate and analyse the data.
-But we haven't answered the question of what we expect to find or what should happen yet.
-We know though that not every rivulet is stable and we know that some of them breakup and form droplets.
-But how many of them do that and is there a systematic behind it?
-This and some more questions will be adressed in the forth coming cells.
-
-## Real space
-So what does the simulations produce?
-Below is an image of the state at the end of the time loop.
-Clearly the rivulet has broken into droplets.
-"
-
-# ╔═╡ d5152b67-bc1d-4cc0-b73e-90d79dbadcb4
-begin
-	nmset = 10
-	ts = 1000000
-	dataH = RivuletTools.read_data(R=data[nmset][1], r=data[nmset][2], kbT=data[nmset][3], month=data[nmset][5], day=data[nmset][6], hour=data[nmset][7], minute=data[nmset][8], θ=data[nmset][9])
-	RivuletTools.heatmap_data(dataH, t=ts)
-end
-
-# ╔═╡ ab5b4c7c-ae24-4aae-a528-1dc427a7f1f1
-md"While a picture says more than a thousand words, it's not always to best way to describe data.
-For example the number of droplets and the wavelength assozitated with that number.
-
-That is why we use the `Image.jl` library to extract image features.
-Luckily one of the features is the number of clusters which equivalent to the number of droplets.
-In the image below we do this analysis for a single state and colorate each feature with a random color."
-
-# ╔═╡ c945050f-3ddc-4d0e-80dd-af909c3f4ab5
-RivuletTools.segment_image(dataH, ts)
-
-# ╔═╡ 7e2fd675-28ba-4412-9c56-4b40b3380576
-md"
-We measure 27 droplets and if we were to count the different colored discs we also would find 27 discs.
-This is an rather straightforward way to see if a rivulet is stable or if it breaks during the simulation.
-"
-
-# ╔═╡ 89045ff9-bfb2-43e7-865b-235181cdf9f7
-md" ### Dynamics in real space
-
-The easist way to identify what is going on, is to just see whats going on.
-This is why we generate a `.gif` file for each individual simulation.
-We use the function `data2gif()` to do this.
-
-#### The quartet of possibilities
-
-In the next three cells we show what the rivulet can do by loading the gifs of some simulations.
-Here we are not strictly comparing apples with apples, instead we mix our data.
-Thus we include data from both the patterned substrate as well as the uniform substrate.
-Considering these two setups we observe the following processes:
-
-1. Retract
-"
-
-# ╔═╡ 03bf6a75-a98c-4641-9939-2336c78e1be7
-begin
-	# slice_gif = RivuletTools.read_data(R=180, r=40, kbT=0.0, month=11, day=3, hour=23, minute=34, θ=40 ,nm=32, arrested=false)
-	# (180, 40, 0.0,    11, 3, 23, 34, 40
-	# RivuletTools.do_gif_slice(slice_gif, "slice_R180_r40_t40"; timeMax=2500000)
-end
-
-# ╔═╡ a58ec747-09cb-4cba-a9f0-4de683c80052
-LocalResource("../assets/ang_40_R_180_rr_40_kbt_off.gif", :width => 600)
-
-# ╔═╡ c66bac82-feaf-4e77-ab1b-ea7a2a5cf6c7
-md"
-2. Retract into breakup
-"
-
-# ╔═╡ b385a6b2-e2b0-4179-ac81-21a8600f86cf
-LocalResource("../assets/ang_40_R_180_rr_20_kbt_off.gif", :width => 600)
-
-# ╔═╡ 7f8b5fe8-f5d1-46eb-a30e-8f0a6e9707bc
-md"
-3. Breakup without retraction (patterned substrate)
-"
-
-# ╔═╡ 2e7b7b97-f4b9-4ef8-b360-e086ffc0a025
-LocalResource("../assets/arr_ang_30_R_180_rr_40_kbt_off.gif", :width => 600)
-
-# ╔═╡ dc37fa99-ceb5-40cb-846a-6cdf9d33c2f3
-md"
-4. Don't breakup without retraction (patterned substrate)
-
-Which we don't show, however there are quite a few of those very stable simulations where essentially nothing happens.
-In the animations you see the height field which color coded and the range is dynamically adjusted.
-
-For a better grip on the dynamics we take all our simulations and perform some simple measures. 
-We are, for example, interested in the growth of the instability on the rivulet. 
-That is why we measure the maximum height difference along the rivulet at every time step.
-On the other hand we want to know if the rivulet has ruptured, thus we use the image analysis introduced in `measure_clusters()`. 
-Often stability can be adressed using a so-called **linear-stability analysis**.
-Some papers have been found in the mean time!
-
-I still have to find a way to compute that however what I readily can do is to analyse the spectra.
-
-For now we stay in real space and try to get one dimensional circuluar cuts of the rivulet.
-The first part to do is to create a distance matrix, which can be accessed with `RivuletTools.distanceArray()`.
-This matrix contains radial distances from the center using Chebyshev distances.
-We are especially interested in the evolution of the center of the rivulet, where we assume for the moment that the center of the rivulet also contains the thickest part of the rivulet.
-We can then use this information to get a circular cut.
-
-It is in fact not as easy as I hoped to, because the distance matrix is not ordered.
-However with an inefficient trick we get the circular cut to be simple connected and have a somewhat smooth curve as depicted below.
-The details of this can be found in `RivuletTools.getRingCurve()`.
-"
-
-# ╔═╡ 7e8e31b9-15fd-4d34-b447-4440ea805811
-hCirc, Radius = RivuletTools.getRingCurve(data[25], 150000)
-
-# ╔═╡ 044b6cab-06cf-405e-864c-3e040faa602d
-radial_plot = plot(0:2π/(length(hCirc)-1):2π, hCirc, label="Cut at R=$(Radius)Δx", l=(1.5, :solid), ylabel="height", grid=false, xlabel="x\\(\\phi\\)", xticks = ([0:π/2:2*π;], ["0", "\\pi/2", "\\pi", "3\\pi/2", "2\\pi"]))
-
-# ╔═╡ c5949c51-d3f5-40b1-9415-7c40ae596b1b
-savefig(radial_plot, "../assets/height_line.png")
-
-# ╔═╡ cfb78bf5-9f06-4557-a777-c34d908f0e67
-md"
-Similar to above we can turn the time series of the profiles into an animation.
-We have normalized the y-axis with the equal volume single droplet height
-```math
-	h_d = r_d(1-\cos(\theta)),
-```
-where $r_d$ is the radius of the sphere from which the cap is cut and given by
-```math
-	r_d = \sqrt[3]{\frac{3V}{\pi(2+\cos(\theta))(1-cos(\theta))^2}},
-```
-and $V$ is the volume of the rivulet at $t=0$.
-The x-axis is normalized using 
-```math
-	x(\phi) = \frac{2\pi x_i}{N-1},
-```
-where $N$ is the number of elements $x_i$ that are contained by the 
-circular cut.
-"
-
-# ╔═╡ cb4a302c-fb04-4362-95d5-7680d8fb2983
-RivuletTools.do_ringgif(data[25], "firstRingAnimation")
-
-# ╔═╡ 30220b96-8154-4ca2-a016-9258860323a5
-md"
-### Growth rates
-
-One rather straight question we can address using the height data is that of growth rates.
-Or put it slightly differentely how does the quantity
-```math
-	\Delta h = h_{max} - h_{min}
-```
-evolve with time.
-This measure has however the downside that $h_{min}$ is more or less constant because it is set by the disjoining pressure $\Pi(h)$ which reads
-```math
-	\Pi(h) = Kf(h),
-```
-with 
-```math
-	K = \frac{2(1-\cos(\theta))}{h_{\ast}},
-```
-and
-```math
-	f(h) = \left(\frac{h_{\ast}}{h}\right)^3 - \left(\frac{h_{\ast}}{h}\right)^2, 
-```
-with $h_{\ast}$ being the precursor film height that is assumed to be $h_{\ast} \ll h$.
-We therefore have 
-```math
-	h_{min} \propto h_{\ast}
-```
-independent of time.
-
-This data is already precompiled and can be found in `all_data_rivulets.csv`.
-To get this data we run the function `RivuletTools.measure_data()` that collects data on $R(t)$, $r(t)$ and $\Delta h(t)$
-"
-
-# ╔═╡ df519afa-309a-4633-860d-2fe40a384fa9
-for to_analyse in [(data, "dynamics_uniform", false), (data_arrested, "dynamics_patterned", true)]
-	run_me = false
-	RivuletTools.measure_data(to_analyse[1], to_analyse[2], run_me, to_analyse[3], "")
-end
-
-# ╔═╡ 3128d6eb-375d-4770-8215-6ed7e3ac5b5a
+# ╔═╡ b43862d9-24c9-4a25-ab45-c9e016331cae
 growthDF = CSV.read("../data/ring_all_sims_nokBT.csv", DataFrame)
 
-# ╔═╡ 41762f92-2017-4059-87b7-dce0bf061de9
-savefig(growth_plot, "../assets/growthRate_R180_r20_th40.pdf")
-
-# ╔═╡ 13c01d35-6267-4be9-b911-74036b91e031
-begin
-	
-	growth_plot2 = plot(subdata.time[2:end], subdata.L2diff[2:end], 
-		label=L"\psi_0 = 1.333",
-		xlabel = L"t/\Delta t",
-		ylabel = L"\epsilon \bar{h}_1",
-		# xaxis=:log10,
-		yticks = ([0.1, 1, 10, 100, 1000], ["0.1", "1", "10", "100", "1000"]),
-		yaxis=:log10,
-		# title = latexstring("\$\\psi_0 = {$(round(psi0, digits=3))}\$"),
-		grid = false,
-		legendfontsize = 12,
-		guidefont = (16, :black),
-		tickfont = (12, :black),
-		minorticks = true,
-		legend = :topleft,
-		w = 2,
-		ylims = (10, 1000)
-		)
-
-				# psi0 = initial_data[(initial_data.R0 .== R) .& (initial_data.rr0 .== rr) .& (initial_data.angle .== th), :].psi0[1]
-				#loop_data = growthDF[(growthDF.R0 .== R) .& (growthDF.rr0 .== rr) .& (growthDF.theta .== th) .& (growthDF.substrate .== "pattern"), :]
-				# plot!(subdata2.time[2:end], subdata2.L2diff[2:end], 
-				#label="unifrom",
-				# l = (2, :dash))
-	# plot!(subdata2.time[2:end], 0.16 .* exp.(0.0000105 .* subdata2.time[2:end]) .+ 0.01, label="Exponential fit",l = (2,  :dashdot, :black))
-
-	# plot!(subdata2.time[2:end], 0.002 .* exp.(0.000007 .* subdata2.time[2:end]) .+ 0.14, label="",l = (2,  :dashdot, :black))
-end
-
-# ╔═╡ a5cac6d9-d113-4acf-b5b1-675fdb900117
-begin
-	growth_plot3 = plot(
-		xlabel = L"t/\Delta t",
-		ylabel = L"\epsilon \bar{h}_1",
-		# xaxis=:log10,
-		yticks = ([0.1, 1, 10, 100, 1000], ["0.1", "1", "10", "100", "1000"]),
-		yaxis=:log10,
-		# title = latexstring("\$\\psi_0 = {$(round(psi0, digits=3))}\$"),
-		grid = false,
-		legendfontsize = 10,
-		guidefont = (16, :black),
-		tickfont = (12, :black),
-		minorticks = true,
-		legend = :outertopright,
-		w = 2,
-		ylims = (10, 1000)
-		)
-	for R in [180]
-		for rr in [20, 40]
-			for th in [20, 30, 40]
-				psiLoop = initial_data[(initial_data.R0 .== R) .& (initial_data.rr0 .== rr) .& (initial_data.angle .== th), :].psi0[1]
-				loop_data = growthDF[(growthDF.R0 .== R) .& (growthDF.rr0 .== rr) .& (growthDF.theta .== th) .& (growthDF.substrate .== "pattern"), :]
-				plot!(loop_data.time[2:end], loop_data.L2diff[2:end], label=latexstring("\$\\psi_0 = {$(round(psiLoop, digits=2))},~\\theta = {$(th)}^{\\circ}\$"), l = (2, :solid))
-			end
-		end
-	end
-	growth_plot3
-	# plot!(subdata2.time[2:end], 0.16 .* exp.(0.0000105 .* subdata2.time[2:end]) .+ 0.01, label="Exponential fit",l = (2,  :dashdot, :black))
-
-	# plot!(subdata2.time[2:end], 0.002 .* exp.(0.000007 .* subdata2.time[2:end]) .+ 0.14, label="",l = (2,  :dashdot, :black))
-end
-
-# ╔═╡ c7590419-c3d0-41f7-8777-227fcc7b1ba8
-md"
-### Linear Stability Analysis (LSA)
-
-The starting point for this analysis is the equation that we numerically approximate
-```math
-	\partial_t h + \nabla (M(h)\nabla p) = 0,
-```
-where $M(h)$ is a mobility given by 
-```math
-	M(h) = \frac{2h^2+6h\delta +3\delta}{6\mu},
-```
-and the pressure 
-```math
-	p = \Delta h - \Pi(h).
-```
-
-For a complet and thorough derivation of this LSA we point towards the paper by [Gonzalez, Diez, Kondic](https://www.cambridge.org/core/product/identifier/S0022112012006076/type/journal_article).
-They go into every detail that one can think of.
-
-When we insert all the terms into the first equation and multiply with $6\mu$ we have
-```math
-	6\mu\partial_t h + \nabla[(2h^2+6h\delta +3\delta)\nabla(\Delta h - \Pi(h))]
-```
-Let
-```math
-	h = h_0(r,\phi) + \epsilon h_1(r, \phi, t),
-```
-with $\epsilon \ll 1$ and insert this in the above equation then we get at $O(1)$
-```math
-	\nabla[M(h_0)\nabla(\Delta h_0 - \Pi(h_0))] = 0.
-```
-At first order $O(\epsilon)$ we find the equality $\partial_t h_1 +\mathcal{L}_1 h_1 = 0$ where
-```math
-	\mathcal{L}_1 h_1 = \nabla[M(h_0)\nabla(\Delta h_1 - \Pi(h_0)) + 3h_1(2h_0^2 + 4h_0\delta + \delta)\nabla (\Delta h_0 - \Pi(h_0))]
-```
-"
-
-# ╔═╡ c1b3e29b-51b6-4bbd-8793-ece13bfb5a70
-measureDF = CSV.read("../data/dynamics_uniform_and_patterned.csv", DataFrame)
-
-# ╔═╡ f12c1925-cf29-41e5-9499-87efe1a96528
-md"
-A result of the LSA done by [Gonzalez, Diez, Kondic](https://www.cambridge.org/core/product/identifier/S0022112012006076/type/journal_article) is an maximal unstable wavenumber and thus a prediction for the number of droplet $n_{max}$ after rivulet breakup.
-
-This number can be approximated using
-```math
-	n_{max,app} = \frac{\pi}{2\psi_0},
-```
-where $\psi_0 = w/R$ with $w$ being the width of the rivulet and $R$ is the radius of the position of the maximum.
-To compute $\psi_0$ we simply look it up in `t0_data()`. 
-Now let's have a look at $n_{max,app}$
-"
-
-# ╔═╡ a41cab07-f8f1-4b24-bd15-5fd29651fe36
-plot(collect(0.001:0.001:1), π ./ (2 .* collect(0.001:0.001:1)), 
-	xlabel = L"\psi_0",
-	ylabel = L"n_{max}",
-	label = L"LSA",
-	xlims= (0, 1),
-	ylims = (0, 30),
-	minorticks = true,
-	grid = false)
-
-# ╔═╡ 695bd289-a4b3-4154-ab49-6229de133164
-md"
-Clearly the number of droplets scales very visible with the geometric initial conditions of the rivulet.
-In a next step we can our data from both the uniform and patterned substrates."
-
-# ╔═╡ 538694ea-a0b1-4f09-b7b4-4af64d7ec10b
-dfLSAclean = RivuletTools.dropletFrame()
-
-# ╔═╡ a0239801-eb9a-4648-b164-15013fc3c445
-md"
-The above dataframe has some minor issues, first and foremost the 10 degree contact angle data is flawed.
-`ImageSegmentation` has a problem with the small droplet heights at small contact angles.
-However the droplets are clearly visible to the eye when plotted.
-
-That is why we edit the dataframe to be in agreement with visiual inspection.
-"
-
-# ╔═╡ 068f3e73-ed23-4210-b739-ccaadc9f2ba8
-dfLSAcleancorrected = CSV.read("../data/maxdroplets-corrected.csv", DataFrame)
-
-# ╔═╡ 5c8e3e0c-3344-431e-a370-625b467e2ea9
-begin
-	@df dfLSAcleancorrected scatter(
-    	:psi0,
-    	:ndrops,
-    	group = :substrate,
-    	# title = "",
-    	xlabel = L"\psi_0",
-    	ylabel = L"n_{max}",
-		legendfontsize = 12,
-		guidefont = (16, :black),
-		tickfont = (12, :black),
-    	m = (0.5, [:circle :star], 12),
-    	# bg = RGB(0.2, 0.2, 0.2)
-	)
-	
-	psis = collect(0.001:0.001:1)
-	LSA_drops = plot!(psis, π ./ (2 .* psis), 
-	# xlabel = L"\psi_0",
-	# ylabel = L"n_{max}",
-	label = "LSA",
-	xlims= (0, 1.05),
-	ylims = (0, 30),
-	minorticks = true,
-	l = (:black, 2),
-	grid = false)
-	
-	# plot!(psis, π ./ (2 .* psis) .- exp.(-psis), 
-	# xlabel = L"\psi_0",
-	# ylabel = L"n_{max}",
-	# label = "LSA - better",
-	# l = (:black, :dash, 2),
-	# )
-	savefig(LSA_drops, "../assets/LSA_droplets.pdf")
-	LSA_drops
-end
-
-# ╔═╡ b9cf9e47-d8da-4416-b67d-7c806595ceb9
-begin
-	@df dfLSAcleancorrected scatter(
-    	:psi0,
-    	:ndrops,
-    	group = :theta,
-    	# title = "",
-    	xlabel = L"\psi_0",
-    	ylabel = L"n_{max}",
-    	m = (0.5, [:circle :star :hex :ut], 12),
-    	# bg = RGB(0.2, 0.2, 0.2)
-	)
-
-	plot!(psis, π ./ (2 .* psis), 
-	# xlabel = L"\psi_0",
-	# ylabel = L"n_{max}",
-	label = "LSA",
-	xlims= (0, 1.05),
-	ylims = (0, 30),
-	minorticks = true,
-	l = (:black, 2),
-	grid = false)
-end
-
-# ╔═╡ 5d722b85-4e5b-4dc3-9b8d-eb3b6cf33941
-md"
-## Wettability gradient
-
-Test me
-"
-
-# ╔═╡ 8bdffe16-02af-46bd-a568-0e238cc76b6c
-RivuletTools.do_gif(RivuletTools.read_data(R=180, r=20, kbT=0.0, year=2024, month=2, day=22, hour=13, minute=5, θ=40, gradient=(true, 10, 40), nm=(3,2)), "gradient_first", timeMax=2500000)
-
-# ╔═╡ 8886f394-ff90-4fbd-8dec-874f6a4ded83
-dropset = 44
-
-# ╔═╡ d9556b99-ac13-4278-8fc2-085728a2cfa9
-begin
-	tend = 2500000
-	arrhere = false
-	if arrhere
-		checkH = RivuletTools.read_data(R=data_arrested[dropset][1], r=data_arrested[dropset][2], kbT=data_arrested[dropset][3], month=data_arrested[dropset][5], day=data_arrested[dropset][6], hour=data_arrested[dropset][7], minute=data_arrested[dropset][8], θ=data_arrested[dropset][9], nm=(3,2), arrested=true)
-		println("Dataset: $(data_arrested[dropset])")
-		println("width: $(2*initial_data[(initial_data.R0 .== data_arrested[dropset][1]) .& (initial_data.rr0 .== data_arrested[dropset][2]) .& (initial_data.angle .== data_arrested[dropset][9]), :].realrr[1]), h: $(initial_data[(initial_data.R0 .== data_arrested[dropset][1]) .& (initial_data.rr0 .== data_arrested[dropset][2]) .& (initial_data.angle .== data_arrested[dropset][9]), :].maxh0[1])")
-	else
-		checkH = RivuletTools.read_data(R=data[dropset][1], r=data[dropset][2], kbT=data[dropset][3], month=data[dropset][5], day=data[dropset][6], hour=data[dropset][7], minute=data[dropset][8], θ=data[dropset][9], nm=(3,2))
-		println("Dataset: $(data[dropset])")
-		println("width: $(2*initial_data[(initial_data.R0 .== data[dropset][1]) .& (initial_data.rr0 .== data[dropset][2]) .& (initial_data.angle .== data[dropset][9]), :].realrr[1]), h: $(initial_data[(initial_data.R0 .== data[dropset][1]) .& (initial_data.rr0 .== data[dropset][2]) .& (initial_data.angle .== data[dropset][9]), :].maxh0[1])")
-	end
-	RivuletTools.heatmap_data(checkH, t=tend)
-end
-
-# ╔═╡ 543dea77-0aea-49e6-811a-5a87218d6632
-RivuletTools.segment_image(checkH, tend)
-
-# ╔═╡ 0489cd43-a451-435e-9024-7b9ff3432761
-begin
-	time1d = 500000
-
-	ll1, spec1 = RivuletTools.height2fft(data[26], time1d, output=true)
-	ll2, spec2 = RivuletTools.height2fft(data[25], time1d, output=true)
-	shifted_k1 = fftshift(fftfreq(length(ll1))*length(ll1))
-	shifted_k2 = fftshift(fftfreq(length(ll2))*length(ll2))
-	k_pi1 = shifted_k1 .* 2π/length(ll1)
-	k_pi2 = shifted_k2 .* 2π/length(ll2)
-	plot(k_pi1, log.(abs.(spec1 .* spec1)) .+ 1, 
-			# aspect_ratio=1, 
-			xlims=(0,π), 
-			xlabel = "q",
-			ylabel = "log(S(q))",
-			label="R=$(data[26][1]) r=$(data[26][2])",
-			#clim=(0.1, 1000) # Limits for heatmap
-		)
-	plot!(k_pi2, log.(abs.(spec2 .* spec2)) .+ 1,
-		label="R=$(data[25][1]) r=$(data[25][2])",
-		xlims=(0.01, pi),
-		xscale = :log10,
-		# ylims=(-10, 10),
-		)
-end
-
-# ╔═╡ 1c6b09bb-9809-411d-8ddd-2095256d0601
-md"
-In the following we work with the hight data only, we don't measure but simply transform it with a **FFT**.
-This way we can compute dominate wavelengths. 
-We also get a dispertion relation, showing (hopefully) growth and damping of different wave modes.
-This information should differ between the arrested rivulets and the contracting rivulets, because 
-- the major and minor radii are not constant and 
-- the wave modes are directly correlated with both them, at least I assume so.
-
-So let's get started and compute some spectra.
-First let's introduce the fft method.
-
-## Reciprocal space
-Using `Image.jl` is in fact only one way to look at this issue, because we can also **Fourier transform** the data and analyse the spectrum in reciprocal space.
-Long waves have small wave numbers and short wavelengths have large wave numbers.
-This is why we loaded `FFTW.jl` at the top of the notebook to compute the **FFT** (fast Fourier transform) of the height field $h(\mathbf{x},t)$, where $\mathbf{x} = (x,y)$.
-
-We therefore choose a single simulation for the unpatterned data set.
-"
-
-# ╔═╡ 2a66eee4-be06-43a2-a9be-fc2e0c4a0f32
-fftset = 25
-
-# ╔═╡ a86d30c5-03f0-4e11-ba25-1f08ba0998b7
-md"
-Next we choose a single time step where we want to compute the **FFT** of the height field.
-"
-
-# ╔═╡ ea5f58f9-5394-4536-9458-0484e85fdc85
-time_here = 250000
-
-# ╔═╡ cca0ed73-b1e7-4895-8537-294ccb3f9e26
-md" 
-The actual height field is just a 512 by 512 matrix with height values at every lattice point, as shown below.
-"
-
-# ╔═╡ 289205ad-0bd3-473c-b076-fab42e1643c3
-begin
-	fft_try = RivuletTools.read_data(R=data[fftset][1], r=data[fftset][2], kbT=data[fftset][3], year=data[fftset][4], month=data[fftset][5], day=data[fftset][6], hour=data[fftset][7], minute=data[fftset][8], θ=data[fftset][9], nm=(3,2))
-	fft_data = RivuletTools.heatmap_data(fft_try, t=time_here, just_data=true)
-	shifted_k = fftshift(fftfreq(512)*512)
-end
-
-# ╔═╡ fc37abf6-6acd-4b11-bdab-ddee379d8d72
-md" 
-The above matrix is a single time step of one of our simulations.
-In fact, a simulation where the rivulet breaks while retracting.
-This height field, `fft_data` can then be used to compute a spectrum as shown below, where we interpret the height data as grayscale.
-"
-
-# ╔═╡ 29f4022e-28dc-4ef8-8e83-11d466437813
-spectrumH= fftshift(fft(fft_data ./ maximum(fft_data)))
-
-# ╔═╡ a1f13b96-fbd3-40ab-aa3f-9af14d55ed55
-md"
-### Spectra
-
-`spectrumH` is a two dimensional *FFT* of the height which is shown in the plot three cells above.
-The *FFT* itself has all the information we need to know for a dispertion relation.
-Radial averaging of this data should correspond to the growth of a dominate wave number and to the damping of wave numbers which are too large to be resolved. 
-"
-
-# ╔═╡ ef66b620-cfa3-47b4-bc2b-6cc77427764f
-RivuletTools.data2fft(whichdata=RivuletTools.data, dataset=fftset, time=250000, quater=false, output=false)
-
-# ╔═╡ 010e2c3b-f66a-411b-b819-3d37448c4087
-md"
-The height field that produces the fft above is shown in the cell below.
-We clearly see that this annulus has some funky undulations and this funky undulations are actually well captured by the fft signal.
-
-If we would take a annulus that is just retracting we would see an isotropic annulus pattern with distance between them based on the real space annulus radius. 
-"
-
-# ╔═╡ 8d0b7517-1be8-41c4-8a4b-716bcad169fb
-RivuletTools.heatmap(fft_data, c=:viridis, xlims=(1,512), ylims=(1, 512), aspect_ratio=1)
-
-# ╔═╡ 19deee02-5fb7-400c-a853-74bd44a8deaf
-md"The *FFT* is as far as I know symmetric and does only contain information for wave lengths up to $L/2$, which in our case is $256\Delta x$.
-That is why a quater of the above image should be enough for further analysis."
-
-# ╔═╡ 608b2a67-b34b-4440-9282-3f225e5714be
-RivuletTools.data2fft(whichdata=RivuletTools.data, dataset=fftset, time=250000, quater=true, output=false)
-
-# ╔═╡ e370f645-d408-4d7f-8c48-0f9e05522b5f
-md"
-### Power Spectral density
-
-Text here
-"
-
-# ╔═╡ 72270f78-01c5-4ce5-aac4-901fd9a5143f
-hmmm = RivuletTools.simpleRadialAverage(spectrumH, abssqrt=true) .+ 1
-
-# ╔═╡ 783e9476-a0a8-4427-b929-9f7c0faa6b59
-plot(0:π/255:π, 
-	hmmm[1:256], 
-	yscale=:log10, 
-	xlims=(0, π)
-)
-
-# ╔═╡ a59cefd2-27c4-4332-943e-1fbd79ae2481
-begin
-	someset = 26
-	# Retraction
-	fft_anim1 = RivuletTools.read_data(R=data[someset][1], r=data[someset][2], kbT=data[someset][3], year=data[someset][4], month=data[someset][5], day=data[someset][6], hour=data[someset][7], minute=data[someset][8], θ=data[someset][9], nm=(3,2))
-	# Breakup
-	fft_anim2 = RivuletTools.read_data(R=data[someset-1][1], r=data[someset-1][2], kbT=data[someset-1][3], year=data[someset-1][4], month=data[someset-1][5], day=data[someset-1][6], hour=data[someset-1][7], minute=data[someset-1][8], θ=data[someset-1][9], nm=(3,2))
-	anim = Animation()
-	dataEnd1 = RivuletTools.heatmap_data(fft_anim1, t=2500000, just_data=true)
-	dataEnd2 = RivuletTools.heatmap_data(fft_anim2, t=2500000, just_data=true)
-	max1 = maximum(dataEnd1)
-	max2 = maximum(dataEnd2)
-	for t in 25000:25000:2500000
-		fftdata1 = RivuletTools.heatmap_data(fft_anim1, t=t, just_data=true) ./ max1
-		fftdata2 = RivuletTools.heatmap_data(fft_anim2, t=t, just_data=true) ./ max2
-		spec1= fftshift(fft(fftdata1))
-		spec2= fftshift(fft(fftdata2))
-		# specH[256, 256] = 1.0
-		averagedPSD1 = RivuletTools.simpleRadialAverage(spec1, abssqrt=true)
-		averagedPSD2 = RivuletTools.simpleRadialAverage(spec2, abssqrt=true)
-		plot(0:π/255:π, 			# x-axis from 0 to pi 
-			log.(averagedPSD1) .+ 1,  	# y-axis averaged FFT
-			title="t=$(t)Δt", 		# Titel
-			label="Retraction",  	# Label
-			xlabel="q/[Δx⁻¹]",  	# x-label
-			xticks = ([0:π/4:π;], ["0", "\\pi/4", "\\pi/2", "3\\pi/4", "\\pi"]),
-			ylabel="log(S(q))", 			# y-label
-			# yscale=:log10, 			# y-axis scaling
-			# xscale=:log10, 		# x-axis scaling
-			grid=false, 			# No grid
-			minorticks=true, 		# Minorticks for log
-			# xlims = (1, 10)
-    	)
-		plot!(0:π/255:π, 
-			log.(averagedPSD2) .+ 1, 
-			label="Breakup", 
-			xlims = (0, π)
-    	)
-		frame(anim)
-	end
-	gif(anim, "../assets/spectrum_difference.gif")
-end
-
-# ╔═╡ 38345378-66ee-42c1-b37f-6691119ecc60
-md"
-Below we just read two `.csv`s because we precompiled the data already.
-There is data on  
-- Uniform substrate
-- Patterend substrate
-
-(However to redo the analysis simply change `run_me` to `true` in the cell below.)
-
-# Lets get some graphs tomorrow!
-"
-
-# ╔═╡ 3273792c-41fb-4225-a4f7-2f1c9d58be4a
-for to_analyse in [(data_gamma05, "gamma05_uniform", "gamma05_"), (data_gamma20, "gamma20_uniform", "gamma20_")]
-	run_me = false
-	RivuletTools.measure_data(to_analyse[1], to_analyse[2], run_me, false, to_analyse[3])
-end
-
-# ╔═╡ 144e23e9-ce3d-4ed6-be2c-dff1fed39e59
-md"For convenience we collect all the data we have into a single dataframe, which for whatever reason is called `all_df`.
-Doing so we use the function `combined_df` that either reads and combines the data or just reads an existing dataframe."
-
-# ╔═╡ f7521761-e9f1-43df-a95c-57aec7c83011
-"""
-	combined_df(name::String; remeasure=false)
-
-Combines the data of the two different substrates.
-"""
-function combined_df(name::String; remeasure=false)
-	if remeasure
-		combined = DataFrame()
-		for csvs in ["dynamics_uniform", "dynamics_patterned"]
-			df = csv2df(csvs)
-			if csvs == "dynamics_uniform"
-				df.substrate = fill(:uniform, length(df.R))
-			elseif csvs == "dynamics_patterned"
-				df.substrate = fill(:patterned, length(df.R))
-			end
-			combined = vcat(combined,df)
-		end
-		CSV.write("data/$(name).csv", combined)
-		return combined
-	else
-		all_df = RivuletTools.csv2df(name)
-		return all_df
-	end
-end
-
-# ╔═╡ 77697cb7-40fa-4ed4-9008-8d78cfa0c247
-md"
-In `all_df` we have evaluated if a rivulet has ruptured, when it ruptured, how many droplets it produced and which kind of substrate we started the simulation on.
-There is still a lot of data because we still consider every time step.
-
-We might come back to `all_df` but for the first simple information we want to extract if the rivulets ruptured and when they ruptured.
-"
-
-# ╔═╡ 7f60e96f-9a5e-41f5-a388-f531585e15b0
-all_df = combined_df("data_all_rivulets")
-
-# ╔═╡ 96dea7cc-4742-460f-a18e-ae22f0c92033
-
-
-# ╔═╡ e4bb69eb-e608-4f50-9c42-678a74b99192
-all_df.gamma .= 0.01
-
-# ╔═╡ 010e992a-f35a-4a7a-946e-f796aba41a32
-
-
-# ╔═╡ cdbe66ff-d643-4b7a-a446-85c284c668ba
-all_df
-
-# ╔═╡ 6b34bdad-2518-43f5-9fb0-d28a99a411fe
-md"
-With `breakup_detection()` we reduce every simulation to a single row in a dataframe.
-The only information we want to extract in this row is
-
-- Did the rivulet rupture?
-- When did it rupture?
-- How many droplets are produced?
-
-The answer to the first and third question can be answered with the same information.
-We just ask how many clusters we have at the end of the simulation, if that number is larger than one we set `df.rupture = true`.
-Similar we set `df.drops = data.clusters[tmax]` where `tmax` is the last time simulation time step.
-
-To answer when the rivulet has ruptured we use the function [`findfirst()`](https://docs.julialang.org/en/v1/base/arrays/) and check where `data.clusters > 1` for the first time.
-"
-
-# ╔═╡ 627c3c50-b22f-4e95-a755-26f2197fff92
-"""
-	breakup_detection(df::DataFrame, label::String)
-
-Scans the time dependent data and extracts if the rivulet breaks up into droplets and many more features. Saves the result to a csv named with `label`.
-"""
-function breakup_detection(df::DataFrame, label::String; remeasure=false)
-	if remeasure
-		droplets = DataFrame()
-		frag = Bool[]
-		Rs = Int64[]
-		rrs = Int64[]
-		rupturetime = Int64[]
-		beta0 = Float64[]
-		betaR = Float64[]
-		kbts = Float64[]
-		ndrops = Int64[]
-		angles = Float64[]
-		wavelengths = Float64[]
-		substrate = String[]
-		existing = String[]
-		for rr in [20, 30, 40, 80]
-			for R in [150, 160, 180, 200]
-				for θ in [1/18, 1/9, 1/6, 2/9]
-					for sub in ["uniform", "patterned"]
-						for kbt in [0.0, 1e-6]
-							sim = df[(df.theta .== round(rad2deg(θ*π))) .& (df.R .== R) .& (df.rr .== rr) .& (df.substrate .== sub) .& (df.kbt .== kbt), :]
-							push!(Rs, R)
-							push!(rrs, rr)
-							push!(kbts, kbt)
-							push!(angles, round(rad2deg(θ*π)))
-							push!(substrate, sub)
-							# Check if there is actual data
-							if length(sim.clusters) > 0
-								# Check if the rivulet ruptured
-								if sim.clusters[end] > 1
-									rt = findfirst(x -> x > 1, sim.clusters)
-									push!(rupturetime, sim.time[rt])
-									push!(frag, true)
-									push!(ndrops, sim.clusters[end])
-									push!(betaR, sim.beta[rt])
-									push!(wavelengths, 2π*R/sim.clusters[end])
-									push!(beta0, sim.beta[begin])
-								else
-									push!(frag, false)
-									push!(rupturetime, 3000000)
-									push!(betaR, sim.beta[end])
-									push!(ndrops, 0)
-									push!(wavelengths, 2π*R+1)
-									push!(beta0, sim.beta[begin])
-								end
-								push!(existing, "Yes")
-							else
-								push!(frag, false)
-								push!(rupturetime, 0)
-								push!(betaR, 0)
-								push!(ndrops, 0)
-								push!(wavelengths, 0)
-								push!(beta0, 0)
-								push!(existing, "No")
-							end
-						end
-					end
-				end
-			end
-		end
-		droplets.R = Rs
-		droplets.rr = rrs
-		droplets.theta = angles
-		droplets.kbt = kbts
-		droplets.substrate = substrate
-		droplets.rupture = frag
-		droplets.rupturetime = rupturetime
-		droplets.drops = ndrops
-		droplets.lambda = wavelengths
-		droplets.beta_start = beta0
-		droplets.beta_rup = betaR
-		droplets.exists = existing
-	
-		CSV.write("data/$(label).csv", droplets)
-		return droplets
-	else
-		# droplets = CSV.read("/net/euler/zitz/Swalbe.jl/data/DataFrames/$(label).csv", DataFrame)
-		droplets = CSV.read("../data/$(label).csv", DataFrame)
-		return droplets
-	end
-end
-
-# ╔═╡ bebbf9b7-0d4a-44d0-baa1-aba99b9c59ef
-md"
-In `simpleBreakup` we collected the result of `breakup_detection`, therefore have a rupture flag, a rupture time and the number of droplets as well as a wavelength. 
-
-The keen observer quickly finds a mismatch between `all_df` and `simpleBreakup` in terms of dimensions.
-Ever simulation creates a 100 height field snapshots in the 2.500.000 time steps.
-When reduced to a single rupture or not rupture question, there should be only 147 rows.
-Not all data is equal and simulations on the patterend substrates use slightly different initial conditions.
-Which is why we simply add ghost data and add a column called `df.exists` which has the states Yes or No.
-
-Those rows where `df.exists = No` can be ignored, it was just easier to loop through the data like that.
-"
-
-# ╔═╡ b1953875-92ca-42d1-a22e-2f393141ddbe
-simpleBreakup = breakup_detection(all_df, "stability")
-
-# ╔═╡ 6a1ce8de-49b4-4a97-aa32-1cd20ded4b04
-md"
-Now we can ask which simulations ruptured and find this data in `rupture_only`.
-"
-
-# ╔═╡ adf3dbe5-ade0-4949-9507-10b5c8164ddd
-rupture_only = simpleBreakup[(simpleBreakup.rupture .== true) .& (simpleBreakup.exists .== "Yes") .& (simpleBreakup.kbt .== 0.0), [:R, :rr, :theta, :substrate, :rupturetime, :drops, :lambda, :beta_start]]
-
-# ╔═╡ b8a96a22-4950-4300-8c28-2c8aedf6b66b
-md"
-Similarly we can ask which existing simulations do not rupture and save that to `stable_only`.
-"
-
-# ╔═╡ 081c009c-0871-458e-9081-365d5102fefd
-stable_only = simpleBreakup[(simpleBreakup.rupture .== false) .& (simpleBreakup.exists .== "Yes") .& (simpleBreakup.kbt .== 0.0), [:R, :rr, :theta, :substrate, :rupturetime, :drops, :lambda, :beta_start]]
-
-# ╔═╡ 14d1a55a-43b0-4857-8dd9-b10c86f8a123
-md"
-## Actual research
-
-So far we have discussed how we generated the data and which initial conditions we are using.
-We showed that there can be four different outcomes and wrote a few functions to get insights into the data.
-But we still lack a real outcome as well as a how our results relate to other studies.
-
-Therefore we have to start some more general questions.
-One of them may be which geometries break and when?
-
-### Stability
-
-In the following plots we measure for each simulation if the rivulet breaks up or does nothing (pattterned) or contracts into a single droplet.
-"
-
-# ╔═╡ 512e1060-eee5-4374-966c-02d7fb62f303
-begin
-	scatter_unstable = scatter(rupture_only[rupture_only.substrate .== "uniform", :theta], 
-	rupture_only[rupture_only.substrate .== "uniform", :beta_start],
-	label = "unifrom",
-	xlabel = "θ/[°]",
-	ylabel = "β",
-	m = (:circle, 8, 0.6),
-	title = "Unstable rivulets",
-	)
-	scatter!(rupture_only[rupture_only.substrate .== "patterned", :theta], 
-	rupture_only[rupture_only.substrate .== "patterned", :beta_start],
-	label = "patterned",
-	m = (:rect, 8, 0.6),
-	)
-	# savefig(scatter_unstable, "/net/euler/zitz/Swalbe.jl/assets/unstable_scatter.png")
-end
-
-# ╔═╡ 61474944-c347-448a-beb9-aa2e4ef6331e
-begin
-	scatter_stable = scatter(stable_only[stable_only.substrate .== "uniform", :theta], 
-	stable_only[stable_only.substrate .== "uniform", :beta_start],
-	label = "uniform",
-	xlabel = "θ/[°]",
-	ylabel = "β",
-	m = (:star5, 8, 0.6, palette(:tab10)[3]),
-	title = "Stable rivulets",
-	)
-	scatter!(stable_only[stable_only.substrate .== "patterned", :theta], 
-	stable_only[stable_only.substrate .== "patterned", :beta_start],
-	label = "patterned",
-	m = (:diamond, 8, 0.6, palette(:tab10)[4]),
-	)
-	# savefig(scatter_stable, "/net/euler/zitz/Swalbe.jl/assets/stable_scatter.png")
-end
-
-# ╔═╡ af255535-e903-4eef-8629-13d836f1f145
-md"
-Another way to display the data is to plot it for each substrate.
-
-Johan: Time scale of pinching is related to minor radius, such as Rayleigh-Plateau. Coalescence is driven by outer radii mismatch. If the time scales of the instability are larger than the retraction on the patterned substrate then it should relate to the uniform substrate. 
-
-Maybe run some simulations where I set all the velocities to 0 at some reoccuring interval `t_velDump`.
-"
-
-# ╔═╡ 13257859-e48e-4aa3-a3a3-a4ecf4c8dd1f
-begin
-	scatter_unstable_uni = scatter(stable_only[stable_only.substrate .== "uniform", :theta], 
-	stable_only[stable_only.substrate .== "uniform", :beta_start],
-	label = "Retracting",
-	xlabel = "θ/[°]",
-	ylabel = "β",
-	title = "Uniform substrate",
-	legendfontsize = 12,			# legend font size
-    tickfontsize = 12,	# tick font and size
-    guidefontsize = 13,	# label font and size
-	m = (:circle, 8, 0.6),
-	)
-	scatter!(rupture_only[rupture_only.substrate .== "uniform", :theta], 
-	rupture_only[rupture_only.substrate .== "uniform", :beta_start],
-	label = "Fragmenting",
-	m = (:rect, 8, 0.6),
-	)
-	# savefig(scatter_unstable_uni, "../assets/uniform_scatter.png")
-end
-
-# ╔═╡ 9e40d379-50e9-4d33-a53c-6c5089059de5
-begin
-	scatter_pat = scatter(stable_only[stable_only.substrate .== "patterned", :theta], 
-	stable_only[stable_only.substrate .== "patterned", :beta_start],
-	label = "Stable",
-	xlabel = "θ/[°]",
-	ylabel = "β",
-	legendfontsize = 12,			# legend font size
-    tickfontsize = 12,	# tick font and size
-    guidefontsize = 13,	# label font and size
-	title = "Patterned substrate",
-	m = (:circle, 8, 0.6),
-	)
-	scatter!(rupture_only[rupture_only.substrate .== "patterned", :theta], 
-	rupture_only[rupture_only.substrate .== "patterned", :beta_start],
-	label = "Fragmenting",
-	m = (:rect, 8, 0.6),
-	)
-	# savefig(scatter_pat, "../assets/pattern_scatter.png")
-end
-
-# ╔═╡ df08506c-f66d-430a-b235-4c9dfb80d414
-# ╠═╡ disabled = true
-#=╠═╡
-plot(df_sub.time./10^6, df_sub.clusters, xlabel="time/10⁶ [a.u.]", ylabel="# clusters",
-l = (3, :solid))
-  ╠═╡ =#
-
-# ╔═╡ ecba3acb-6bc1-4722-9cee-a388a2442fae
-# ╠═╡ disabled = true
-#=╠═╡
-h20040 = measurements[(measurements.R .== 200) .& (measurements.rr .== 40) .& (measurements.kbt .== 0.0), :]
-  ╠═╡ =#
-
-# ╔═╡ 87c627a8-2c54-44ff-aa66-d9b5c379f646
-#=╠═╡
-begin
-	markers1 = [:circle, :ut, :s]
-	linesty1 = [:solid, :dash, :dashdot]
-	timescale = collect(25000:25000:2500000)
-	t0 = initial_data[(initial_data.R0 .== 200) .& (initial_data.rr0 .== 40) .& (initial_data.angle .== 20), :t0][1]
-	h0 = initial_data[(initial_data.R0 .== 200) .& (initial_data.rr0 .== 40) .& (initial_data.angle .== 20), :maxh0][1]
-	p = plot(timescale, 
-		h20040[h20040.theta .== 20, :dH], 
-		label="θ=20°", 
-		l=(3, :solid), 
-		xlabel="t", 
-		ylabel="Δh",
-		st = :samplemarkers,
-		step = 5, 	
-		title = "Unscaled",
-		marker = (8, :circle, 0.6),		
-		# yaxis=:log,
-		#xaxis=:log,
-		# ylims = (0, 5),
-		legendfontsize = 12,			# legend font size
-        tickfontsize = 12,	# tick font and size
-        guidefontsize = 13,	# label font and size
-		)
-	for ang in enumerate([30.0, 40.0])
-		plot!(
-		timescale, 
-		h20040[h20040.theta .== ang[2], :dH], 
-		label="θ=$(ceil(Int, ang[2]))°", 
-		l=(3, linesty1[ang[1]+1]), 
-		# xlabel="t/τ", 
-		# ylabel="Δh/h₀",
-		st = :samplemarkers,
-		step = 5, 						
-		marker = (8, markers1[ang[1]+1], 0.6),		
-		# yaxis=:log,
-		# xaxis=:log,
-		)
-	end
-	savefig(p, "../assets/delth_base.png")
-	p
-	
-end
-  ╠═╡ =#
-
-# ╔═╡ c848d2cf-5d36-4437-b53a-e278150e75ef
-#=╠═╡
-begin
-	p2 = plot(timescale ./ t0, 
-		h20040[h20040.theta .== 20, :dH] ./ h0, 
-		label="θ=20°", 
-		l=(3, :solid), 
-		xlabel="t/t_c", 
-		ylabel="Δh/h₀",
-		st = :samplemarkers,
-		step = 5, 	
-		title = "t_c = rμ/γ",
-		marker = (8, :circle, 0.6),		
-		# yaxis=:log,
-		# xaxis=:log,
-		# xlims=(0, 750),
-		legendfontsize = 12,			# legend font size
-        tickfontsize = 12,	# tick font and size
-        guidefontsize = 13,	# label font and size
-		)
-	for ang in enumerate([30.0, 40.0])
-		param = initial_data[(initial_data.R0 .== 200) .& (initial_data.rr0 .== 40) .& (initial_data.angle .== ang[2]), [:t0, :maxh0]]
-		plot!(
-		timescale ./ param.t0[1], 
-		h20040[h20040.theta .== ang[2], :dH] ./ param.maxh0[1], 
-		label="θ=$(ceil(Int, ang[2]))°", 
-		l=(3, linesty1[ang[1]+1]), 
-		# xlabel="t/τ", 
-		# ylabel="Δh/h₀",
-		st = :samplemarkers,
-		step = 5, 						
-		marker = (8, markers1[ang[1]+1], 0.6),		
-		# yaxis=:log,
-		# xaxis=:log,
-		)
-	end
-	savefig(p2, "../assets/delth_t0scaling.png")
-	p2
-	
-end
-  ╠═╡ =#
-
-# ╔═╡ 1007c151-b6ab-4f81-8421-4746dc3b67f4
-#=╠═╡
-begin
-	p3 = plot(timescale ./ initial_data[(initial_data.R0 .== 200) .& (initial_data.rr0 .== 40) .& (initial_data.angle .== 20), :tau][1], 
-		h20040[h20040.theta .== 20, :dH] ./ h0, 
-		label="θ=20°", 
-		l=(3, :solid), 
-		xlabel="t/τ", 
-		ylabel="Δh/h₀",
-		st = :samplemarkers,
-		step = 5, 						
-		marker = (8, :circle, 0.6),		
-		# yaxis=:log,
-		# xaxis=:log,
-		grid = false,
-		title = "τ = 9μhₑ/(γθ³)",
-		legendfontsize = 12,			# legend font size
-        tickfontsize = 12,	# tick font and size
-        guidefontsize = 13,	# label font and size
-		# xlims = (0.0, 25),
-		# ylims = (0.7, 1.5)
-		)
-	for ang in enumerate([30.0, 40.0])
-		param = initial_data[(initial_data.R0 .== 200) .& (initial_data.rr0 .== 40) .& (initial_data.angle .== ang[2]), [:tau, :maxh0]]
-		plot!(
-		timescale ./ param.tau[1], 
-		h20040[h20040.theta .== ang[2], :dH] ./ param.maxh0[1], 
-		label="θ=$(ceil(Int, ang[2]))°", 
-		l=(3, linesty1[ang[1]+1]), 
-		# xlabel="t/τ", 
-		# ylabel="Δh/h₀",
-		st = :samplemarkers,
-		step = 5, 						
-		marker = (8, markers1[ang[1]+1], 0.6),		
-		# yaxis=:log,
-		# xaxis=:log,
-		)
-	end
-	savefig(p3, "../assets/delth_taurimscaling.png")
-	p3
-	
-end
-  ╠═╡ =#
-
-# ╔═╡ a32e4478-585f-431e-b4f0-bb6b92010cde
-#=╠═╡
-begin
-	p4 = plot(timescale ./ initial_data[(initial_data.R0 .== 200) .& (initial_data.rr0 .== 40) .& (initial_data.angle .== 20), :t00][1], 
-		h20040[h20040.theta .== 20, :dH] ./ h0, 
-		label="θ=20°", 
-		l=(3, :solid), 
-		xlabel="t/t₀", 
-		ylabel="Δh/h₀",
-		st = :samplemarkers,
-		step = 5, 						
-		marker = (8, :circle, 0.6),		
-		# yaxis=:log,
-		# xaxis=:log,
-		grid = false,
-		title = "t₀ = 3μ/(γr³q₀⁴)",
-		legendfontsize = 12,			# legend font size
-        tickfontsize = 12,	# tick font and size
-        guidefontsize = 13,	# label font and size
-		# xlims = (0.0, 0.5),
-		# ylims = (0.7, 1.5)
-		)
-	for ang in enumerate([30.0, 40.0])
-		param = initial_data[(initial_data.R0 .== 200) .& (initial_data.rr0 .== 40) .& (initial_data.angle .== ang[2]), [:t00, :maxh0]]
-		plot!(
-		timescale ./ param.t00[1], 
-		h20040[h20040.theta .== ang[2], :dH] ./ param.maxh0[1], 
-		label="θ=$(ceil(Int, ang[2]))°", 
-		l=(3, linesty1[ang[1]+1]), 
-		# xlabel="t/τ", 
-		# ylabel="Δh/h₀",
-		st = :samplemarkers,
-		step = 5, 						
-		marker = (8, markers1[ang[1]+1], 0.6),		
-		# yaxis=:log,
-		# xaxis=:log,
-		)
-	end
-	savefig(p4, "../assets/delth_filmscaling.png")
-	p4
-	
-end
-  ╠═╡ =#
-
-# ╔═╡ 5ed1e95e-bf40-4c96-8434-ac83e54e9362
-#=╠═╡
-begin
-	p5 = plot(timescale ./ initial_data[(initial_data.R0 .== 200) .& (initial_data.rr0 .== 40) .& (initial_data.angle .== 20), :ts][1], 
-		h20040[h20040.theta .== 20, :dH] ./ h0, 
-		label="θ=20°", 
-		l=(3, :solid), 
-		xlabel="t/tₛ", 
-		ylabel="Δh/h₀",
-		st = :samplemarkers,
-		step = 5, 						
-		marker = (8, :circle, 0.6),		
-		# yaxis=:log,
-		# xaxis=:log,
-		title = "tₛ = 3μh/γ[M/(1-cos(θ))]²",
-		grid = false,
-		legendfontsize = 12,			# legend font size
-        tickfontsize = 12,	# tick font and size
-        guidefontsize = 13,	# label font and size
-		# xlims = (0.0, 750),
-		# ylims = (0.7, 1.5)
-		)
-	for ang in enumerate([30.0, 40.0])
-		param = initial_data[(initial_data.R0 .== 200) .& (initial_data.rr0 .== 40) .& (initial_data.angle .== ang[2]), [:ts, :maxh0]]
-		plot!(
-		timescale ./ param.ts[1], 
-		h20040[h20040.theta .== ang[2], :dH] ./ param.maxh0[1], 
-		label="θ=$(ceil(Int, ang[2]))°", 
-		l=(3, linesty1[ang[1]+1]), 
-		# xlabel="t/τ", 
-		# ylabel="Δh/h₀",
-		st = :samplemarkers,
-		step = 5, 						
-		marker = (8, markers1[ang[1]+1], 0.6),		
-		# yaxis=:log,
-		# xaxis=:log,
-		)
-	end
-	savefig(p5, "../assets/delth_filmscaling.png")
-	p5
-	
-end
-  ╠═╡ =#
-
-# ╔═╡ 9624ad58-8ac5-4ed5-89fe-76874dfe18c1
-# ╠═╡ disabled = true
-#=╠═╡
+# ╔═╡ 3544b7df-56be-4fe2-aa45-753cd04a5439
 begin
 	incond = (180, 20, 40, "pattern", "uniform")
 	subdata = growthDF[(growthDF.R0 .== incond[1]) .& (growthDF.rr0 .== incond[2]) .& (growthDF.theta .== incond[3]) .& (growthDF.substrate .== incond[4]), :]
@@ -1470,48 +49,7 @@ begin
 	plot!(subdata2.time[2:end] ./ T0, subdata2.deltaH[2:end] ./ H0, 
 		label="unifrom",
 		l = (2, :dash))
-	plot!(subdata2.time[1:end] ./ T0, (0.13 .* exp.(sigma0 .* subdata2.time[1:end]) .+ 0.01) ./ H0, 
-		label="Exponential fit",
-		l = (2,  :dashdot, :black))
-
-	plot!(subdata2.time[1:end] ./ T0, (0.001 .* exp.(0.000008 .* subdata2.time[1:end]) .+ 0.14) ./ H0, 
-		label="",
-		l = (2,  :dashdot, :black))
-
-	# println(sigma0)
-end
-  ╠═╡ =#
-
-# ╔═╡ 103063b6-c5a9-4c5d-829b-4587813bfaf4
-begin
-	incond = (180, 20, 40, "pattern", "uniform")
-	subdata = growthDF[(growthDF.R0 .== incond[1]) .& (growthDF.rr0 .== incond[2]) .& (growthDF.theta .== incond[3]) .& (growthDF.substrate .== incond[4]), :]
-	psi0 = initial_data[(initial_data.R0 .== incond[1]) .& (initial_data.rr0 .== incond[2]) .& (initial_data.angle .== incond[3]), :].psi0[1]	
-	T0 = initial_data[(initial_data.R0 .== incond[1]) .& (initial_data.rr0 .== incond[2]) .& (initial_data.angle .== incond[3]), :].tauMax[1]	
-	H0 = initial_data[(initial_data.R0 .== incond[1]) .& (initial_data.rr0 .== incond[2]) .& (initial_data.angle .== incond[3]), :].hdrop[1]	
-	sigma0 = initial_data[(initial_data.R0 .== incond[1]) .& (initial_data.rr0 .== incond[2]) .& (initial_data.angle .== incond[3]), :].sigmaMax[1]	
-	growth_plot = plot(subdata.time[2:end] ./ T0, subdata.deltaH[2:end] ./ H0, 
-		label="band",
-		xlabel = L"t/\tau_m",
-		ylabel = L"\Delta h / h_d",
-		# xaxis=:log10,
-		yaxis=:log10,
-		# title = latexstring("\$\\psi_0 = {$(round(psi0, digits=3))}\$"),
-		grid = false,
-		legendfontsize = 12,
-		guidefont = (16, :black),
-		tickfont = (12, :black),
-		minorticks = true,
-		legend = :bottomright,
-		w = 2,
-		ylims = (0.003, 1.1),
-		xlims = (0.0, 12)
-		)
-	subdata2 = growthDF[(growthDF.R0 .== incond[1]) .& (growthDF.rr0 .== incond[2]) .& (growthDF.theta .== incond[3]) .& (growthDF.substrate .== incond[5]), :]
-	plot!(subdata2.time[2:end] ./ T0, subdata2.deltaH[2:end] ./ H0, 
-		label="unifrom",
-		l = (2, :dash))
-	plot!(subdata2.time[1:end] ./ T0, (0.18 .* exp.(sigma0 .* subdata2.time[1:end]) .- 0.01) ./ H0, 
+	plot!(subdata2.time[1:end] ./ T0, (0.16 .* exp.(sigma0 .* subdata2.time[1:end]) .+ 0.04) ./ H0, 
 		label="Exponential fit",
 		l = (2,  :dashdot, :black))
 
@@ -1540,17 +78,17 @@ Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 StatsPlots = "f3b207a7-027a-5e70-b257-86293d7955fd"
 
 [compat]
-CSV = "~0.10.11"
+CSV = "~0.10.12"
 CategoricalArrays = "~0.10.8"
 DataFrames = "~1.6.1"
 FFTW = "~1.8.0"
-FileIO = "~1.16.1"
+FileIO = "~1.16.2"
 ImageSegmentation = "~1.8.2"
 Images = "~0.26.0"
-JLD2 = "~0.4.38"
+JLD2 = "~0.4.46"
 LaTeXStrings = "~1.3.1"
 Plots = "~1.39.0"
-PlutoUI = "~0.7.53"
+PlutoUI = "~0.7.57"
 StatsPlots = "~0.15.7"
 """
 
@@ -1560,7 +98,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.9.3"
 manifest_format = "2.0"
-project_hash = "3f7a11b0b835f62bbe6a0183f8514e7fd21fd89b"
+project_hash = "73572a2d7c41b4b3875640bce4319ce378c85342"
 
 [[deps.AbstractFFTs]]
 deps = ["LinearAlgebra"]
@@ -1575,15 +113,15 @@ weakdeps = ["ChainRulesCore", "Test"]
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
-git-tree-sha1 = "91bd53c39b9cbfb5ef4b015e8b582d344532bd0a"
+git-tree-sha1 = "c278dfab760520b8bb7e9511b968bf4ba38b7acc"
 uuid = "6e696c72-6542-2067-7265-42206c756150"
-version = "1.2.0"
+version = "1.2.3"
 
 [[deps.Adapt]]
 deps = ["LinearAlgebra", "Requires"]
-git-tree-sha1 = "02f731463748db57cc2ebfbd9fbc9ce8280d3433"
+git-tree-sha1 = "0fb305e0253fd4e833d486914367a2ee2c2e78d0"
 uuid = "79e6a3ab-5dfb-504d-930d-738a2a938a0e"
-version = "3.7.1"
+version = "4.0.1"
 weakdeps = ["StaticArrays"]
 
     [deps.Adapt.extensions]
@@ -1613,9 +151,9 @@ version = "3.5.1+1"
 
 [[deps.ArrayInterface]]
 deps = ["Adapt", "LinearAlgebra", "Requires", "SparseArrays", "SuiteSparse"]
-git-tree-sha1 = "16267cf279190ca7c1b30d020758ced95db89cd0"
+git-tree-sha1 = "c5aeb516a84459e0318a02507d2261edad97eb75"
 uuid = "4fba245c-0d91-5ea0-9b3e-6abc04ee57a9"
-version = "7.5.1"
+version = "7.7.1"
 
     [deps.ArrayInterface.extensions]
     ArrayInterfaceBandedMatricesExt = "BandedMatrices"
@@ -1638,9 +176,9 @@ uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
 
 [[deps.AxisAlgorithms]]
 deps = ["LinearAlgebra", "Random", "SparseArrays", "WoodburyMatrices"]
-git-tree-sha1 = "66771c8d21c8ff5e3a93379480a2307ac36863f7"
+git-tree-sha1 = "01b8ccb13d68535d73d2b0c23e39bd23155fb712"
 uuid = "13072b0f-2c55-5437-9ae7-d433b7a33950"
-version = "1.0.1"
+version = "1.1.0"
 
 [[deps.AxisArrays]]
 deps = ["Dates", "IntervalSets", "IterTools", "RangeArrays"]
@@ -1652,9 +190,9 @@ version = "0.4.7"
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
 
 [[deps.BitFlags]]
-git-tree-sha1 = "43b1a4a8f797c1cddadf60499a8a077d4af2cd2d"
+git-tree-sha1 = "2dc09997850d68179b69dafb58ae806167a32b1b"
 uuid = "d1d4a3ce-64b1-5f1a-9ba4-7e7e69966f35"
-version = "0.1.7"
+version = "0.1.8"
 
 [[deps.BitTwiddlingConvenienceFunctions]]
 deps = ["Static"]
@@ -1664,14 +202,14 @@ version = "0.1.5"
 
 [[deps.Bzip2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "19a35467a82e236ff51bc17a3a44b69ef35185a2"
+git-tree-sha1 = "9e2a6b69137e6969bab0152632dcb3bc108c8bdd"
 uuid = "6e34b625-4abd-537c-b88f-471c36dfa7a0"
-version = "1.0.8+0"
+version = "1.0.8+1"
 
 [[deps.CEnum]]
-git-tree-sha1 = "eb4cb44a499229b3b8426dcfb5dd85333951ff90"
+git-tree-sha1 = "389ad5c84de1ae7cf0e28e381131c98ea87d54fc"
 uuid = "fa961155-64e5-5f13-b03f-caf6b980ea82"
-version = "0.4.2"
+version = "0.5.0"
 
 [[deps.CPUSummary]]
 deps = ["CpuId", "IfElse", "PrecompileTools", "Static"]
@@ -1681,9 +219,9 @@ version = "0.2.4"
 
 [[deps.CSV]]
 deps = ["CodecZlib", "Dates", "FilePathsBase", "InlineStrings", "Mmap", "Parsers", "PooledArrays", "PrecompileTools", "SentinelArrays", "Tables", "Unicode", "WeakRefStrings", "WorkerUtilities"]
-git-tree-sha1 = "44dbf560808d49041989b8a96cae4cffbeb7966a"
+git-tree-sha1 = "679e69c611fff422038e9e21e270c4197d49d918"
 uuid = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
-version = "0.10.11"
+version = "0.10.12"
 
 [[deps.Cairo_jll]]
 deps = ["Artifacts", "Bzip2_jll", "CompilerSupportLibraries_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "LZO_jll", "Libdl", "Pixman_jll", "Pkg", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
@@ -1723,9 +261,9 @@ version = "0.10.8"
 
 [[deps.ChainRulesCore]]
 deps = ["Compat", "LinearAlgebra"]
-git-tree-sha1 = "e0af648f0692ec1691b5d094b8724ba1346281cf"
+git-tree-sha1 = "892b245fdec1c511906671b6a5e1bafa38a727c1"
 uuid = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
-version = "1.18.0"
+version = "1.22.0"
 weakdeps = ["SparseArrays"]
 
     [deps.ChainRulesCore.extensions]
@@ -1739,15 +277,15 @@ version = "0.1.12"
 
 [[deps.Clustering]]
 deps = ["Distances", "LinearAlgebra", "NearestNeighbors", "Printf", "Random", "SparseArrays", "Statistics", "StatsBase"]
-git-tree-sha1 = "05f9816a77231b07e634ab8715ba50e5249d6f76"
+git-tree-sha1 = "9ebb045901e9bbf58767a9f34ff89831ed711aae"
 uuid = "aaaa29a8-35af-508c-8bc3-b662a17a0fe5"
-version = "0.15.5"
+version = "0.15.7"
 
 [[deps.CodecZlib]]
 deps = ["TranscodingStreams", "Zlib_jll"]
-git-tree-sha1 = "cd67fc487743b2f0fd4380d4cbd3a24660d0eec8"
+git-tree-sha1 = "59939d8a997469ee05c4b4944560a820f9ba0d73"
 uuid = "944b1d66-785c-5afd-91f1-9de20f533193"
-version = "0.7.3"
+version = "0.7.4"
 
 [[deps.ColorSchemes]]
 deps = ["ColorTypes", "ColorVectorSpace", "Colors", "FixedPointNumbers", "PrecompileTools", "Random"]
@@ -1778,10 +316,10 @@ uuid = "5ae59095-9a9b-59fe-a467-6f913c188581"
 version = "0.12.10"
 
 [[deps.Compat]]
-deps = ["UUIDs"]
-git-tree-sha1 = "8a62af3e248a8c4bad6b32cbbe663ae02275e32c"
+deps = ["TOML", "UUIDs"]
+git-tree-sha1 = "d2c021fbdde94f6cdaa799639adfeeaa17fd67f5"
 uuid = "34da2185-b29b-5c13-b0c7-acf172513d20"
-version = "4.10.0"
+version = "4.13.0"
 weakdeps = ["Dates", "LinearAlgebra"]
 
     [deps.Compat.extensions]
@@ -1799,9 +337,9 @@ version = "0.3.2"
 
 [[deps.ConcurrentUtilities]]
 deps = ["Serialization", "Sockets"]
-git-tree-sha1 = "8cfa272e8bdedfa88b6aefbbca7c19f1befac519"
+git-tree-sha1 = "9c4708e3ed2b799e6124b5673a712dda0b596a9b"
 uuid = "f0e56b4a-5159-44fe-b623-3e5288b988bb"
-version = "2.3.0"
+version = "2.3.1"
 
 [[deps.Contour]]
 git-tree-sha1 = "d05d9e7b7aedff4e5b51a029dced05cfb6125781"
@@ -1831,9 +369,9 @@ uuid = "dc8bdbbb-1ca9-579f-8c36-e416f6a65cce"
 version = "1.0.2"
 
 [[deps.DataAPI]]
-git-tree-sha1 = "8da84edb865b0b5b0100c0666a9bc9a0b71c553c"
+git-tree-sha1 = "abe83f3a2f1b857aac70ef8b269080af17764bbe"
 uuid = "9a962f9c-6df0-11e9-0e5d-c546b8b5ee8a"
-version = "1.15.0"
+version = "1.16.0"
 
 [[deps.DataFrames]]
 deps = ["Compat", "DataAPI", "DataStructures", "Future", "InlineStrings", "InvertedIndices", "IteratorInterfaceExtensions", "LinearAlgebra", "Markdown", "Missings", "PooledArrays", "PrecompileTools", "PrettyTables", "Printf", "REPL", "Random", "Reexport", "SentinelArrays", "SortingAlgorithms", "Statistics", "TableTraits", "Tables", "Unicode"]
@@ -1843,9 +381,9 @@ version = "1.6.1"
 
 [[deps.DataStructures]]
 deps = ["Compat", "InteractiveUtils", "OrderedCollections"]
-git-tree-sha1 = "3dbd312d370723b6bb43ba9d02fc36abade4518d"
+git-tree-sha1 = "ac67408d9ddf207de5cfa9a97e114352430f01ed"
 uuid = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
-version = "0.18.15"
+version = "0.18.16"
 
 [[deps.DataValueInterfaces]]
 git-tree-sha1 = "bfc1187b79289637fa0ef6d4436ebdfe6905cbd6"
@@ -1864,9 +402,9 @@ version = "1.9.1"
 
 [[deps.Distances]]
 deps = ["LinearAlgebra", "Statistics", "StatsAPI"]
-git-tree-sha1 = "5225c965635d8c21168e32a12954675e7bea1151"
+git-tree-sha1 = "66c4c81f259586e8f002eacebc177e1fb06363b0"
 uuid = "b4f34e82-e78d-54a5-968a-f98e89d6e8f7"
-version = "0.10.10"
+version = "0.10.11"
 weakdeps = ["ChainRulesCore", "SparseArrays"]
 
     [deps.Distances.extensions]
@@ -1918,9 +456,9 @@ version = "0.0.20230411+0"
 
 [[deps.ExceptionUnwrapping]]
 deps = ["Test"]
-git-tree-sha1 = "e90caa41f5a86296e014e148ee061bd6c3edec96"
+git-tree-sha1 = "dcb08a0d93ec0b1cdc4af184b26b591e9695423a"
 uuid = "460bff9d-24e4-43bc-9d9f-a8973cb893f4"
-version = "0.1.9"
+version = "0.1.10"
 
 [[deps.Expat_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -1960,9 +498,9 @@ version = "3.3.10+0"
 
 [[deps.FileIO]]
 deps = ["Pkg", "Requires", "UUIDs"]
-git-tree-sha1 = "299dc33549f68299137e51e6d49a13b5b1da9673"
+git-tree-sha1 = "c5c28c245101bd59154f649e19b038d15901b5dc"
 uuid = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
-version = "1.16.1"
+version = "1.16.2"
 
 [[deps.FilePathsBase]]
 deps = ["Compat", "Dates", "Mmap", "Printf", "Test", "UUIDs"]
@@ -2020,10 +558,10 @@ deps = ["Random"]
 uuid = "9fa8497b-333b-5362-9e8d-4d0656e87820"
 
 [[deps.GLFW_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl", "Libglvnd_jll", "Pkg", "Xorg_libXcursor_jll", "Xorg_libXi_jll", "Xorg_libXinerama_jll", "Xorg_libXrandr_jll"]
-git-tree-sha1 = "d972031d28c8c8d9d7b41a536ad7bb0c2579caca"
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Libglvnd_jll", "Xorg_libXcursor_jll", "Xorg_libXi_jll", "Xorg_libXinerama_jll", "Xorg_libXrandr_jll"]
+git-tree-sha1 = "ff38ba61beff76b8f4acad8ab0c97ef73bb670cb"
 uuid = "0656b61e-2033-5cc2-a64a-77c0f6c09b89"
-version = "3.3.8+0"
+version = "3.3.9+0"
 
 [[deps.GR]]
 deps = ["Artifacts", "Base64", "DelimitedFiles", "Downloads", "GR_jll", "HTTP", "JSON", "Libdl", "LinearAlgebra", "Pkg", "Preferences", "Printf", "Random", "Serialization", "Sockets", "TOML", "Tar", "Test", "UUIDs", "p7zip_jll"]
@@ -2074,9 +612,9 @@ version = "1.0.2"
 
 [[deps.HTTP]]
 deps = ["Base64", "CodecZlib", "ConcurrentUtilities", "Dates", "ExceptionUnwrapping", "Logging", "LoggingExtras", "MbedTLS", "NetworkOptions", "OpenSSL", "Random", "SimpleBufferStream", "Sockets", "URIs", "UUIDs"]
-git-tree-sha1 = "5eab648309e2e060198b45820af1a37182de3cce"
+git-tree-sha1 = "ac7b73d562b8f4287c3b67b4c66a5395a19c1ae8"
 uuid = "cd3eb016-35fb-5094-929b-558a96fad6f3"
-version = "1.10.0"
+version = "1.10.2"
 
 [[deps.HarfBuzz_jll]]
 deps = ["Artifacts", "Cairo_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "Graphite2_jll", "JLLWrappers", "Libdl", "Libffi_jll", "Pkg"]
@@ -2104,9 +642,9 @@ version = "0.3.23"
 
 [[deps.Hyperscript]]
 deps = ["Test"]
-git-tree-sha1 = "8d511d5b81240fc8e6802386302675bdf47737b9"
+git-tree-sha1 = "179267cfa5e712760cd43dcae385d7ea90cc25a4"
 uuid = "47d2ed2b-36de-50cf-bf87-49c2cf4b8b91"
-version = "0.0.4"
+version = "0.0.5"
 
 [[deps.HypertextLiteral]]
 deps = ["Tricks"]
@@ -2116,9 +654,9 @@ version = "0.9.5"
 
 [[deps.IOCapture]]
 deps = ["Logging", "Random"]
-git-tree-sha1 = "d75853a0bdbfb1ac815478bacd89cd27b550ace6"
+git-tree-sha1 = "8b72179abc660bfab5e28472e019392b97d0985c"
 uuid = "b5f81e59-6552-4d32-b1f0-c071b021bf89"
-version = "0.2.3"
+version = "0.2.4"
 
 [[deps.IfElse]]
 git-tree-sha1 = "debdd00ffef04665ccbb3e150747a77560e8fad1"
@@ -2150,10 +688,10 @@ uuid = "f332f351-ec65-5f6a-b3d1-319c6670881a"
 version = "0.3.12"
 
 [[deps.ImageCore]]
-deps = ["AbstractFFTs", "ColorVectorSpace", "Colors", "FixedPointNumbers", "MappedArrays", "MosaicViews", "OffsetArrays", "PaddedViews", "PrecompileTools", "Reexport"]
-git-tree-sha1 = "fc5d1d3443a124fde6e92d0260cd9e064eba69f8"
+deps = ["ColorVectorSpace", "Colors", "FixedPointNumbers", "MappedArrays", "MosaicViews", "OffsetArrays", "PaddedViews", "PrecompileTools", "Reexport"]
+git-tree-sha1 = "b2a7eaa169c13f5bcae8131a83bc30eff8f71be0"
 uuid = "a09fc81d-aa75-5fe9-8630-4744c3626534"
-version = "0.10.1"
+version = "0.10.2"
 
 [[deps.ImageCorners]]
 deps = ["ImageCore", "ImageFiltering", "PrecompileTools", "StaticArrays", "StatsBase"]
@@ -2223,9 +761,9 @@ version = "0.3.8"
 
 [[deps.ImageTransformations]]
 deps = ["AxisAlgorithms", "CoordinateTransformations", "ImageBase", "ImageCore", "Interpolations", "OffsetArrays", "Rotations", "StaticArrays"]
-git-tree-sha1 = "7ec124670cbce8f9f0267ba703396960337e54b5"
+git-tree-sha1 = "e0884bdf01bbbb111aea77c348368a86fb4b5ab6"
 uuid = "02fcd773-0e25-5acc-982a-7f6622650795"
-version = "0.10.0"
+version = "0.10.1"
 
 [[deps.Images]]
 deps = ["Base64", "FileIO", "Graphics", "ImageAxes", "ImageBase", "ImageBinarization", "ImageContrastAdjustment", "ImageCore", "ImageCorners", "ImageDistances", "ImageFiltering", "ImageIO", "ImageMagick", "ImageMetadata", "ImageMorphology", "ImageQualityIndexes", "ImageSegmentation", "ImageShow", "ImageTransformations", "IndirectArrays", "IntegralArrays", "Random", "Reexport", "SparseArrays", "StaticArrays", "Statistics", "StatsBase", "TiledIteration"]
@@ -2262,10 +800,10 @@ uuid = "1d092043-8f09-5a30-832f-7509e371ab51"
 version = "0.1.5"
 
 [[deps.IntelOpenMP_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "ad37c091f7d7daf900963171600d7c1c5c3ede32"
+deps = ["Artifacts", "JLLWrappers", "Libdl"]
+git-tree-sha1 = "5fdf2fe6724d8caabf43b557b84ce53f3b7e2f6b"
 uuid = "1d5cc7b8-4909-519e-a0f8-d0f5ad9712d0"
-version = "2023.2.0+0"
+version = "2024.0.2+0"
 
 [[deps.InteractiveUtils]]
 deps = ["Markdown"]
@@ -2273,18 +811,23 @@ uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
 
 [[deps.Interpolations]]
 deps = ["Adapt", "AxisAlgorithms", "ChainRulesCore", "LinearAlgebra", "OffsetArrays", "Random", "Ratios", "Requires", "SharedArrays", "SparseArrays", "StaticArrays", "WoodburyMatrices"]
-git-tree-sha1 = "721ec2cf720536ad005cb38f50dbba7b02419a15"
+git-tree-sha1 = "88a101217d7cb38a7b481ccd50d21876e1d1b0e0"
 uuid = "a98d9a8b-a2ab-59e6-89dd-64a1c18fca59"
-version = "0.14.7"
+version = "0.15.1"
+weakdeps = ["Unitful"]
+
+    [deps.Interpolations.extensions]
+    InterpolationsUnitfulExt = "Unitful"
 
 [[deps.IntervalSets]]
-deps = ["Dates", "Random"]
-git-tree-sha1 = "3d8866c029dd6b16e69e0d4a939c4dfcb98fac47"
+git-tree-sha1 = "dba9ddf07f77f60450fe5d2e2beb9854d9a49bd0"
 uuid = "8197267c-284f-5f27-9208-e0e47529a953"
-version = "0.7.8"
-weakdeps = ["Statistics"]
+version = "0.7.10"
+weakdeps = ["Random", "RecipesBase", "Statistics"]
 
     [deps.IntervalSets.extensions]
+    IntervalSetsRandomExt = "Random"
+    IntervalSetsRecipesBaseExt = "RecipesBase"
     IntervalSetsStatisticsExt = "Statistics"
 
 [[deps.InvertedIndices]]
@@ -2298,9 +841,9 @@ uuid = "92d709cd-6900-40b7-9082-c6be49f344b6"
 version = "0.2.2"
 
 [[deps.IterTools]]
-git-tree-sha1 = "4ced6667f9974fc5c5943fa5e2ef1ca43ea9e450"
+git-tree-sha1 = "42d5f897009e7ff2cf88db414a389e5ed1bdd023"
 uuid = "c8e1da08-722c-5040-9ed9-7db0dc04731e"
-version = "1.8.0"
+version = "1.10.0"
 
 [[deps.IteratorInterfaceExtensions]]
 git-tree-sha1 = "a3f24677c21f5bbe9d2a714f95dcd58337fb2856"
@@ -2309,15 +852,15 @@ version = "1.0.0"
 
 [[deps.JLD2]]
 deps = ["FileIO", "MacroTools", "Mmap", "OrderedCollections", "Pkg", "PrecompileTools", "Printf", "Reexport", "Requires", "TranscodingStreams", "UUIDs"]
-git-tree-sha1 = "9bbb5130d3b4fa52846546bca4791ecbdfb52730"
+git-tree-sha1 = "5ea6acdd53a51d897672edb694e3cc2912f3f8a7"
 uuid = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
-version = "0.4.38"
+version = "0.4.46"
 
 [[deps.JLFzf]]
 deps = ["Pipe", "REPL", "Random", "fzf_jll"]
-git-tree-sha1 = "9fb0b890adab1c0a4a475d4210d51f228bfc250d"
+git-tree-sha1 = "a53ebe394b71470c7f97c2e7e170d51df21b17af"
 uuid = "1019f520-868f-41f5-a6de-eb00f4b6a39c"
-version = "0.1.6"
+version = "0.1.7"
 
 [[deps.JLLWrappers]]
 deps = ["Artifacts", "Preferences"]
@@ -2333,15 +876,15 @@ version = "0.21.4"
 
 [[deps.JpegTurbo]]
 deps = ["CEnum", "FileIO", "ImageCore", "JpegTurbo_jll", "TOML"]
-git-tree-sha1 = "d65930fa2bc96b07d7691c652d701dcbe7d9cf0b"
+git-tree-sha1 = "fa6d0bcff8583bac20f1ffa708c3913ca605c611"
 uuid = "b835a17e-a41a-41e7-81f0-2f016b05efe0"
-version = "0.1.4"
+version = "0.1.5"
 
 [[deps.JpegTurbo_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "6f2675ef130a300a112286de91973805fcc5ffbc"
+git-tree-sha1 = "60b1194df0a3298f460063de985eae7b01bc011a"
 uuid = "aacddb02-875f-59d6-b918-886e6ef4fbf8"
-version = "2.1.91+0"
+version = "3.0.1+0"
 
 [[deps.KernelDensity]]
 deps = ["Distributions", "DocStringExtensions", "FFTW", "Interpolations", "StatsBase"]
@@ -2362,10 +905,10 @@ uuid = "88015f11-f218-50d7-93a8-a6af411a945d"
 version = "3.0.0+1"
 
 [[deps.LLVMOpenMP_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "f689897ccbe049adb19a065c495e75f372ecd42b"
+deps = ["Artifacts", "JLLWrappers", "Libdl"]
+git-tree-sha1 = "d986ce2d884d49126836ea94ed5bfb0f12679713"
 uuid = "1d63c593-3942-5779-bab2-d838dc0a180e"
-version = "15.0.4+0"
+version = "15.0.7+0"
 
 [[deps.LZO_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -2483,9 +1026,9 @@ uuid = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 
 [[deps.LogExpFunctions]]
 deps = ["DocStringExtensions", "IrrationalConstants", "LinearAlgebra"]
-git-tree-sha1 = "7d6dd4e9212aebaeed356de34ccf262a3cd415aa"
+git-tree-sha1 = "18144f3e9cbe9b15b070288eef858f71b291ce37"
 uuid = "2ab3a3ac-af41-5b50-aa03-7779005ae688"
-version = "0.3.26"
+version = "0.3.27"
 
     [deps.LogExpFunctions.extensions]
     LogExpFunctionsChainRulesCoreExt = "ChainRulesCore"
@@ -2527,16 +1070,16 @@ uuid = "6c6e2e6c-3030-632d-7369-2d6c69616d65"
 version = "0.1.4"
 
 [[deps.MKL_jll]]
-deps = ["Artifacts", "IntelOpenMP_jll", "JLLWrappers", "LazyArtifacts", "Libdl", "Pkg"]
-git-tree-sha1 = "eb006abbd7041c28e0d16260e50a24f8f9104913"
+deps = ["Artifacts", "IntelOpenMP_jll", "JLLWrappers", "LazyArtifacts", "Libdl"]
+git-tree-sha1 = "72dc3cf284559eb8f53aa593fe62cb33f83ed0c0"
 uuid = "856f044c-d86e-5d09-b602-aeab76dc8ba7"
-version = "2023.2.0+0"
+version = "2024.0.0+0"
 
 [[deps.MacroTools]]
 deps = ["Markdown", "Random"]
-git-tree-sha1 = "9ee1618cbf5240e6d4e0371d6f24065083f60c48"
+git-tree-sha1 = "2fa9ee3e63fd3a4f7a9a4f4744a52f4856de82df"
 uuid = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
-version = "0.5.11"
+version = "0.5.13"
 
 [[deps.ManualMemory]]
 git-tree-sha1 = "bcaef4fc7a0cfe2cba636d84cda54b5e4e4ca3cd"
@@ -2553,10 +1096,10 @@ deps = ["Base64"]
 uuid = "d6f4376e-aef5-505a-96c1-9c027394607a"
 
 [[deps.MbedTLS]]
-deps = ["Dates", "MbedTLS_jll", "MozillaCACerts_jll", "Random", "Sockets"]
-git-tree-sha1 = "03a9b9718f5682ecb107ac9f7308991db4ce395b"
+deps = ["Dates", "MbedTLS_jll", "MozillaCACerts_jll", "NetworkOptions", "Random", "Sockets"]
+git-tree-sha1 = "c067a280ddc25f196b5e7df3877c6b226d390aaf"
 uuid = "739be429-bea8-5141-9913-cc70e7f3736d"
-version = "1.1.7"
+version = "1.1.9"
 
 [[deps.MbedTLS_jll]]
 deps = ["Artifacts", "Libdl"]
@@ -2607,9 +1150,9 @@ version = "1.0.2"
 
 [[deps.NearestNeighbors]]
 deps = ["Distances", "StaticArrays"]
-git-tree-sha1 = "2c3726ceb3388917602169bed973dbc97f1b51a8"
+git-tree-sha1 = "ded64ff6d4fdd1cb68dfcbb818c69e144a5b2e4c"
 uuid = "b8a86587-4115-5ab1-83bc-aa920d37bbce"
-version = "0.4.13"
+version = "0.4.16"
 
 [[deps.Netpbm]]
 deps = ["FileIO", "ImageCore", "ImageMetadata"]
@@ -2627,10 +1170,13 @@ uuid = "510215fc-4207-5dde-b226-833fc4488ee2"
 version = "0.5.5"
 
 [[deps.OffsetArrays]]
-deps = ["Adapt"]
-git-tree-sha1 = "2ac17d29c523ce1cd38e27785a7d23024853a4bb"
+git-tree-sha1 = "6a731f2b5c03157418a20c12195eb4b74c8f8621"
 uuid = "6fe1bfb0-de20-5000-8ca7-80f57d26f881"
-version = "1.12.10"
+version = "1.13.0"
+weakdeps = ["Adapt"]
+
+    [deps.OffsetArrays.extensions]
+    OffsetArraysAdaptExt = "Adapt"
 
 [[deps.Ogg_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -2685,9 +1231,9 @@ uuid = "91d4177d-7536-5919-b921-800302f37372"
 version = "1.3.2+0"
 
 [[deps.OrderedCollections]]
-git-tree-sha1 = "2e73fe17cac3c62ad1aebe70d44c963c3cfdc3e3"
+git-tree-sha1 = "dfdf5519f235516220579f949664f1bf44e741c5"
 uuid = "bac558e1-5e72-5ebc-8fee-abe8a469f55d"
-version = "1.6.2"
+version = "1.6.3"
 
 [[deps.PCRE2_jll]]
 deps = ["Artifacts", "Libdl"]
@@ -2702,9 +1248,9 @@ version = "0.11.31"
 
 [[deps.PNGFiles]]
 deps = ["Base64", "CEnum", "ImageCore", "IndirectArrays", "OffsetArrays", "libpng_jll"]
-git-tree-sha1 = "5ded86ccaf0647349231ed6c0822c10886d4a1ee"
+git-tree-sha1 = "67186a2bc9a90f9f85ff3cc8277868961fb57cbd"
 uuid = "f57f5aa1-a3ce-4bc8-8ab9-96f992907883"
-version = "0.4.1"
+version = "0.4.3"
 
 [[deps.PaddedViews]]
 deps = ["OffsetArrays"]
@@ -2720,9 +1266,9 @@ version = "0.12.3"
 
 [[deps.Parsers]]
 deps = ["Dates", "PrecompileTools", "UUIDs"]
-git-tree-sha1 = "716e24b21538abc91f6205fd1d8363f39b442851"
+git-tree-sha1 = "8489905bcdbcfac64d1daa51ca07c0d8f0283821"
 uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
-version = "2.7.2"
+version = "2.8.1"
 
 [[deps.Pipe]]
 git-tree-sha1 = "6842804e7867b115ca9de748a0cf6b364523c16d"
@@ -2754,9 +1300,9 @@ version = "3.1.0"
 
 [[deps.PlotUtils]]
 deps = ["ColorSchemes", "Colors", "Dates", "PrecompileTools", "Printf", "Random", "Reexport", "Statistics"]
-git-tree-sha1 = "f92e1315dadf8c46561fb9396e525f7200cdc227"
+git-tree-sha1 = "862942baf5663da528f66d24996eb6da85218e76"
 uuid = "995b91a9-d308-5afd-9ec6-746e21dbc043"
-version = "1.3.5"
+version = "1.4.0"
 
 [[deps.Plots]]
 deps = ["Base64", "Contour", "Dates", "Downloads", "FFMPEG", "FixedPointNumbers", "GR", "JLFzf", "JSON", "LaTeXStrings", "Latexify", "LinearAlgebra", "Measures", "NaNMath", "Pkg", "PlotThemes", "PlotUtils", "PrecompileTools", "Preferences", "Printf", "REPL", "Random", "RecipesBase", "RecipesPipeline", "Reexport", "RelocatableFolders", "Requires", "Scratch", "Showoff", "SparseArrays", "Statistics", "StatsBase", "UUIDs", "UnicodeFun", "UnitfulLatexify", "Unzip"]
@@ -2780,9 +1326,9 @@ version = "1.39.0"
 
 [[deps.PlutoUI]]
 deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "FixedPointNumbers", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "MIMEs", "Markdown", "Random", "Reexport", "URIs", "UUIDs"]
-git-tree-sha1 = "db8ec28846dbf846228a32de5a6912c63e2052e3"
+git-tree-sha1 = "a6783c887ca59ce7e97ed630b74ca1f10aefb74d"
 uuid = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
-version = "0.7.53"
+version = "0.7.57"
 
 [[deps.PolyesterWeave]]
 deps = ["BitTwiddlingConvenienceFunctions", "CPUSummary", "IfElse", "Static", "ThreadingUtilities"]
@@ -2825,10 +1371,10 @@ uuid = "21216c6a-2e73-6563-6e65-726566657250"
 version = "1.4.1"
 
 [[deps.PrettyTables]]
-deps = ["Crayons", "LaTeXStrings", "Markdown", "Printf", "Reexport", "StringManipulation", "Tables"]
-git-tree-sha1 = "6842ce83a836fbbc0cfeca0b5a4de1a4dcbdb8d1"
+deps = ["Crayons", "LaTeXStrings", "Markdown", "PrecompileTools", "Printf", "Reexport", "StringManipulation", "Tables"]
+git-tree-sha1 = "88b895d13d53b5577fd53379d913b9ab9ac82660"
 uuid = "08abe8d2-0d0c-5749-adfa-8a2ac140af0d"
-version = "2.2.8"
+version = "2.3.1"
 
 [[deps.Printf]]
 deps = ["Unicode"]
@@ -2860,9 +1406,9 @@ version = "2.9.4"
 
 [[deps.Quaternions]]
 deps = ["LinearAlgebra", "Random", "RealDot"]
-git-tree-sha1 = "da095158bdc8eaccb7890f9884048555ab771019"
+git-tree-sha1 = "994cc27cdacca10e68feb291673ec3a76aa2fae9"
 uuid = "94ee1d12-ae83-5a48-8b1c-48b8ff168ae0"
-version = "0.7.4"
+version = "0.7.6"
 
 [[deps.REPL]]
 deps = ["InteractiveUtils", "Markdown", "Sockets", "Unicode"]
@@ -2942,9 +1488,13 @@ version = "0.4.0+0"
 
 [[deps.Rotations]]
 deps = ["LinearAlgebra", "Quaternions", "Random", "StaticArrays"]
-git-tree-sha1 = "0783924e4a332493f72490253ba4e668aeba1d73"
+git-tree-sha1 = "2a0a5d8569f481ff8840e3b7c84bbf188db6a3fe"
 uuid = "6038ab10-8711-5258-84ad-4b1120ba62dc"
-version = "1.6.0"
+version = "1.7.0"
+weakdeps = ["RecipesBase"]
+
+    [deps.Rotations.extensions]
+    RotationsRecipesBaseExt = "RecipesBase"
 
 [[deps.SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
@@ -3014,9 +1564,9 @@ uuid = "6462fe0b-24de-5631-8697-dd941f90decc"
 
 [[deps.SortingAlgorithms]]
 deps = ["DataStructures"]
-git-tree-sha1 = "5165dfb9fd131cf0c6957a3a7605dede376e7b63"
+git-tree-sha1 = "66e0a8e672a0bdfca2c3f5937efb8538b9ddc085"
 uuid = "a2af1166-a08f-5f64-846c-94a0d3cef48c"
-version = "1.2.0"
+version = "1.2.1"
 
 [[deps.SparseArrays]]
 deps = ["Libdl", "LinearAlgebra", "Random", "Serialization", "SuiteSparse_jll"]
@@ -3040,15 +1590,15 @@ version = "0.1.1"
 
 [[deps.Static]]
 deps = ["IfElse"]
-git-tree-sha1 = "f295e0a1da4ca425659c57441bcb59abb035a4bc"
+git-tree-sha1 = "b366eb1eb68075745777d80861c6706c33f588ae"
 uuid = "aedffcd0-7271-4cad-89d0-dc628f76c6d3"
-version = "0.8.8"
+version = "0.8.9"
 
 [[deps.StaticArrayInterface]]
 deps = ["ArrayInterface", "Compat", "IfElse", "LinearAlgebra", "PrecompileTools", "Requires", "SparseArrays", "Static", "SuiteSparse"]
-git-tree-sha1 = "03fec6800a986d191f64f5c0996b59ed526eda25"
+git-tree-sha1 = "5d66818a39bb04bf328e92bc933ec5b4ee88e436"
 uuid = "0d7ed370-da01-4f52-bd93-41d350b8b718"
-version = "1.4.1"
+version = "1.5.0"
 weakdeps = ["OffsetArrays", "StaticArrays"]
 
     [deps.StaticArrayInterface.extensions]
@@ -3056,13 +1606,14 @@ weakdeps = ["OffsetArrays", "StaticArrays"]
     StaticArrayInterfaceStaticArraysExt = "StaticArrays"
 
 [[deps.StaticArrays]]
-deps = ["LinearAlgebra", "Random", "StaticArraysCore"]
-git-tree-sha1 = "0adf069a2a490c47273727e029371b31d44b72b2"
+deps = ["LinearAlgebra", "PrecompileTools", "Random", "StaticArraysCore"]
+git-tree-sha1 = "7b0e9c14c624e435076d19aea1e5cbdec2b9ca37"
 uuid = "90137ffa-7385-5640-81b9-e52037218182"
-version = "1.6.5"
-weakdeps = ["Statistics"]
+version = "1.9.2"
+weakdeps = ["ChainRulesCore", "Statistics"]
 
     [deps.StaticArrays.extensions]
+    StaticArraysChainRulesCoreExt = "ChainRulesCore"
     StaticArraysStatisticsExt = "Statistics"
 
 [[deps.StaticArraysCore]]
@@ -3179,9 +1730,9 @@ uuid = "06e1c1a7-607b-532d-9fad-de7d9aa2abac"
 version = "0.5.0"
 
 [[deps.TranscodingStreams]]
-git-tree-sha1 = "1fbeaaca45801b4ba17c251dd8603ef24801dd84"
+git-tree-sha1 = "54194d92959d8ebaa8e26227dbe3cdefcdcd594f"
 uuid = "3bb67fe8-82b1-5028-8e26-92a6c54297fa"
-version = "0.10.2"
+version = "0.10.3"
 weakdeps = ["Random", "Test"]
 
     [deps.TranscodingStreams.extensions]
@@ -3217,9 +1768,9 @@ version = "0.4.1"
 
 [[deps.Unitful]]
 deps = ["Dates", "LinearAlgebra", "Random"]
-git-tree-sha1 = "a72d22c7e13fe2de562feda8645aa134712a87ee"
+git-tree-sha1 = "3c793be6df9dd77a0cf49d80984ef9ff996948fa"
 uuid = "1986cc42-f94f-5a68-af5c-568840ba703d"
-version = "1.17.0"
+version = "1.19.0"
 
     [deps.Unitful.extensions]
     ConstructionBaseUnitfulExt = "ConstructionBase"
@@ -3242,9 +1793,9 @@ version = "0.2.0"
 
 [[deps.VectorizationBase]]
 deps = ["ArrayInterface", "CPUSummary", "HostCPUFeatures", "IfElse", "LayoutPointers", "Libdl", "LinearAlgebra", "SIMDTypes", "Static", "StaticArrayInterface"]
-git-tree-sha1 = "b182207d4af54ac64cbc71797765068fdeff475d"
+git-tree-sha1 = "7209df901e6ed7489fe9b7aa3e46fb788e15db85"
 uuid = "3d5dd08c-fd9d-11e8-17fa-ed2836048c2f"
-version = "0.21.64"
+version = "0.21.65"
 
 [[deps.Wayland_jll]]
 deps = ["Artifacts", "EpollShim_jll", "Expat_jll", "JLLWrappers", "Libdl", "Libffi_jll", "Pkg", "XML2_jll"]
@@ -3254,9 +1805,9 @@ version = "1.21.0+1"
 
 [[deps.Wayland_protocols_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "4528479aa01ee1b3b4cd0e6faef0e04cf16466da"
+git-tree-sha1 = "93f43ab61b16ddfb2fd3bb13b3ce241cafb0e6c9"
 uuid = "2381bf8a-dfd0-557d-9999-79630e7b1b91"
-version = "1.25.0+0"
+version = "1.31.0+0"
 
 [[deps.WeakRefStrings]]
 deps = ["DataAPI", "InlineStrings", "Parsers"]
@@ -3272,9 +1823,9 @@ version = "0.6.6"
 
 [[deps.WoodburyMatrices]]
 deps = ["LinearAlgebra", "SparseArrays"]
-git-tree-sha1 = "de67fa59e33ad156a590055375a30b23c40299d3"
+git-tree-sha1 = "c1a7aa6219628fcd757dede0ca95e245c5cd9511"
 uuid = "efce3f68-66dc-5838-9240-27a6d6f5f9b6"
-version = "0.5.5"
+version = "1.0.0"
 
 [[deps.WorkerUtilities]]
 git-tree-sha1 = "cd1659ba0d57b71a464a29e64dbc67cfe83d54e7"
@@ -3283,9 +1834,9 @@ version = "1.6.1"
 
 [[deps.XML2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Libiconv_jll", "Zlib_jll"]
-git-tree-sha1 = "24b81b59bd35b3c42ab84fa589086e19be919916"
+git-tree-sha1 = "801cbe47eae69adc50f36c3caec4758d2650741b"
 uuid = "02c8fc9c-b97f-50b9-bbe4-9be30ff0a78a"
-version = "2.11.5+0"
+version = "2.12.2+0"
 
 [[deps.XSLT_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Libgcrypt_jll", "Libgpg_error_jll", "Libiconv_jll", "Pkg", "XML2_jll", "Zlib_jll"]
@@ -3431,10 +1982,10 @@ uuid = "3161d3a3-bdf6-5164-811a-617609db77b4"
 version = "1.5.5+0"
 
 [[deps.fzf_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "47cf33e62e138b920039e8ff9f9841aafe1b733e"
+deps = ["Artifacts", "JLLWrappers", "Libdl"]
+git-tree-sha1 = "a68c9655fbe6dfcab3d972808f1aafec151ce3f8"
 uuid = "214eeab7-80f7-51ab-84ad-2988db7cef09"
-version = "0.35.1+0"
+version = "0.43.0+0"
 
 [[deps.libaom_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -3460,10 +2011,10 @@ uuid = "f638f0a6-7fb0-5443-88ba-1cc74229b280"
 version = "2.0.2+0"
 
 [[deps.libpng_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "Zlib_jll"]
-git-tree-sha1 = "94d180a6d2b5e55e447e2d27a29ed04fe79eb30c"
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Zlib_jll"]
+git-tree-sha1 = "873b4f805771d3e4bafe63af759a26ea8ca84d14"
 uuid = "b53b4c65-9356-5827-b1ea-8c7a1a84506f"
-version = "1.6.38+0"
+version = "1.6.42+0"
 
 [[deps.libsixel_jll]]
 deps = ["Artifacts", "JLLWrappers", "JpegTurbo_jll", "Libdl", "Pkg", "libpng_jll"]
@@ -3507,128 +2058,10 @@ version = "1.4.1+1"
 """
 
 # ╔═╡ Cell order:
-# ╟─569bbd2c-7fae-4e26-afe5-3f4d06f7d505
-# ╟─94b9bdb0-73ee-11ee-10e9-e93688ea4523
-# ╠═f268582b-0756-41cf-910d-7a57b698451d
-# ╠═f075f19a-81b6-47b7-9104-57d2e51e7241
-# ╟─1b26468c-b4f7-4252-b891-4f95bc04c869
-# ╟─6d3c1725-75fa-412e-9b30-8f8df4e7874b
-# ╟─2df8c833-7ca7-4d7a-ade5-0df083a013a1
-# ╟─04e344a3-3d5b-449e-9222-481df24015c7
-# ╠═974c334e-38fb-436e-842b-bb016854d136
-# ╟─5aad6dcc-8400-4a7a-a2bc-69105b32e09f
-# ╟─351d01de-7225-40e0-b650-0ef40b1a1cf7
-# ╟─7cf4ce88-33de-472c-99c6-5b3ae258f3d1
-# ╠═8b2c77d3-f743-4840-a9d9-9308e05be28d
-# ╟─0361d281-4a64-4792-812f-7eb9d268d2ae
-# ╟─60ce933e-4335-4190-a7b0-5c86d0326a35
-# ╠═a9601fe8-6321-4ad7-a950-c7354290aed6
-# ╠═3eaf9941-d510-4a91-99bf-2084bbe3ea40
-# ╠═1ebb5c9b-df33-4c48-8240-bbff2a06520c
-# ╟─70da13b0-6111-4d5d-a6f5-49fcc0499738
-# ╟─4fb1d7ad-47f2-4adf-a2ba-0ecc0fc8eeb0
-# ╠═41aee571-9016-4759-859a-c99eb143a410
-# ╟─13ce2bea-889f-4727-a126-71a5006a86ab
-# ╠═0efbcab7-4a58-400a-84af-f1a6703c7ec9
-# ╟─a1ee76ab-bf27-466e-8324-01ecde09931c
-# ╠═74590e82-5e2b-4a88-afde-3b2992d9b001
-# ╟─dc5ab038-569e-4603-95af-0549c6e4ee76
-# ╠═90bd4975-315d-4a55-9af4-5b40ceda4eb3
-# ╠═93e8f4ee-7558-4178-8f06-96a422528c48
-# ╟─05715ba9-fdd3-43c8-b6fc-ee32d225cdf0
-# ╠═24fde296-5a6f-4a92-bf16-855df4c99227
-# ╠═42094521-c209-4c82-8226-1a0b9b1c0d85
-# ╠═b3be394c-5997-4494-ad40-ced2f10fd364
-# ╟─0f204a06-71b2-438a-bb49-4af8ebda0001
-# ╠═d5152b67-bc1d-4cc0-b73e-90d79dbadcb4
-# ╟─ab5b4c7c-ae24-4aae-a528-1dc427a7f1f1
-# ╠═c945050f-3ddc-4d0e-80dd-af909c3f4ab5
-# ╟─7e2fd675-28ba-4412-9c56-4b40b3380576
-# ╟─89045ff9-bfb2-43e7-865b-235181cdf9f7
-# ╠═03bf6a75-a98c-4641-9939-2336c78e1be7
-# ╟─a58ec747-09cb-4cba-a9f0-4de683c80052
-# ╟─c66bac82-feaf-4e77-ab1b-ea7a2a5cf6c7
-# ╟─b385a6b2-e2b0-4179-ac81-21a8600f86cf
-# ╟─7f8b5fe8-f5d1-46eb-a30e-8f0a6e9707bc
-# ╟─2e7b7b97-f4b9-4ef8-b360-e086ffc0a025
-# ╟─dc37fa99-ceb5-40cb-846a-6cdf9d33c2f3
-# ╠═7e8e31b9-15fd-4d34-b447-4440ea805811
-# ╠═044b6cab-06cf-405e-864c-3e040faa602d
-# ╟─c5949c51-d3f5-40b1-9415-7c40ae596b1b
-# ╟─cfb78bf5-9f06-4557-a777-c34d908f0e67
-# ╠═cb4a302c-fb04-4362-95d5-7680d8fb2983
-# ╟─30220b96-8154-4ca2-a016-9258860323a5
-# ╠═df519afa-309a-4633-860d-2fe40a384fa9
-# ╠═3128d6eb-375d-4770-8215-6ed7e3ac5b5a
-# ╠═103063b6-c5a9-4c5d-829b-4587813bfaf4
-# ╠═41762f92-2017-4059-87b7-dce0bf061de9
-# ╠═9624ad58-8ac5-4ed5-89fe-76874dfe18c1
-# ╠═13c01d35-6267-4be9-b911-74036b91e031
-# ╠═a5cac6d9-d113-4acf-b5b1-675fdb900117
-# ╟─c7590419-c3d0-41f7-8777-227fcc7b1ba8
-# ╠═c1b3e29b-51b6-4bbd-8793-ece13bfb5a70
-# ╟─f12c1925-cf29-41e5-9499-87efe1a96528
-# ╠═a41cab07-f8f1-4b24-bd15-5fd29651fe36
-# ╟─695bd289-a4b3-4154-ab49-6229de133164
-# ╠═538694ea-a0b1-4f09-b7b4-4af64d7ec10b
-# ╟─a0239801-eb9a-4648-b164-15013fc3c445
-# ╠═068f3e73-ed23-4210-b739-ccaadc9f2ba8
-# ╠═5c8e3e0c-3344-431e-a370-625b467e2ea9
-# ╠═b9cf9e47-d8da-4416-b67d-7c806595ceb9
-# ╠═5d722b85-4e5b-4dc3-9b8d-eb3b6cf33941
-# ╠═8bdffe16-02af-46bd-a568-0e238cc76b6c
-# ╠═8886f394-ff90-4fbd-8dec-874f6a4ded83
-# ╟─d9556b99-ac13-4278-8fc2-085728a2cfa9
-# ╠═543dea77-0aea-49e6-811a-5a87218d6632
-# ╠═0489cd43-a451-435e-9024-7b9ff3432761
-# ╟─1c6b09bb-9809-411d-8ddd-2095256d0601
-# ╠═2a66eee4-be06-43a2-a9be-fc2e0c4a0f32
-# ╟─a86d30c5-03f0-4e11-ba25-1f08ba0998b7
-# ╠═ea5f58f9-5394-4536-9458-0484e85fdc85
-# ╟─cca0ed73-b1e7-4895-8537-294ccb3f9e26
-# ╠═289205ad-0bd3-473c-b076-fab42e1643c3
-# ╟─fc37abf6-6acd-4b11-bdab-ddee379d8d72
-# ╠═29f4022e-28dc-4ef8-8e83-11d466437813
-# ╟─a1f13b96-fbd3-40ab-aa3f-9af14d55ed55
-# ╠═ef66b620-cfa3-47b4-bc2b-6cc77427764f
-# ╟─010e2c3b-f66a-411b-b819-3d37448c4087
-# ╠═8d0b7517-1be8-41c4-8a4b-716bcad169fb
-# ╟─19deee02-5fb7-400c-a853-74bd44a8deaf
-# ╠═608b2a67-b34b-4440-9282-3f225e5714be
-# ╟─e370f645-d408-4d7f-8c48-0f9e05522b5f
-# ╠═72270f78-01c5-4ce5-aac4-901fd9a5143f
-# ╠═783e9476-a0a8-4427-b929-9f7c0faa6b59
-# ╠═a59cefd2-27c4-4332-943e-1fbd79ae2481
-# ╟─38345378-66ee-42c1-b37f-6691119ecc60
-# ╠═3273792c-41fb-4225-a4f7-2f1c9d58be4a
-# ╟─144e23e9-ce3d-4ed6-be2c-dff1fed39e59
-# ╠═f7521761-e9f1-43df-a95c-57aec7c83011
-# ╟─77697cb7-40fa-4ed4-9008-8d78cfa0c247
-# ╠═7f60e96f-9a5e-41f5-a388-f531585e15b0
-# ╠═96dea7cc-4742-460f-a18e-ae22f0c92033
-# ╠═e4bb69eb-e608-4f50-9c42-678a74b99192
-# ╠═010e992a-f35a-4a7a-946e-f796aba41a32
-# ╠═cdbe66ff-d643-4b7a-a446-85c284c668ba
-# ╟─6b34bdad-2518-43f5-9fb0-d28a99a411fe
-# ╟─627c3c50-b22f-4e95-a755-26f2197fff92
-# ╟─bebbf9b7-0d4a-44d0-baa1-aba99b9c59ef
-# ╠═b1953875-92ca-42d1-a22e-2f393141ddbe
-# ╟─6a1ce8de-49b4-4a97-aa32-1cd20ded4b04
-# ╠═adf3dbe5-ade0-4949-9507-10b5c8164ddd
-# ╟─b8a96a22-4950-4300-8c28-2c8aedf6b66b
-# ╠═081c009c-0871-458e-9081-365d5102fefd
-# ╟─14d1a55a-43b0-4857-8dd9-b10c86f8a123
-# ╠═512e1060-eee5-4374-966c-02d7fb62f303
-# ╠═61474944-c347-448a-beb9-aa2e4ef6331e
-# ╠═af255535-e903-4eef-8629-13d836f1f145
-# ╠═13257859-e48e-4aa3-a3a3-a4ecf4c8dd1f
-# ╠═9e40d379-50e9-4d33-a53c-6c5089059de5
-# ╠═df08506c-f66d-430a-b235-4c9dfb80d414
-# ╠═ecba3acb-6bc1-4722-9cee-a388a2442fae
-# ╠═87c627a8-2c54-44ff-aa66-d9b5c379f646
-# ╟─c848d2cf-5d36-4437-b53a-e278150e75ef
-# ╟─1007c151-b6ab-4f81-8421-4746dc3b67f4
-# ╟─a32e4478-585f-431e-b4f0-bb6b92010cde
-# ╠═5ed1e95e-bf40-4c96-8434-ac83e54e9362
+# ╠═98443f3c-d712-11ee-0e87-0d4cb8ba0aea
+# ╠═265292da-57e8-455e-9093-855069961f3d
+# ╠═947d4e49-8215-4a9b-8e04-589efba72c7b
+# ╠═b43862d9-24c9-4a25-ab45-c9e016331cae
+# ╠═3544b7df-56be-4fe2-aa45-753cd04a5439
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

@@ -368,6 +368,11 @@ function segment_image(h_data, t)
 	newH = map(i->get_random_color(i), labels_map(segments)) .* (1 .-bw)
 end
 
+function growth_plot(data, pattern) 
+	growthDF = CSV.read("../data/ring_all_sims_nokBT.csv", DataFrame)
+	initial_data = CSV.read("../data/initial_conditions.csv", DataFrame)
+end
+
 # Measurements and data analysis
 function dropletFrame(; saveme=false)
 	measureDF = CSV.read("../data/dynamics_uniform_and_patterned.csv", DataFrame)
@@ -923,13 +928,11 @@ Computes different parameters from the initial condition, as such the true radii
 # Returns
 - `initial_data::Dataframe` : A dataframe with multiple case specific datapoints.
 """
-function t0_data()
+function t0_data(;γ=0.01, μ=1/6, hmin = 0.05)
 	initial_data = DataFrame()
-	γ = 0.01
-	μ = 1/6
-	angs = Float64[] 	# initial condition angle
-	Rs = Float64[] 		# initial condition major radius
-	rrs = Float64[] 	# initial condition minor radius
+	angs = Int64[] 	# initial condition angle
+	Rs = Int64[] 		# initial condition major radius
+	rrs = Int64[] 		# initial condition minor radius
 	m1 = Float64[] 		# measured outer radius
 	m2 = Float64[] 		# measured minor radius
 	m3 = Float64[] 		# measured outer-minor radius 
@@ -942,6 +945,9 @@ function t0_data()
 	droph = Float64[] 	# maximal height of a droplet containing all liquid
 	charL = Float64[] 	# see paper: "Capillary instabilities in solid thin films: Lines"
 	charT = Float64[] 	# see paper: "Stability of a liquid ring on a substrate"
+	tauM = Float64[] 	# see paper: "Competing Liquid Phase Instabilities during Pulsed Laser Induced Self-Assembly of Copper Rings into Ordered Nanoparticle Arrays on SiO2"
+	Area = Float64[] 	# Area of the crosssection of one side of the rivulet
+	sigmaM = Float64[] 	# Area of the crosssection of one side of the rivulet
 	Ohs = Float64[] 	# Ohnesorge number
 	# Loop through initial conditions
 	for angle in [2/9, 1/6, 1/9, 1/18]
@@ -949,6 +955,9 @@ function t0_data()
 			for rr in [20, 30, 40, 60, 80, 100]
 				# Create initial condition
 				h = RivuletTools.torus(512, 512, rr, R, angle, (256, 256))
+				slice = h[256, 256:end]
+				sliceC = slice .- hmin
+				A = sum(sliceC)
 				# measure relevant parameter
 				drop_radius, drop_vol, drop_h = compute_droplet(h, angle)
 				geometry = measure_diameter(h)
@@ -958,7 +967,7 @@ function t0_data()
 				push!(psi0, (geometry[3] - geometry[1])/(geometry[1] + geometry[2]))
 				push!(nmax, π/(2((geometry[3] - geometry[1])/(geometry[1] + geometry[2]))))
 				push!(beta, (geometry[2]/2)/R)
-				push!(angs, angle)
+				push!(angs, round.(Int, rad2deg(angle * π)))
 				push!(Ohs, compute_Oh(geometry[2]/2))
 				push!(Rs, R)
 				push!(rrs, rr)
@@ -968,10 +977,13 @@ function t0_data()
 				push!(droph, drop_h)
 				push!(charL, sqrt((rr*rr*(angle*π - sinpi(angle)*cospi(angle)))/π))
 				push!(charT, (3*μ*(geometry[2]/2))/γ)
+				push!(Area, A)
+				push!(tauM, 1/(γ/(6μ)*0.0379*(π*angle)^3/(sinpi(angle))*sqrt(π*angle - sinpi(2*angle)/2)*1/sqrt(A)))
+				push!(sigmaM, γ/(6μ)*0.0379*(π*angle)^3/(sinpi(angle))*sqrt(π*angle - sinpi(2*angle)/2)*1/sqrt(A))
 			end
 		end
 	end
-	initial_data.angle = round.(rad2deg.(angs .* π)) 
+	initial_data.angle = angs
 	initial_data.R0 = Rs
 	initial_data.rr0 = rrs
 	initial_data.realR = m3
@@ -993,6 +1005,9 @@ function t0_data()
 	initial_data.ts = round.(t_s.(droph, angs))
 	initial_data.t00 = round.(t_00.(m2, angs))
 	initial_data.Oh = Ohs 
+	initial_data.SectionArea = Area 
+	initial_data.tauMax = tauM 
+	initial_data.sigmaMax = sigmaM 
 
 	return initial_data
 end
