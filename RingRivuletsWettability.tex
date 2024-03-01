@@ -183,11 +183,11 @@ The master equation for the evolution of the discrete probability functions $f_l
 &(1 - \omega) f_l(\mathbf{x},t) + \omega f_l^{(eq)}(\mathbf{x},t) + w_l \frac{\Delta t}{c_s^2} \mathbf{c}^{(l)} \cdot \mathbf{F}_{\mbox{\tiny{tot}}},
 \end{split}
 \end{equation}
-where the discrete lattice velocities $\mathbf{c}_l$ run from $0$ to $8$, for our two-dimensional scheme.
-This equation is build on the idea that there is a local collision step in which the distribution functions are relaxed towards their equilibrium $f_l^{(eq)}(\mathbf{x},t)$ with relaxation rate $\omega = \Delta t/\tau$ and a non-local collision step, where the $f_l(\mathbf{x},t)$ are streamed to their nearest neighbours.
+where the discrete lattice velocities $\mathbf{c}_l$ run from $0$ to $8$ in our two-dimensional scheme.
+This equation is build on the idea that there is a local collision step in which the distribution functions are relaxed towards their equilibrium $f_l^{(eq)}(\mathbf{x},t)$ with relaxation rate $\omega = \Delta t/\tau$ and a non-local streaming step, where the $f_l(\mathbf{x},t)$ are streamed to their nearest neighbours.
 The relaxation time $\tau$ is set to $1$ and is proportional to the fluid's kinematic viscosity $\nu = 1/6$.  
 The remaining parameters, namely $c_s$ and $w_l$, are the speed of sound and the lattice weights. 
-We use the standard $D2Q9$ (athermal) values, therefore $c_s = 1/\sqrt{3}$, the lattice velocities $\mathbf{c}^{(l)}$~\cite{krugerLatticeBoltzmannMethod2017}   
+We use the standard $D2Q9$ (athermal) values, therefore $c_s = 1/\sqrt{3}$, the lattice velocities $\mathbf{c}^{(l)}$~\cite{krugerLatticeBoltzmannMethod2017, zitzLatticeBoltzmannMethod2019, salmonLatticeBoltzmannMethod1999}   
 \begin{equation}\label{eq:speeds}
 \mathbf{c}^{(l)}  =
 \left\{
@@ -209,7 +209,18 @@ and the weights
     \end{array}
     \right..
 \end{equation}
-
+Assuming there are no forces acting we can close the system Eq.~(\ref{eq:LBE}) knowing the equilibria,
+\begin{equation} \label{eq:equilibria}
+f_l^{(eq)}  =
+\left\{
+\begin{array}{ll}
+h - \frac{5gh^2}{6c_s^2} - \frac{2hu^2}{3c_s^2}& l = 0 \\
+\frac{gh^2}{6c_s^2} + \frac{h \mathbf{c}^{(l)}\cdot \mathbf{u}}{3 c_s^2} + \frac{h(\mathbf{c}^{(l)}\cdot \mathbf{u})^2}{2 c_s^4}-\frac{hu^2}{6c_s^2} &  l=1,3,5,7 \\
+\frac{gh^2}{24c_s^2} + \frac{h \mathbf{c}^{(l)}\cdot\mathbf{u}}{12 c_s^2} + \frac{h (\mathbf{c}^{(l)}\cdot\mathbf{u})^2}{8c_s^4}-\frac{hu^2}{24c_s^2} & l=2,4,6,8
+\end{array}
+\right.,
+\end{equation}
+where $u^2 = |\mathbf{u}|^2$ is the magnitude of the velocity.
 
 
 \subsection{Initial conditions}
@@ -302,7 +313,7 @@ We strongly encourage authors to include author contributions and recommend usin
 For footnotes in the main text of the article please number the footnotes to avoid duplicate symbols. \textit{e.g.}\ \texttt{\textbackslash footnote[num]\{your text\}}. The corresponding author $\ast$ counts as footnote 1, ESI as footnote 2, \textit{e.g.}\ if there is no ESI, please start at [num]=[2], if ESI is cited in the title please start at [num]=[3] \textit{etc.} Please also cite the ESI within the main body of the text using \dag. For the reference section, the style file \texttt{rsc.bst} can be used to generate the correct reference style.
 
 \section*{Conflicts of interest}
-In accordance with our policy on \href{https://www.rsc.org/journals-books-databases/journal-authors-reviewers/author-responsibilities/#code-of-conduct}{Conflicts of interest} please ensure that a conflicts of interest statement is included in your manuscript here.  Please note that this statement is required for all submitted manuscripts.  If no conflicts exist, please state that ``There are no conflicts to declare''.
+There are no conflicts to declare.
 
 \section*{Acknowledgements}
 The authors acknowledge financial support from the Independent Research Fund Denmark through a DFF Sapere Aude Research Leader grant (grant number 9063-00018B).
