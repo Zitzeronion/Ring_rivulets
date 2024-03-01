@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.38
+# v0.19.40
 
 using Markdown
 using InteractiveUtils
@@ -28,8 +28,11 @@ begin
 	T0 = initial_data[(initial_data.R0 .== incond[1]) .& (initial_data.rr0 .== incond[2]) .& (initial_data.angle .== incond[3]), :].tauMax[1]	
 	H0 = initial_data[(initial_data.R0 .== incond[1]) .& (initial_data.rr0 .== incond[2]) .& (initial_data.angle .== incond[3]), :].hdrop[1]	
 	sigma0 = initial_data[(initial_data.R0 .== incond[1]) .& (initial_data.rr0 .== incond[2]) .& (initial_data.angle .== incond[3]), :].sigmaMax[1]	
-	growth_plot = plot(subdata.time[2:end] ./ T0, subdata.deltaH[2:end] ./ H0, 
-		label="band",
+	 
+	subdata2 = growthDF[(growthDF.R0 .== incond[1]) .& (growthDF.rr0 .== incond[2]) .& (growthDF.theta .== incond[3]) .& (growthDF.substrate .== incond[5]), :]
+	growth_plot = scatter(subdata2.time[2:end] ./ T0, subdata2.deltaH[2:end] ./ H0, 
+		label="unifrom",
+		m = (8, :circ),
 		xlabel = L"t/\tau_m",
 		ylabel = L"\Delta h / h_d",
 		# xaxis=:log10,
@@ -43,22 +46,58 @@ begin
 		legend = :bottomright,
 		w = 2,
 		ylims = (0.003, 1.1),
-		xlims = (0.0, 12)
-		)
-	subdata2 = growthDF[(growthDF.R0 .== incond[1]) .& (growthDF.rr0 .== incond[2]) .& (growthDF.theta .== incond[3]) .& (growthDF.substrate .== incond[5]), :]
-	plot!(subdata2.time[2:end] ./ T0, subdata2.deltaH[2:end] ./ H0, 
-		label="unifrom",
-		l = (2, :dash))
+		xlims = (0.0, 6))
 	plot!(subdata2.time[1:end] ./ T0, (0.16 .* exp.(sigma0 .* subdata2.time[1:end]) .+ 0.04) ./ H0, 
 		label="Exponential fit",
 		l = (2,  :dashdot, :black))
 
-	plot!(subdata2.time[1:end] ./ T0, (0.001 .* exp.(0.000008 .* subdata2.time[1:end]) .+ 0.14) ./ H0, 
-		label="",
-		l = (2,  :dashdot, :black))
+	#plot!(subdata2.time[1:end] ./ T0, (0.001 .* exp.(0.000008 .* subdata2.time[1:end]) .+ 0.14) ./ H0, 
+		#label="",
+		# l = (2,  :dashdot, :black))
 
 	# println(sigma0)
 end
+
+# ╔═╡ a3190736-9b19-4355-9843-33215b1707de
+begin
+	growths = plot(xlabel = L"t/\tau_m", ylabel = L"\Delta h / h_d",
+		# xaxis=:log10,
+		yaxis=:log10,
+		grid = false,
+		legendfontsize = 12,
+		guidefont = (16, :black),
+		tickfont = (12, :black),
+		minorticks = true,
+		legend = :bottomright,
+		# w = 2,
+		# ylims = (0.003, 1.1),
+		xlims = (0.0, 5)
+	)
+	inconds = [(180, 20, 40, 2π/9), (180, 20, 30, π/6), (200, 20, 30, π/6), (150, 20, 20, π/9)]
+	for ics in inconds
+		iC = initial_data[(initial_data.R0 .== ics[1]) .& (initial_data.rr0 .== ics[2]) .& (initial_data.angle .== ics[3]), :]
+		
+		tt = 1/((0.01*0.0379*ics[4]^3/(sin(ics[4]))*sqrt(ics[4] - sin(2ics[4])/2)*1/iC.realrr[1]))
+		
+		tnorm = iC.tauMax[1] #(0.5 * 2iC.realrr / 0.01)
+	 	dataSamp = growthDF[(growthDF.R0 .== ics[1]) .& (growthDF.rr0 .== ics[2]) .& (growthDF.theta .== ics[3]) .& (growthDF.substrate .== "uniform"), :]
+		scatter!(dataSamp.time[2:end] ./ tt,# iC.tauMax[1], 
+			dataSamp.deltaH[2:end] ./ iC.maxh0[1], 
+		label=latexstring("\$\\psi_0 = {$(round(iC.psi0[1], digits=3))}\$"),
+		m = (8, :circ)
+		)
+	
+		# plot!(dataSamp.time[1:end] ./ iC.tauMax[1], (0.16 .* exp.(iC.sigmaMax[1] .* dataSamp.time[1:end]) .+ 0.04) ./ iC.hdrop[1], label="Exponential fit", l = (2,  :dashdot, :black))
+	end
+	#plot!(subdata2.time[1:end] ./ T0, (0.001 .* exp.(0.000008 .* subdata2.time[1:end]) .+ 0.14) ./ H0, 
+		#label="",
+		# l = (2,  :dashdot, :black))
+
+	growths
+end
+
+# ╔═╡ b92731a3-b78f-4bc4-a40c-8f14d49a2ff5
+
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -2063,5 +2102,7 @@ version = "1.4.1+1"
 # ╠═947d4e49-8215-4a9b-8e04-589efba72c7b
 # ╠═b43862d9-24c9-4a25-ab45-c9e016331cae
 # ╠═3544b7df-56be-4fe2-aa45-753cd04a5439
+# ╠═a3190736-9b19-4355-9843-33215b1707de
+# ╠═b92731a3-b78f-4bc4-a40c-8f14d49a2ff5
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

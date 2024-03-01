@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.38
+# v0.19.40
 
 using Markdown
 using InteractiveUtils
@@ -298,6 +298,9 @@ data_grad = RivuletTools.data_gradient
 # ╔═╡ b3be394c-5997-4494-ad40-ced2f10fd364
 RivuletTools.renderGifs()
 
+# ╔═╡ d56dc1d3-992a-4be9-87bd-56dae4c41d9c
+RivuletTools.do_gif(RivuletTools.read_data(R=180, r=30, kbT=0.0, nm=(3,2), θ=40, year=2024, month=2, day=29, hour=16, minute=0, arrested=false, gamma="", slip=0, gradient=(false, 10, 40)), "ang_40_R_180_r_30_kbt_off", timeMax=2500000)
+
 # ╔═╡ 0f204a06-71b2-438a-bb49-4af8ebda0001
 md" # Results
 
@@ -483,8 +486,91 @@ end
 # ╔═╡ 3128d6eb-375d-4770-8215-6ed7e3ac5b5a
 growthDF = CSV.read("../data/ring_all_sims_nokBT.csv", DataFrame)
 
+# ╔═╡ 103063b6-c5a9-4c5d-829b-4587813bfaf4
+begin
+	incond = (180, 20, 40, "pattern", "uniform")
+	subdata = growthDF[(growthDF.R0 .== incond[1]) .& (growthDF.rr0 .== incond[2]) .& (growthDF.theta .== incond[3]) .& (growthDF.substrate .== incond[4]), :]
+	psi0 = initial_data[(initial_data.R0 .== incond[1]) .& (initial_data.rr0 .== incond[2]) .& (initial_data.angle .== incond[3]), :].psi0[1]	
+	T0 = initial_data[(initial_data.R0 .== incond[1]) .& (initial_data.rr0 .== incond[2]) .& (initial_data.angle .== incond[3]), :].tauMax[1]	
+	H0 = initial_data[(initial_data.R0 .== incond[1]) .& (initial_data.rr0 .== incond[2]) .& (initial_data.angle .== incond[3]), :].hdrop[1]	
+	sigma0 = initial_data[(initial_data.R0 .== incond[1]) .& (initial_data.rr0 .== incond[2]) .& (initial_data.angle .== incond[3]), :].sigmaMax[1]	
+	growth_plot = plot(subdata.time[2:end] ./ T0, subdata.deltaH[2:end] ./ H0, 
+		label="band",
+		xlabel = L"t/\tau_m",
+		ylabel = L"\Delta h / h_d",
+		# xaxis=:log10,
+		yaxis=:log10,
+		# title = latexstring("\$\\psi_0 = {$(round(psi0, digits=3))}\$"),
+		grid = false,
+		legendfontsize = 12,
+		guidefont = (16, :black),
+		tickfont = (12, :black),
+		minorticks = true,
+		legend = :bottomright,
+		w = 2,
+		ylims = (0.003, 1.1),
+		xlims = (0.0, 12)
+		)
+	subdata2 = growthDF[(growthDF.R0 .== incond[1]) .& (growthDF.rr0 .== incond[2]) .& (growthDF.theta .== incond[3]) .& (growthDF.substrate .== incond[5]), :]
+	plot!(subdata2.time[2:end] ./ T0, subdata2.deltaH[2:end] ./ H0, 
+		label="unifrom",
+		l = (2, :dash))
+	plot!(subdata2.time[1:end] ./ T0, (0.18 .* exp.(sigma0 .* subdata2.time[1:end]) .- 0.01) ./ H0, 
+		label="Exponential fit",
+		l = (2,  :dashdot, :black))
+
+	plot!(subdata2.time[1:end] ./ T0, (0.001 .* exp.(0.000008 .* subdata2.time[1:end]) .+ 0.14) ./ H0, 
+		label="",
+		l = (2,  :dashdot, :black))
+
+	# println(sigma0)
+end
+
 # ╔═╡ 41762f92-2017-4059-87b7-dce0bf061de9
 savefig(growth_plot, "../assets/growthRate_R180_r20_th40.pdf")
+
+# ╔═╡ 9624ad58-8ac5-4ed5-89fe-76874dfe18c1
+# ╠═╡ disabled = true
+#=╠═╡
+begin
+	incond = (180, 20, 40, "pattern", "uniform")
+	subdata = growthDF[(growthDF.R0 .== incond[1]) .& (growthDF.rr0 .== incond[2]) .& (growthDF.theta .== incond[3]) .& (growthDF.substrate .== incond[4]), :]
+	psi0 = initial_data[(initial_data.R0 .== incond[1]) .& (initial_data.rr0 .== incond[2]) .& (initial_data.angle .== incond[3]), :].psi0[1]	
+	T0 = initial_data[(initial_data.R0 .== incond[1]) .& (initial_data.rr0 .== incond[2]) .& (initial_data.angle .== incond[3]), :].tauMax[1]	
+	H0 = initial_data[(initial_data.R0 .== incond[1]) .& (initial_data.rr0 .== incond[2]) .& (initial_data.angle .== incond[3]), :].hdrop[1]	
+	sigma0 = initial_data[(initial_data.R0 .== incond[1]) .& (initial_data.rr0 .== incond[2]) .& (initial_data.angle .== incond[3]), :].sigmaMax[1]	
+	growth_plot = plot(subdata.time[2:end] ./ T0, subdata.deltaH[2:end] ./ H0, 
+		label="band",
+		xlabel = L"t/\tau_m",
+		ylabel = L"\Delta h / h_d",
+		# xaxis=:log10,
+		yaxis=:log10,
+		# title = latexstring("\$\\psi_0 = {$(round(psi0, digits=3))}\$"),
+		grid = false,
+		legendfontsize = 12,
+		guidefont = (16, :black),
+		tickfont = (12, :black),
+		minorticks = true,
+		legend = :bottomright,
+		w = 2,
+		ylims = (0.003, 1.1),
+		xlims = (0.0, 12)
+		)
+	subdata2 = growthDF[(growthDF.R0 .== incond[1]) .& (growthDF.rr0 .== incond[2]) .& (growthDF.theta .== incond[3]) .& (growthDF.substrate .== incond[5]), :]
+	plot!(subdata2.time[2:end] ./ T0, subdata2.deltaH[2:end] ./ H0, 
+		label="unifrom",
+		l = (2, :dash))
+	plot!(subdata2.time[1:end] ./ T0, (0.13 .* exp.(sigma0 .* subdata2.time[1:end]) .+ 0.01) ./ H0, 
+		label="Exponential fit",
+		l = (2,  :dashdot, :black))
+
+	plot!(subdata2.time[1:end] ./ T0, (0.001 .* exp.(0.000008 .* subdata2.time[1:end]) .+ 0.14) ./ H0, 
+		label="",
+		l = (2,  :dashdot, :black))
+
+	# println(sigma0)
+end
+  ╠═╡ =#
 
 # ╔═╡ 13c01d35-6267-4be9-b911-74036b91e031
 begin
@@ -1438,89 +1524,6 @@ begin
 	
 end
   ╠═╡ =#
-
-# ╔═╡ 9624ad58-8ac5-4ed5-89fe-76874dfe18c1
-# ╠═╡ disabled = true
-#=╠═╡
-begin
-	incond = (180, 20, 40, "pattern", "uniform")
-	subdata = growthDF[(growthDF.R0 .== incond[1]) .& (growthDF.rr0 .== incond[2]) .& (growthDF.theta .== incond[3]) .& (growthDF.substrate .== incond[4]), :]
-	psi0 = initial_data[(initial_data.R0 .== incond[1]) .& (initial_data.rr0 .== incond[2]) .& (initial_data.angle .== incond[3]), :].psi0[1]	
-	T0 = initial_data[(initial_data.R0 .== incond[1]) .& (initial_data.rr0 .== incond[2]) .& (initial_data.angle .== incond[3]), :].tauMax[1]	
-	H0 = initial_data[(initial_data.R0 .== incond[1]) .& (initial_data.rr0 .== incond[2]) .& (initial_data.angle .== incond[3]), :].hdrop[1]	
-	sigma0 = initial_data[(initial_data.R0 .== incond[1]) .& (initial_data.rr0 .== incond[2]) .& (initial_data.angle .== incond[3]), :].sigmaMax[1]	
-	growth_plot = plot(subdata.time[2:end] ./ T0, subdata.deltaH[2:end] ./ H0, 
-		label="band",
-		xlabel = L"t/\tau_m",
-		ylabel = L"\Delta h / h_d",
-		# xaxis=:log10,
-		yaxis=:log10,
-		# title = latexstring("\$\\psi_0 = {$(round(psi0, digits=3))}\$"),
-		grid = false,
-		legendfontsize = 12,
-		guidefont = (16, :black),
-		tickfont = (12, :black),
-		minorticks = true,
-		legend = :bottomright,
-		w = 2,
-		ylims = (0.003, 1.1),
-		xlims = (0.0, 12)
-		)
-	subdata2 = growthDF[(growthDF.R0 .== incond[1]) .& (growthDF.rr0 .== incond[2]) .& (growthDF.theta .== incond[3]) .& (growthDF.substrate .== incond[5]), :]
-	plot!(subdata2.time[2:end] ./ T0, subdata2.deltaH[2:end] ./ H0, 
-		label="unifrom",
-		l = (2, :dash))
-	plot!(subdata2.time[1:end] ./ T0, (0.13 .* exp.(sigma0 .* subdata2.time[1:end]) .+ 0.01) ./ H0, 
-		label="Exponential fit",
-		l = (2,  :dashdot, :black))
-
-	plot!(subdata2.time[1:end] ./ T0, (0.001 .* exp.(0.000008 .* subdata2.time[1:end]) .+ 0.14) ./ H0, 
-		label="",
-		l = (2,  :dashdot, :black))
-
-	# println(sigma0)
-end
-  ╠═╡ =#
-
-# ╔═╡ 103063b6-c5a9-4c5d-829b-4587813bfaf4
-begin
-	incond = (180, 20, 40, "pattern", "uniform")
-	subdata = growthDF[(growthDF.R0 .== incond[1]) .& (growthDF.rr0 .== incond[2]) .& (growthDF.theta .== incond[3]) .& (growthDF.substrate .== incond[4]), :]
-	psi0 = initial_data[(initial_data.R0 .== incond[1]) .& (initial_data.rr0 .== incond[2]) .& (initial_data.angle .== incond[3]), :].psi0[1]	
-	T0 = initial_data[(initial_data.R0 .== incond[1]) .& (initial_data.rr0 .== incond[2]) .& (initial_data.angle .== incond[3]), :].tauMax[1]	
-	H0 = initial_data[(initial_data.R0 .== incond[1]) .& (initial_data.rr0 .== incond[2]) .& (initial_data.angle .== incond[3]), :].hdrop[1]	
-	sigma0 = initial_data[(initial_data.R0 .== incond[1]) .& (initial_data.rr0 .== incond[2]) .& (initial_data.angle .== incond[3]), :].sigmaMax[1]	
-	growth_plot = plot(subdata.time[2:end] ./ T0, subdata.deltaH[2:end] ./ H0, 
-		label="band",
-		xlabel = L"t/\tau_m",
-		ylabel = L"\Delta h / h_d",
-		# xaxis=:log10,
-		yaxis=:log10,
-		# title = latexstring("\$\\psi_0 = {$(round(psi0, digits=3))}\$"),
-		grid = false,
-		legendfontsize = 12,
-		guidefont = (16, :black),
-		tickfont = (12, :black),
-		minorticks = true,
-		legend = :bottomright,
-		w = 2,
-		ylims = (0.003, 1.1),
-		xlims = (0.0, 12)
-		)
-	subdata2 = growthDF[(growthDF.R0 .== incond[1]) .& (growthDF.rr0 .== incond[2]) .& (growthDF.theta .== incond[3]) .& (growthDF.substrate .== incond[5]), :]
-	plot!(subdata2.time[2:end] ./ T0, subdata2.deltaH[2:end] ./ H0, 
-		label="unifrom",
-		l = (2, :dash))
-	plot!(subdata2.time[1:end] ./ T0, (0.18 .* exp.(sigma0 .* subdata2.time[1:end]) .- 0.01) ./ H0, 
-		label="Exponential fit",
-		l = (2,  :dashdot, :black))
-
-	plot!(subdata2.time[1:end] ./ T0, (0.001 .* exp.(0.000008 .* subdata2.time[1:end]) .+ 0.14) ./ H0, 
-		label="",
-		l = (2,  :dashdot, :black))
-
-	# println(sigma0)
-end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -3539,6 +3542,7 @@ version = "1.4.1+1"
 # ╠═24fde296-5a6f-4a92-bf16-855df4c99227
 # ╠═42094521-c209-4c82-8226-1a0b9b1c0d85
 # ╠═b3be394c-5997-4494-ad40-ced2f10fd364
+# ╠═d56dc1d3-992a-4be9-87bd-56dae4c41d9c
 # ╟─0f204a06-71b2-438a-bb49-4af8ebda0001
 # ╠═d5152b67-bc1d-4cc0-b73e-90d79dbadcb4
 # ╟─ab5b4c7c-ae24-4aae-a528-1dc427a7f1f1

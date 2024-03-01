@@ -605,11 +605,16 @@ end
 function combine_ring_data()
 	dpath = joinpath("/home/zitz", "Ring_rivulets/data/")
 	df = DataFrame()
-	for i in [(data, false), (data_arrested, true)]
+	for i in [(data, false, false), (data_arrested, true, false), (data_gradient, false, true)]
 		for j in i[1]
 			if j[3] == 0.0
-				somedf = ringOverTime(j, arr=i[2], curves=false, savedataframe=false)
-				println("Analysing simulation R=$(j[1]) r=$(j[2]) theta=$(j[9])")
+				if i[3]
+					somedf = ringOverTime(j, arr=i[2], curves=false, savedataframe=false, grad=(i[3], j[10], j[11]))
+					println("Analysing simulation R=$(j[1]) r=$(j[2]) gradient from $(j[10]) to $(j[11])")
+				else
+					somedf = ringOverTime(j, arr=i[2], curves=false, savedataframe=false)
+					println("Analysing simulation R=$(j[1]) r=$(j[2]) theta=$(j[9])")
+				end
 				df = vcat(df, somedf)
 			end
 		end
@@ -1244,6 +1249,9 @@ data = [
 	(150, 40, 0.0,    2023, 11, 3, 19, 13, 40), 	# 23
 	(150, 80, 0.0,    2023, 11, 3, 20, 39, 40), 	# 24
 	(180, 20, 0.0,    2023, 11, 3, 22, 6,  40), 	# 25
+	(180, 22, 0.0,    2024, 2, 29, 13, 18, 40), 	# 25
+	(180, 25, 0.0,    2024, 2, 29, 14, 39, 40), 	# 25
+	(180, 30, 0.0,    2024, 2, 29, 16, 0,  40), 	# 25
 	(180, 40, 0.0,    2023, 11, 3, 23, 34, 40), 	# 26
 	(180, 80, 0.0,    2023, 11, 4, 1,  1,  40), 	# 27
 	(200, 20, 0.0,    2023, 11, 4, 2,  27, 40), 	# 28
