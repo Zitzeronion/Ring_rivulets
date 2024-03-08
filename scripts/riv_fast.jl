@@ -71,13 +71,15 @@ begin
 		legend = :bottomright,
 		# w = 2,
 		# ylims = (0.003, 1.1),
-		xlims = (0.0, 5)
+		xlims = (0.0, 2)
 	)
 	inconds = [(180, 20, 40, 2π/9), (180, 20, 30, π/6), (200, 20, 30, π/6), (150, 20, 20, π/9)]
 	for ics in inconds
 		iC = initial_data[(initial_data.R0 .== ics[1]) .& (initial_data.rr0 .== ics[2]) .& (initial_data.angle .== ics[3]), :]
-		
-		tt = 1/((0.01*0.0379*ics[4]^3/(sin(ics[4]))*sqrt(ics[4] - sin(2ics[4])/2)*1/iC.realrr[1]))
+
+		LL = iC.realrr[1]# sqrt(iC.realrr[1] * iC.rr0[1]) #sqrt(iC.R0[1]*iC.maxh0[1])
+		om = ((0.01*0.0379*ics[4]^3/(sin(ics[4]))*sqrt(ics[4] - sin(2ics[4])/2)*1/LL))
+		tt = 1/om
 		
 		tnorm = iC.tauMax[1] #(0.5 * 2iC.realrr / 0.01)
 	 	dataSamp = growthDF[(growthDF.R0 .== ics[1]) .& (growthDF.rr0 .== ics[2]) .& (growthDF.theta .== ics[3]) .& (growthDF.substrate .== "uniform"), :]

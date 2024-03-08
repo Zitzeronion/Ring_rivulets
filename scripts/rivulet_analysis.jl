@@ -296,10 +296,10 @@ data_slip= RivuletTools.data_slip
 data_grad = RivuletTools.data_gradient
 
 # ╔═╡ b3be394c-5997-4494-ad40-ced2f10fd364
-RivuletTools.renderGifs()
+# RivuletTools.renderGifs()
 
 # ╔═╡ d56dc1d3-992a-4be9-87bd-56dae4c41d9c
-RivuletTools.do_gif(RivuletTools.read_data(R=180, r=30, kbT=0.0, nm=(3,2), θ=40, year=2024, month=2, day=29, hour=16, minute=0, arrested=false, gamma="", slip=0, gradient=(false, 10, 40)), "ang_40_R_180_r_30_kbt_off", timeMax=2500000)
+RivuletTools.do_gif(RivuletTools.read_data(R=180, r=80, kbT=0.0, nm=(3,2), θ=20, year=2024, month=3, day=5, hour=16, minute=34, arrested=false, gamma="", slip=0, gradient=(true, 40, 20)), "grad_40_20_R_180_r_80_kbt_off", timeMax=2500000)
 
 # ╔═╡ 0f204a06-71b2-438a-bb49-4af8ebda0001
 md" # Results
