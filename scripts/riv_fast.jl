@@ -64,16 +64,16 @@ begin
 		# xaxis=:log10,
 		yaxis=:log10,
 		grid = false,
-		legendfontsize = 12,
+		legendfontsize = 11,
 		guidefont = (16, :black),
 		tickfont = (12, :black),
 		minorticks = true,
 		legend = :bottomright,
 		# w = 2,
 		# ylims = (0.003, 1.1),
-		xlims = (0.0, 2)
+		xlims = (0.0, 3.5)
 	)
-	inconds = [(180, 20, 40, 2π/9), (180, 20, 30, π/6), (200, 20, 30, π/6), (150, 20, 20, π/9)]
+	inconds = [(150, 20, 40, 2π/9, :ut), (180, 20, 40, 2π/9, :circ), (200, 40, 20, π/9, :hex), (150, 20, 30, π/6, :dt), (180, 20, 30, π/6, :rect), (200, 20, 30, π/6, :diamond), (150, 20, 20, π/9, :xcross), (180, 20, 20, π/9, :star5),  (200, 20, 20, π/9, :cross),   ]
 	for ics in inconds
 		iC = initial_data[(initial_data.R0 .== ics[1]) .& (initial_data.rr0 .== ics[2]) .& (initial_data.angle .== ics[3]), :]
 
@@ -83,10 +83,11 @@ begin
 		
 		tnorm = iC.tauMax[1] #(0.5 * 2iC.realrr / 0.01)
 	 	dataSamp = growthDF[(growthDF.R0 .== ics[1]) .& (growthDF.rr0 .== ics[2]) .& (growthDF.theta .== ics[3]) .& (growthDF.substrate .== "uniform"), :]
-		scatter!(dataSamp.time[2:end] ./ tt,# iC.tauMax[1], 
-			dataSamp.deltaH[2:end] ./ iC.maxh0[1], 
-		label=latexstring("\$\\psi_0 = {$(round(iC.psi0[1], digits=3))}\$"),
-		m = (8, :circ)
+		scatter!(dataSamp.time[2:end] ./ iC.tauMax[1], 
+			dataSamp.deltaH[2:end] ./ iC.hdrop[1], 
+		# label=latexstring("\$(\\psi_0, \\theta) = ({$(round(iC.psi0[1], digits=3))}, {$(ics[3])})\$"),
+		label="(θ, ψ₀) = ($(ics[3])°, $(round(iC.psi0[1], digits=3)))",
+		m = (8, ics[5], 0.75)
 		)
 	
 		# plot!(dataSamp.time[1:end] ./ iC.tauMax[1], (0.16 .* exp.(iC.sigmaMax[1] .* dataSamp.time[1:end]) .+ 0.04) ./ iC.hdrop[1], label="Exponential fit", l = (2,  :dashdot, :black))
@@ -99,7 +100,7 @@ begin
 end
 
 # ╔═╡ b92731a3-b78f-4bc4-a40c-8f14d49a2ff5
-
+savefig(growths, "../assets/growth-breakup.pdf")
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
