@@ -299,7 +299,7 @@ data_grad = RivuletTools.data_gradient
 # RivuletTools.renderGifs()
 
 # ╔═╡ d56dc1d3-992a-4be9-87bd-56dae4c41d9c
-RivuletTools.do_gif(RivuletTools.read_data(R=180, r=80, kbT=0.0, nm=(3,2), θ=20, year=2024, month=3, day=5, hour=16, minute=34, arrested=false, gamma="", slip=0, gradient=(true, 40, 20)), "grad_40_20_R_180_r_80_kbt_off", timeMax=2500000)
+RivuletTools.do_gif(RivuletTools.read_data(R=180, r=80, kbT=0.0, nm=(3,2), θ=20, year=2024, month=3, day=6, hour=18, minute=32, arrested=false, gamma="", slip=0, gradient=(true, 30, 20)), "grad_30_20_R_180_r_80_mT_5M_kbt_off", timeMax=5000000)
 
 # ╔═╡ 0f204a06-71b2-438a-bb49-4af8ebda0001
 md" # Results

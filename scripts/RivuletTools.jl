@@ -800,7 +800,7 @@ end
 
 Generates a dataframe of dynamic measurements for a set of `data` and writes it to a `.csv` or reads it from a `.csv`.
 """
-function measure_data(data, label::String, remeasure::Bool, pat::Bool, gam::String)
+function measure_data(data, label::String, remeasure::Bool, pat::Bool, gam::String, grad)
 	measurements = DataFrame()
 	dpath = joinpath("/home/zitz", "Ring_rivulets/data/")
 	if remeasure
@@ -817,9 +817,10 @@ function measure_data(data, label::String, remeasure::Bool, pat::Bool, gam::Stri
 						hour=data[i][7], 
 						minute=data[i][8], 
 						θ=data[i][9] ,
-						nm=32, 
+						nm=(3,2), 
 						arrested=pat, 
-						gamma=gam
+						gamma=gam,
+						gradient=grad
 						)
 			R = Float64[]
 			rr = Float64[]
@@ -1033,7 +1034,8 @@ function data2fft(;whichdata=data, dataset=25, time=25000, quater=false, output=
 						hour=whichdata[dataset][7], 
 						minute=whichdata[dataset][8], 
 						θ=whichdata[dataset][9], 
-						nm=(3,2))
+						nm=(3,2),
+						gradient=(false, 10, 40))
 	heightField = heatmap_data(input, t=time, just_data=true)
 	L = size(heightField)[1]
 	maxH = maximum(heightField)
@@ -1504,8 +1506,8 @@ data_gradient = [
 	(180, 20, 0.0, 2024, 2, 22, 13,  5, 40, 10, 40)
 	(180, 20, 0.0, 2024, 2, 23, 11, 11, 40, 20, 40)
 	(180, 20, 0.0, 2024, 2, 23, 12, 31, 40, 30, 40)
-	(180, 80, 0.0, 2024, 3,  5, 15, 12, 20, 30, 20)
-	(180, 80, 0.0, 2024, 3,  5, 16, 34, 20, 40, 20)
+	(180, 80, 0.0, 2024, 3,  6, 18, 32, 20, 30, 20)
+	(180, 80, 0.0, 2024, 3,  6, 21, 14, 20, 40, 20)
 ]
 
 # End module
