@@ -121,10 +121,10 @@
 \sffamily
 \begin{tabular}{m{4.5cm} p{13.5cm} }
 
-\includegraphics{head_foot/DOI} & \noindent\LARGE{\textbf{Instabilities of ring rivulets: Impact of wettability gradients$^\dag$}} \\%Article title goes here instead of the text "This is the title"
+\includegraphics{head_foot/DOI} & \noindent\LARGE{\textbf{Instabilities of ring-rivulets: Impact of wettability gradients$^\dag$}} \\%Article title goes here instead of the text "This is the title"
 \vspace{0.3cm} & \vspace{0.3cm} \\
 
- & \noindent\large{Stefan Zitz,\textit{$^{a}$} Johan Roenby\textit{$^{a}$}} \\%Author names go here instead of "Full name", etc.
+ & \noindent\large{Stefan Zitz,\textit{$^{a}$} Andrea Scagliarini,\textit{$^{b,c}$} Johan Roenby\textit{$^{a}$}} \\%Author names go here instead of "Full name", etc.
 
 \includegraphics{head_foot/dates} & \noindent\normalsize{
 Rivulets and droplets are naturally appearing shapes when small amounts of liquid are brought into contact with a partially wettable substrate.
@@ -138,7 +138,7 @@ Thus making it possible to enhance the probability for a Rayleigh-Plateau type b
 
  \end{@twocolumnfalse} \vspace{0.6cm}
 
-  ]
+]
 %%%END OF TITLE, AUTHORS AND ABSTRACT%%%
 
 %%%FONT SETUP - please do not change any commands within this section
@@ -151,14 +151,16 @@ Thus making it possible to enhance the probability for a Rayleigh-Plateau type b
 %%%FOOTNOTES%%%
 
 \footnotetext{\textit{$^{a}$~IMFUFA, Department of Science and Environment, Roskilde University, Postbox 260, 4000 Roskilde, DK. Tel: +45 2993 1923; E-mail: johan@ruc.dk}}
-% \footnotetext{\textit{$^{b}$~Address, Address, Town, Country. }}
+\footnotetext{\textit{$^{b}$~Institute for Applied Mathematics "M. Picone" (IAC), Consiglio Nazionale delle Ricerche (CNR), Via dei Taurini 19, 00185 Rome, Italy, E-mail: andrea.scagliarini@cnr.it}}
+\footnotetext{\textit{$^{c}$~INFN, sezione Roma ``Tor Vergata'', via della Ricerca Scientifica 1, 00133 Rome, Italy}}
+
 
 %Please use \dag to cite the ESI in the main text of the article.
 %If you article does not have ESI please remove the the \dag symbol from the title and the footnotetext below.
-\footnotetext{\dag~Electronic Supplementary Information (ESI) available: [details of any supplementary information available should be included here]. See DOI: 10.1039/cXsm00000x/}
+\footnotetext{\dag~Electronic Supplementary Information (ESI) available: \href{https://github.com/Zitzeronion/Ring_rivulets}{Ring\_rivulets}. See DOI: 10.1039/cXsm00000x/}
 %additional addresses can be cited as above using the lower-case letters, c, d, e... If all authors are from the same address, no letter is required
 
-\footnotetext{\ddag~Additional footnotes to the title and authors can be included \textit{e.g.}\ `Present address:' or `These authors contributed equally to this work' as above using the symbols: \ddag, \textsection, and \P. Please place the appropriate symbol next to the author's name and include a \texttt{\textbackslash footnotetext} entry in the the correct place in the list.}
+%\footnotetext{\ddag~Additional footnotes to the title and authors can be included \textit{e.g.}\ `Present address:' or `These authors contributed equally to this work' as above using the symbols: \ddag, \textsection, and \P. Please place the appropriate symbol next to the author's name and include a \texttt{\textbackslash footnotetext} entry in the the correct place in the list.}
 
 
 %%%END OF FOOTNOTES%%%
@@ -167,13 +169,40 @@ Thus making it possible to enhance the probability for a Rayleigh-Plateau type b
 \section{Introduction}
 \label{sec:intro}
 Thin films and droplets play in an important role in our everyday life.
+They are the basis for a host of natural and technological applications~\cite{degennesCapillarityWettingPhenomena2004, ronsinPhaseFieldSimulationsMorphology2022, fockeLabonaFoilMicrofluidicsThin2010}.
+Understanding their dynamics and controlling their stability is a central problem for applied research in process engineering and nanotechnology~\cite{singhInkjetPrintingProcess2010, quereFluidCoatingFiber1999, utadaDrippingJettingDrops2007}, but also poses a fundamental physical problem~\cite{oronLongscaleEvolutionThin1997, beckerComplexDewettingScenarios2003, thielePatternedDepositionMoving2014, wilczekSlidingDropsEnsemble2017, peschkaSignaturesSlipDewetting2019}.
+One of the more commonly known example that have been theoretically explored are coatings. 
+During the coating process the coverage of the film relies heavily on the wettability of the surface. 
+Impurities on the surface or instabilities on the film can actually damage the coating and lead wrinkling, to hole formation or dewetting~\cite{bonnWettingSpreading2009, chenWrinklingInstabilitiesPolymer2012}. 
+To simulate this systems one has to overcome and inherent multiscale problem, that spans from the molecular motion at the three phase contact line to the nano-/mircoscale thickness of the film up to the macroscopic area the coating covers. 
 
+A thin film model can also be used to study the dynamics of ring-rivulet on a solid substrate.
+This particular fluid structure has been point of interest to previous studies~\cite{nguyenCompetitionCollapseBreakup2012, gonzalezStabilityLiquidRing2013, wuCompetingLiquidPhase2011} and differs considerably from a straight liquid rivulet~\cite{diezBreakupFluidRivulets2009, diezStabilityFinitelengthRivulet2009, diezInstabilityTransverseLiquid2012} due to the introduction of multiple unbalanced curvatures.
+Recently, Suo et al.~\cite{suoDewettingCornerFilm2023a} have studied a related problem where the film admits a wedge shape and a solid cylinder fills the inner part of the ring. 
+The ring is therefore not allowed to contract, but can breakup and form droplets.
+They further show a good agreement between theory and simulations as well as a clear dependence of the dynamics on the initial width of the film and the contact angles at each boundary.
+Self- and direct assembly of nanomaterials from liquid nanostructures has been one of the driving forces for the study of Nguyen et al.~\cite{nguyenCompetitionCollapseBreakup2012} and earlier studies of Wu et al.~\cite{wuBreakupPatternedNanoscale2010} where they showed that liquid-metal rings are suited to form arrays of droplets.
+Diez et al.~\cite{diezBreakupFluidRivulets2009, diezStabilityFinitelengthRivulet2009} laid the theoretical foundation for a straight rivulet in their work using linear stability analysis (LSA) and numerical simulations. 
+Later, Gonz{\'a}lez et al.~\cite{gonzalezStabilityLiquidRing2013} extend these results towards a cut torus shape and called it liquid ring, making it therefore possible to predict wavelengths for the most unstable mode and describing the competing time scales for collapse and breakup.
+In their study they however point out that for thin films, where the disjoining pressure~\cite{schwartzSimulationDropletMotion1998, beckerComplexDewettingScenarios2003, oronLongscaleEvolutionThin1997} can not be ignored, e.g. a few nanometres in thickness, the LSA overpredicts  the expected number of droplets after breakup.
+While the disjoining pressure model seems to choose a larger wavelength before breakup Nguyen et al.~\cite{nguyenCompetitionCollapseBreakup2012} showed that molecular dynamics (MD) simulations seem to agree with the LSA when it comes to the number of droplets.
+Beside the work on thin films Mehrabian and Feng~\cite{mehrabianCapillaryBreakupLiquid2013} showed simulations and experiments of a freely suspend liquid torus in another fluid.
+In their study they found that the time to breakup depends inversely on the amplitude of the initial perturbation and the initial thickness of the torus.
+They further discuss the influence of the viscosity contrast between the liquids, as this difference has an effect both on the capillary waves and the retraction velocities.
 
-The outline of the paper is as follows
+We are going to address the thin ring-rivulet problem with a further complication, namely the introduction of a wettability gradient.
+With recent developments in surface chemistry and the emerging technology of switchable substrates~\cite{xinReversiblySwitchableWettability2010, stuartEmergingApplicationsStimuliresponsive2010,chenThermalresponsiveHydrogelSurface2010, ichimuraLightDrivenMotionLiquids2000, mugeleElectrowettingConvenientWay2005} local precise wettability gradients are more attainable than ever.
+It has been shown numerous times that wettability gradients are able to transport droplets, see ref.~\cite{liuActuatingWaterDroplets2015} or more recently with time dependent patterns refs.~\cite{grawitterSteeringDropletsSubstrates2021, zitzControllingDewettingMorphologies2023}, thus having a wettability gradient should allow for a more fine grained the control of the intermediate ring-rivulet states.
+To this end we show that it is possible to actively control the number of droplets after breakup and furthermore be even able to set the spacing between neighboring droplets.
+Having arbitrary control over these quantities will in fact make this process more applicable for the production of nanomaterials. 
+
+The outline of the paper is as follows: In the next section, Sec.~\ref{sec:method} we introduce the method we use to run numerical experiments.
+We then present our results in Sec.~\ref{sec:dynamics}, starting with a comparison with the literature and then present the impact of the wettability gradient.
+In the last section, Sec.~\ref{sec:conclu} we give a short summary, highlighting important results and conclude with an outlook of possible research applications.
 
 \section{Simulation method}
 \label{sec:method}
-For the time resolved simulations of a thin liquid ring-rivulet we use a recently developed lattice Boltzmann method (LBM) for thin films~\cite{zitzLatticeBoltzmannMethod2019, zitzSwalbeJlLattice2022}. 
+For the time resolved simulations of a thin liquid ring-rivulet we use a recently developed lattice Boltzmann method (LBM) for thin films~\cite{zitzLatticeBoltzmannMethod2019, zitzLatticeBoltzmannSimulations2021, zitzSwalbeJlLattice2022, zitzControllingDewettingMorphologies2023}. 
 Here we quickly introduce the method and highlight the relevant modelling approximations.
 The thin film model is build on a class of LBMs originally proposed for shallow water systems~\cite{salmonLatticeBoltzmannMethod1999, dellarNonhydrodynamicModesPriori2002}.
 The master equation for the evolution of the discrete probability functions $f_l(\mathbf{x},t)$ of a fluid system subject to a forcing $\mathbf{F}_{\mbox{\tiny{tot}}}$ reads
@@ -183,11 +212,11 @@ The master equation for the evolution of the discrete probability functions $f_l
 &(1 - \omega) f_l(\mathbf{x},t) + \omega f_l^{(eq)}(\mathbf{x},t) + w_l \frac{\Delta t}{c_s^2} \mathbf{c}^{(l)} \cdot \mathbf{F}_{\mbox{\tiny{tot}}},
 \end{split}
 \end{equation}
-where the discrete lattice velocities $\mathbf{c}_l$ run from $0$ to $8$ in our two-dimensional scheme.
-This equation is build on the idea that there is a local collision step in which the distribution functions are relaxed towards their equilibrium $f_l^{(eq)}(\mathbf{x},t)$ with relaxation rate $\omega = \Delta t/\tau$ and a non-local streaming step, where the $f_l(\mathbf{x},t)$ are streamed to their nearest neighbours.
-The relaxation time $\tau$ is set to $1$ and is proportional to the fluid's kinematic viscosity $\nu = 1/6$.  
-The remaining parameters, namely $c_s$ and $w_l$, are the speed of sound and the lattice weights. 
-We use the standard $D2Q9$ (athermal) values, therefore $c_s = 1/\sqrt{3}$, the lattice velocities $\mathbf{c}^{(l)}$~\cite{krugerLatticeBoltzmannMethod2017, zitzLatticeBoltzmannMethod2019, salmonLatticeBoltzmannMethod1999}   
+where the discrete lattice velocities $\mathbf{c}_l$ run from $0$ to $8$ in our two-dimensional scheme and $\mathbf{x} = (x,y)$.
+This equation admits a local collision step in which the distribution functions are relaxed towards their equilibrium $f_l^{(eq)}(\mathbf{x},t)$ with relaxation rate $\omega = \Delta t/\tau$ and a non-local streaming step, where the $f_l(\mathbf{x},t)$ are streamed to their nearest neighbours.
+The relaxation time $\tau$, within this study we set $\tau = 1$, is proportional to the fluid's kinematic viscosity $\nu$, which is set to $\nu = 1/6$.  
+The remaining parameters, namely $c_s$, $\mathbf{c}^{(l)}$ and $w_l$, are the speed of sound, discrete lattice velocities and the lattice weights. 
+We use the standard $D2Q9$ (athermal) values, therefore $c_s = 1/\sqrt{3}$, the lattice velocities are set using~\cite{krugerLatticeBoltzmannMethod2017, zitzLatticeBoltzmannMethod2019, salmonLatticeBoltzmannMethod1999}   
 \begin{equation}\label{eq:speeds}
 \mathbf{c}^{(l)}  =
 \left\{
@@ -209,7 +238,7 @@ and the weights
     \end{array}
     \right..
 \end{equation}
-Assuming there are no forces acting we can close the system Eq.~(\ref{eq:LBE}) knowing the equilibria,
+The equilibria can be derived using mass, momentum and energy conservation and the set we are using is given by~\cite{salmonLatticeBoltzmannMethod1999, dellarNonhydrodynamicModesPriori2002}  
 \begin{equation} \label{eq:equilibria}
 f_l^{(eq)}  =
 \left\{
@@ -221,7 +250,41 @@ h - \frac{5gh^2}{6c_s^2} - \frac{2hu^2}{3c_s^2}& l = 0 \\
 \right.,
 \end{equation}
 where $u^2 = |\mathbf{u}|^2$ is the magnitude of the velocity.
+Upon applying the multiscale Chapman-Enskog expansion~\cite{enskogKinetischeTheorieVorgange1917, chapmanMathematicalTheoryNonuniform1990, krugerLatticeBoltzmannMethod2017} to this LBE and within well defined limits, e.g. $Ma/Fr \ll 1$, where $Fr$ and $Ma$ are the Froude and Mach number respectively, we recover the shallow water system~\cite{salmonLatticeBoltzmannMethod1999, zitzLatticeBoltzmannMethod2019}.
 
+In Eq.~(\ref{eq:LBE}) we left $\mathbf{F}_{\mbox{\tiny{tot}}}$ to be arbitrary, however as discussed in Ref.~\cite{zitzLatticeBoltzmannMethod2019} we can use this term to match the shallow water system to the thin film equation~\cite{oronLongscaleEvolutionThin1997, crasterDynamicsStabilityThin2009, bonnWettingSpreading2009}.
+The resulting system of equations reads,
+\begin{align}\label{eq:hydro3}
+    &\partial_t h + \nabla \cdot (h \mathbf{u})  = 0 \nonumber\\ 
+    &\partial_t (h \mathbf{u}) = -gh \nabla h -\frac{1}{\rho_0}h\nabla p_{\mbox{\tiny{film}}} - \nu \alpha_{\delta}(h) \mathbf{u} + \mathbf{F},
+\end{align}
+where $g$ is the gravitational acceleration, $p_{\mbox{\tiny{film}}}$ is the film pressure
+\begin{equation}\label{eq:filmpressure}
+    p_{\mbox{\tiny{film}}} = - \gamma\nabla^2 h -\Pi(h),
+\end{equation}
+with a disjoining pressure~\cite{schwartzSimulationDropletMotion1998,nguyenCompetitionCollapseBreakup2012, gonzalezStabilityLiquidRing2013, zitzControllingDewettingMorphologies2023}
+\begin{equation}\label{eq:disjoinpressure}
+\Pi(h,\theta) = \frac{2\gamma}{h_{\ast}}[1-\cos\theta(\mathbf{x})]\left[\left(\frac{h_*}{h}\right)^3 -\left(\frac{h_*}{h}\right)^2\right],
+\end{equation}
+where $\gamma$ is the surface tension which is set to $\gamma = 10^{-2}$ in all numerical experiments.
+The space dependent equilibrium contact angle $\theta(\mathbf{x})$, which allows us to ``pattern'' the substrate is set within the bounds $[\pi/18, 2\pi/9]$, with the exception of the banded pattern. 
+Lastly $\alpha_{\delta}(h)$ is a substrate friction term that mimics a slip boundary condition with an effective slip length $\delta$
+\begin{equation}\label{eq:alphafric}
+\alpha_{\delta}(h) = \frac{6h}{(2 h^2 + 6 \delta h + 3 \delta^2)}.
+\end{equation}
+By introducing a precursor layer $h_{\ast}$ and a slip length $\delta$ we regularize the contact line divergence~\cite{huhHydrodynamicModelSteady1971}. 
+The slip length lies within the weak/intermediate slip regime~\cite{peschkaSignaturesSlipDewetting2019,fetzerQuantifyingHydrodynamicSlip2007, munchLubricationModelsSmall2005} and the thickness of the precursor film is set to $h_{\ast} = 0.05$.
+Inserting Eqs.~(\ref{eq:filmpressure}\ref{eq:alphafric}) into the second line of Eq.~(\ref{eq:hydro3}) and assuming the quasi-steady limit ($\partial_t(h\mathbf{u}) \approx 0$) we can solve for $\mathbf{u}$.
+By applying this solution for $\mathbf{u}$ to the continuity equation we have
+\begin{equation}\label{eq:thinsolve}
+     \partial_t h(\mathbf{x},t) = \nabla\cdot\left(M_{\delta}(h)\nabla p_{\mbox{\tiny{film}}}\right),
+\end{equation}
+with the mobility function $M_{\delta}(h) = \frac{h^2}{\mu\alpha_{\delta}(h)}$ which for the no-slip boundary condition $(\delta \rightarrow 0)$ reduces to $M_{0}(h) = h^3/3\mu$.
+Without loss of generality we set $\rho_0 = 1$ and thus the dynamic viscosity is $\mu = \rho_0 \nu = 1/6$. 
+
+Our strategy is therefore to iterate Eq.~(\ref{eq:LBE}) in time and find an approximate solution to Eq.~(\ref{eq:thinsolve})~\cite{zitzSwalbeJlLattice2022}.
+The numerical domain consists of a square lattice with $512\Delta x$ in both horizontal directions.
+We further use biperiodic boundary conditions at the edges of the domain. 
 
 \subsection{Initial conditions}
 \begin{figure}
@@ -230,53 +293,67 @@ where $u^2 = |\mathbf{u}|^2$ is the magnitude of the velocity.
   \caption{Schematic setup of our initial conditions. In (a) we show the top view where $R$ and $r$ are the two different radii and $\theta_a$ and $\theta_b$ can be different contact angles. 
   In (b) we show an isometric view of the initial condition.
   By cutting along the dashed line in (a) we get the side view of (c).}
-  \label{fgr:ringschema}
+  \label{fig:ringschema}
 \end{figure}
 
-The initial thickness profile $h(x,y)$ of the film at $t=0$ is set by an implicit equation for a torus with radial symmetry along the z-axis and is given by
+The initial thickness profile $h(\mathbf{x}, t=0)$ of the film is set by an implicit equation for a torus with radial symmetry along the z-axis according to
 \begin{equation}\label{eq:torus}
-    h_t(x,y) = \sqrt{r^2 - \left(R-\xi\right)^2},
+    h(\mathbf{x}, t=0) = \sqrt{r_0^2 - \left(R_0-\xi\right)^2} - r_0\cos(\theta) + \varepsilon(\mathbf{x})\mathcal{N},
 \end{equation}
-where $\xi = \sqrt{(x-x_0)^2+(y-y_0)^2}$, $R$ is the major radius and $r$ is the minor radius of the torus.
-The center of the torus is at $(x_0,y_0)$ and $h_t$ is the height of the torus.
-We only consider the upper half with $h<0$ as shown in Fig.~\ref{fgr:ringschema}. 
-The resulting fluid structure is a half-torus with $90^{\circ}$ contact angle.
-This contact angle violates the long wave approximation $\theta \ll 1$, therefore we perform another cut to a smaller contact angle using
-\begin{equation}\label{eq:cut_torus}
-    h(x,y,t=0) = h_t(x,y) - r\cos(\theta)
-\end{equation}
-and set all $h < 0$ to $h = h_{\ast}$ which is the thickness of the precursor film.
+where $\xi = \sqrt{(x-x_0)^2+(y-y_0)^2}$ is a radial coordinate, $R_0$ is the major radius and $r_0$ is the minor radius of the torus.
+The center of the torus is at $(x_0,y_0)$ and for all numerical experiments set to the center of the numerical domain $(256,256)$.
+Eq.~(\ref{eq:torus}) allows for negative thickness values, however we only consider the upper half of the torus as shown in Fig.~\ref{fig:ringschema}. 
+The second term in Eq.~(\ref{eq:torus}) is to cut the upper half to a smaller contact angle.
+The third term adds white noise to initial condition, $\mathcal{N}$ is a gaussian with zero mean and $\varepsilon(\mathbf{x})$ is an amplitude that is 
+\begin{equation}
+    \varepsilon(\mathbf{x}) =
+    \begin{cases}
+        10^{-2}\quad \textbf{if}~h(\mathbf{x}) > h_{\ast}\\
+        0~~\quad\quad \textbf{else}
+    \end{cases}
+    .
+\end{equation} 
+We further require that any $h(\mathbf{x}) < 0$ is set to $h_{\ast}$.
+The lubrication approximation does in fact not allow us to use the initial conditions in refs.~\cite{nguyenCompetitionCollapseBreakup2012, wuBreakupPatternedNanoscale2010} but are in agreement with Gonz{\'a}lez et al.~\cite{gonzalezStabilityLiquidRing2013}.
 
-Our main interest is focused on the impact of a pattern on the evolution of the ring-rivulet. 
-As indicated in Fig.~\ref{fgr:ringschema} we use different contact angle configurations $\theta(x,y)$.
-First we use 
+
+Our main interest is focused on the impact of a pattern on the evolution of the ring-rivulet, Eq.~(\ref{eq:torus}). 
+As indicated in Fig.~\ref{fig:ringschema} we use different patterns.
+A natural starting point that allows to compare to Refs.~\cite{gonzalezStabilityLiquidRing2013, nguyenCompetitionCollapseBreakup2012, wuBreakupPatternedNanoscale2010} is
 \begin{equation}\label{eq:theta_const}
-    \theta(x,y) = \theta_0,
+    \theta(\xi) = \theta_0,
 \end{equation}
 where $\theta_0$ is a constant.
-Next we consider a banded case, where the ring-rivulet has the same contact angle as its immediate surrounding and the rest of the substrate has a higher contact angle
+In the second scenario we consider a banded case, where the ring-rivulet has the same contact angle as its immediate surrounding and the rest of the substrate has a higher contact angle
 \begin{equation}\label{eq:theta_band}
-    \theta(r_i) =\begin{cases}
+    \theta(\xi) =\begin{cases}
         \theta_a,\quad \text{if}~h(\xi\pm \delta\xi) > 0\\
         \theta_b,\quad \text{else}
     \end{cases}.
 \end{equation}
 The addition of $\delta\xi$ widens the band and allow the ring-rivulet to contract a bit.  
-Lastly, we consider a linear wettability gradient with decreasing contact angle towards the middle
+Lastly, we consider a linear radial wettability gradient towards the middle
 \begin{equation}\label{eq:theta_grad}
-    \theta(\xi) = \frac{\theta_{max}-\theta_{min}}{R} \xi + \theta_{min},
+    \theta(\xi) = \frac{\theta_{a}-\theta_{b}}{R} \xi + \theta_{b},
 \end{equation}
-where $\theta_{max}, \theta_{min}$ are the maximal, minimal contact angle respectively.
+where $\theta_{a}\neq\theta_{b}$.
+We consider both possibilities, thus a negative wettability gradient ($\theta_a > \theta_b$) and a positive wettability gradient ($\theta_a < \theta_b$).
 
-\section{Dynamics of ring rivulets}
+These three expressions for $\theta$, Eqs.~(\ref{eq:theta_const}-\ref{eq:theta_grad}), are then used in Eq.~(\ref{eq:disjoinpressure}) which is part of the pressure calculation in Eq.~(\ref{eq:thinsolve}).
+The numerical experiments therefore create a dynamic response of the initial condition Eq.~(\ref{eq:torus}) to each pattern.
+
+\section{Dynamics of a ring-rivulet}
 \label{sec:dynamics}
+The time resolved dynamics of initial fluid structures Eq.~(\ref{eq:torus}) are surprisingly rich.
+It has been shown that the torus geometry is an unstable fluid state~\cite{gonzalezStabilityLiquidRing2013, mehrabianCapillaryBreakupLiquid2013} which is prone to Rayleigh-Plateau and other contact line instabilities. 
+The fluid interface itself admits three distinct curvatures, two horizontal ones at the two triple lines between substrate fluid and gas, $\kappa_a = 1/(R+r)$ and $\kappa_b = 1/(R-r)$ as indicated in Fig.~\ref{fig:ringschema}, and one vertical along the liquid-gas interface $\kappa_r = 1/r$.
+We remark that both $R$ and $r$ are time dependent quantities that change as the rivulet retracts.
+At $t=0$ we have $R_0 = R$ and $r = r_0\sin(\theta)$, thus $r_0$ is the radius of the circle from which the rivulet is cut.
+These curvatures lead to capillary forces and small instabilities can quickly be amplified and destabilize a torus~\cite{mehrabianCapillaryBreakupLiquid2013} or a liquid ring~\cite{gonzalezStabilityLiquidRing2013}. 
+The result can either be a single droplet due to contraction, which is also referred to as collapse or multiple small droplets due to breakup.
+Within our numerical experiments we indeed observe both scenarios.
 
-The dynamics of this fluid structure is surprisingly rich. 
-Straight rivulet~\cite{diezBreakupFluidRivulets2009, diezInstabilityTransverseLiquid2012}.
-Ring Rivulet~\cite{gonzalezStabilityLiquidRing2013, nguyenCompetitionCollapseBreakup2012}.
-
-\subsection{Stability}
-
+\subsection{Stability}\label{subsec:stability}
 \begin{figure}
     \centering
     \includegraphics[width=0.45\textwidth]{assets/growthRate_R180_r20_th40.pdf}
@@ -284,10 +361,18 @@ Ring Rivulet~\cite{gonzalezStabilityLiquidRing2013, nguyenCompetitionCollapseBre
     The growth rate of $\Delta h$ depend on the pattern. 
     We show the constant contact angle Eq.~(\ref{eq:theta_const}) in blue and the banded pattern Eq.~(\ref{eq:theta_band}) in orange.
     In green we add a exponential growth as predicted by the LSA.}
-    \label{fig:enter-label}
+    \label{fig:first_growth}
 \end{figure}
 
+One of the dynamical properties that we are interested in is the stability of the ring-rivulet.
+In previous studies~\cite{gonzalezStabilityLiquidRing2013} the focus was set on the three phase contact lines and the LSA predictions agreed well with the slip model simulations.
+Among the many results of this work is the fact that the varicos modes are always growing stronger than the zigzag modes.
+The stability, then, is associated with the width of the ring-rivulet as well as the ratio of radii $\psi_0 = 2r_0/R_0$.
+When the width approaches zero, $2r \rightarrow 0$, the rivulet breaks up and is likely to form independent droplets.
 
+
+
+\subsection{Retracting rivulets}\label{subsec:retract}
 \begin{figure}
     \centering
     \includegraphics[width=0.45\textwidth]{assets/LSA_droplets.pdf}
@@ -297,9 +382,10 @@ Ring Rivulet~\cite{gonzalezStabilityLiquidRing2013, nguyenCompetitionCollapseBre
     \label{fig:max_drops}
 \end{figure}
 
+\subsection{Wettability patterns}\label{subsec:wettability}
 
 
-\section{Conclusions}
+\section{Conclusions}\label{sec:conclu}
 We have presented numerical experiments of a liquid ring-rivulet on a uniform and patterned substrate. 
 The basis of our experiments is the thin film equation with an additional disjoining pressure model.
 First we have confirmed that for small $\psi_0$ values the LSA of Gonz{\'a}lez et al.~\cite{gonzalezStabilityLiquidRing2013} and the measured amount of droplets show good agreement.
