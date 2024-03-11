@@ -353,14 +353,14 @@ These curvatures lead to capillary forces and small instabilities can quickly be
 The result can either be a single droplet due to contraction, which is also referred to as collapse or multiple small droplets due to breakup.
 Within our numerical experiments we indeed observe both scenarios.
 
-\subsection{Stability}\label{subsec:stability}
+\subsection{Stability and time scales}\label{subsec:stability}
 \begin{figure}
     \centering
-    \includegraphics[width=0.45\textwidth]{assets/growthRate_R180_r20_th40.pdf}
-    \caption{Thickness difference $\Delta h$ along the radius $\xi(h_{\max})$ over time.
-    The growth rate of $\Delta h$ depend on the pattern. 
-    We show the constant contact angle Eq.~(\ref{eq:theta_const}) in blue and the banded pattern Eq.~(\ref{eq:theta_band}) in orange.
-    In green we add a exponential growth as predicted by the LSA.}
+    \includegraphics[width=0.45\textwidth]{assets/growth-breakup.pdf}
+    \caption{Thickness difference $\Delta h$ normalized by $h_d$ along the radius $\xi(h_{\max})$ over time normalized by $\tau_{\text{rim}}$~\cite{edwardsNotSpreadingReverse2016} for rivulets which break up and $\theta(\xi) = \theta_0$. 
+    Different symbols depict different initial conditions.
+    As a guide to the eye we add the black dashed curve which shows an exponential growth as predicted by LSA.
+    }
     \label{fig:first_growth}
 \end{figure}
 
