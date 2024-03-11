@@ -63,7 +63,7 @@ begin
 	times_now = zeros(101)
 	tscale = []
 	finalH = []
-	growths = plot(xlabel = L"t/10^5\tau_m", ylabel = L"\Delta h / h_d",
+	growths = plot(xlabel = L"t/\tau_m", ylabel = L"\Delta h / (R_0 - R_f)",
 		# xaxis=:log10,
 		yaxis=:log10,
 		grid = false,
@@ -73,21 +73,22 @@ begin
 		minorticks = true,
 		legend = :bottomright,
 		# w = 2,
-		ylims = (0.003, 1.01),
-		xlims = (0.0, 26)
+		ylims = (0.0001, 0.1),
+		xlims = (0.0, 18)
 	)
 	inconds = [(150, 20, 40, 2π/9, :ut), (180, 20, 40, 2π/9, :circ), (150, 20, 30, π/6, :hex), (180, 20, 30, π/6, :dt), (200, 20, 30, π/6, :rect), (150, 20, 20, π/9, :diamond), (180, 20, 20, π/9, :star5),  (200, 20, 20, π/9, :cross),   ]
 	for ics in inconds
 		iC = initial_data[(initial_data.R0 .== ics[1]) .& (initial_data.rr0 .== ics[2]) .& (initial_data.angle .== ics[3]), :]
 
 		LL = iC.realrr[1]# sqrt(iC.realrr[1] * iC.rr0[1]) #sqrt(iC.R0[1]*iC.maxh0[1])
+		ll = (iC.R0[1] + iC.realrr[1] - iC.rdrop[1])
 		om = ((0.01*0.0379*ics[4]^3/(sin(ics[4]))*sqrt(ics[4] - sin(2ics[4])/2)*1/LL))
-		tt = 10000*3/2(iC.R0[1] + iC.realrr[1] - iC.rdrop[1])/(0.01 * ics[4])
+		tt = 3/2*(iC.R0[1] + iC.realrr[1] - iC.rdrop[1])/(0.01 * ics[4])
 		
 		tnorm = iC.tauMax[1] #(0.5 * 2iC.realrr / 0.01)
 	 	dataSamp = growthDF[(growthDF.R0 .== ics[1]) .& (growthDF.rr0 .== ics[2]) .& (growthDF.theta .== ics[3]) .& (growthDF.substrate .== "uniform"), :]
 		scatter!(dataSamp.time[2:end] ./ tt, # iC.tauMax[1], 
-			dataSamp.deltaH[2:end] ./ iC.hdrop[1], 
+			dataSamp.deltaH[2:end] ./ ll, # iC.hdrop[1], 
 		# label=latexstring("\$(\\psi_0, \\theta) = ({$(round(iC.psi0[1], digits=3))}, {$(ics[3])})\$"),
 		label="(θ, ψ₀) = ($(ics[3])°, $(round(iC.psi0[1], digits=3)))",
 		m = (8, ics[5], 0.75)
@@ -100,7 +101,7 @@ begin
 		end
 	end
 	# println(tscale[1], finalH[1])
-	plot!(times_now ./ tscale[1], (0.01 .* exp.(0.39 .* times_now ./ tscale[1]) .+ 0.04) ./ finalH[1], label="Exponential fit", l = (2,  :dash, :black))
+	plot!(times_now ./ tscale[1], (0.003 .* exp.(0.5 .* times_now ./ tscale[1]) .+ 0.00) ./ finalH[1], label="Exponential fit", l = (2,  :dash, :black))
 	#plot!(subdata2.time[1:end] ./ T0, (0.001 .* exp.(0.000008 .* subdata2.time[1:end]) .+ 0.14) ./ H0, 
 		#label="",
 		# l = (2,  :dashdot, :black))
@@ -108,11 +109,11 @@ begin
 	growths
 end
 
-# ╔═╡ dd19e06e-999b-4a92-afc3-4020304f7bb2
-times_now
-
 # ╔═╡ b92731a3-b78f-4bc4-a40c-8f14d49a2ff5
 savefig(growths, "../assets/growth-breakup.pdf")
+
+# ╔═╡ dd19e06e-999b-4a92-afc3-4020304f7bb2
+times_now
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -2118,7 +2119,7 @@ version = "1.4.1+1"
 # ╠═b43862d9-24c9-4a25-ab45-c9e016331cae
 # ╠═3544b7df-56be-4fe2-aa45-753cd04a5439
 # ╠═a3190736-9b19-4355-9843-33215b1707de
-# ╠═dd19e06e-999b-4a92-afc3-4020304f7bb2
 # ╠═b92731a3-b78f-4bc4-a40c-8f14d49a2ff5
+# ╠═dd19e06e-999b-4a92-afc3-4020304f7bb2
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
