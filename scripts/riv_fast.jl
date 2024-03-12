@@ -63,9 +63,9 @@ begin
 	times_now = zeros(101)
 	tscale = []
 	finalH = []
-	growths = plot(xlabel = L"t/\tau_m", ylabel = L"\Delta h / (R_0 - R_f)",
-		# xaxis=:log10,
+	growths = plot(xlabel = L"t/\tau_m", ylabel = L"\Delta h / H_D",
 		yaxis=:log10,
+		# xaxis=:log10,
 		grid = false,
 		legendfontsize = 10,
 		guidefont = (16, :black),
@@ -73,24 +73,25 @@ begin
 		minorticks = true,
 		legend = :bottomright,
 		# w = 2,
-		ylims = (0.0001, 0.1),
-		xlims = (0.0, 17)
+		ylims = (0.0004, 1.01),
+		xlims = (0.0, 8)
 	)
-	inconds = [(150, 20, 40, 2π/9, :ut), (180, 20, 40, 2π/9, :circ), (150, 20, 30, π/6, :hex), (180, 20, 30, π/6, :dt), (200, 20, 30, π/6, :rect), (150, 20, 20, π/9, :diamond), (180, 20, 20, π/9, :star5),  (200, 20, 20, π/9, :rtriangle),  ]
+	moreData = [ ]
+	inconds = [(150, 20, 40, 2π/9, :ut), (180, 20, 40, 2π/9, :circ), (150, 20, 30, π/6, :ltriangle), (180, 20, 30, π/6, :dt), (200, 20, 30, π/6, :rect), (150, 20, 20, π/9, :diamond), (200, 20, 20, π/9, :hex),  (180, 20, 20, π/9, :star5), ]
 	for ics in inconds
 		iC = initial_data[(initial_data.R0 .== ics[1]) .& (initial_data.rr0 .== ics[2]) .& (initial_data.angle .== ics[3]), :]
 
-		ll = (iC.R0[1] + iC.realrr[1] - iC.rdrop[1])
-		tt = 3/2*(iC.R0[1] + iC.realrr[1] - iC.rdrop[1])/(0.01 * ics[4])
+		# ll = (iC.R0[1] + iC.realrr[1] - iC.rdrop[1])
+		ll = iC.hdrop[1]
+		# tt = 3/2*(iC.R0[1] + iC.realrr[1] - iC.rdrop[1])/(0.01 * ics[4]^3)
+		tt = 1/iC.sigmaMax[1]*ics[4]^(1.5)
 		
-		tnorm = iC.tauMax[1] #(0.5 * 2iC.realrr / 0.01)
 	 	dataSamp = growthDF[(growthDF.R0 .== ics[1]) .& (growthDF.rr0 .== ics[2]) .& (growthDF.theta .== ics[3]) .& (growthDF.substrate .== "uniform"), :]
-		scatter!(dataSamp.time[2:end] ./ tt, # iC.tauMax[1], 
-			dataSamp.deltaH[2:end] ./ ll, # iC.hdrop[1], 
-		# label=latexstring("\$(\\psi_0, \\theta) = ({$(round(iC.psi0[1], digits=3))}, {$(ics[3])})\$"),
-		label="(θ, ψ₀) = ($(ics[3])°, $(round(iC.psi0[1], digits=3)))",
-		m = (8, ics[5], 0.75)
-		)
+		scatter!(dataSamp.time[2:end] ./ tt,
+			dataSamp.deltaH[2:end] ./ ll, 
+			label="(θ, ψ₀) = ($(ics[3])°, $(round(iC.psi0[1], digits=3)))",
+			m = (8, ics[5], 0.75)
+			)
 		if ics[5] == :hex
 			push!(tscale, tt)
 			push!(finalH, iC.hdrop[1])
@@ -104,7 +105,7 @@ begin
 
 		
 		ll = (iC.R0[1] + iC.realrr[1] - iC.rdrop[1])
-		tt = 3/2*(iC.R0[1] + iC.realrr[1] - iC.rdrop[1])/(0.01 * ics[4])
+		tt = 3/2*(iC.R0[1] + iC.realrr[1] - iC.rdrop[1])/(0.01 * ics[4]^3)
 		
 	 	dataSamp = growthDF[(growthDF.R0 .== ics[1]) .& (growthDF.rr0 .== ics[2]) .& (growthDF.theta .== ics[3]) .& (growthDF.substrate .== "uniform"), :]
 		scatter!(dataSamp.time[2:end] ./ tt, 
@@ -114,7 +115,7 @@ begin
 		)
 	end
 	# println(tscale[1], finalH[1])
-	plot!(times_now ./ tscale[1], (0.003 .* exp.(0.5 .* times_now ./ tscale[1]) .+ 0.00) ./ finalH[1], label="Exponential fit", l = (2,  :dash, :black))
+	plot!(times_now ./ tscale[1], (0.0125 .* exp.(1 .* times_now ./ tscale[1]) .+ 0.00) ./ finalH[1], label="Exponential fit", l = (2,  :dash, :black))
 	#plot!(subdata2.time[1:end] ./ T0, (0.001 .* exp.(0.000008 .* subdata2.time[1:end]) .+ 0.14) ./ H0, 
 		#label="",
 		# l = (2,  :dashdot, :black))
