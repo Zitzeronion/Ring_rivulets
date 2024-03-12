@@ -429,12 +429,59 @@ begin
 	#simpleRep = plot()
 	nset = 28
 	dataHring = RivuletTools.read_data(R=data[nset][1], r=data[nset][2], kbT=data[nset][3], year=data[nset][4], month=data[nset][5], day=data[nset][6], hour=data[nset][7], minute=data[nset][8], θ=data[nset][9])	
-	tss = 500000
+	tss = 250000
+	hmaxD = initial_data[(initial_data.R0 .== data[nset][1]) .& (initial_data.rr0 .== data[nset][2]) .& (initial_data.angle .== data[nset][9]), :hdrop]
+	taum = initial_data[(initial_data.R0 .== data[nset][1]) .& (initial_data.rr0 .== data[nset][2]) .& (initial_data.angle .== data[nset][9]), :tauMax]
 	h1d, Rad = RivuletTools.getRingCurve(data[nset], tss)
 	hfield = RivuletTools.heatmap_data(dataHring, t=tss, just_data=true)
 	plot(heatmap(hfield, aspect_ratio=1, c=:viridis, xlim=(1,512), ylim=(1,512)), plot(0:2π/(length(h1d)-1):2π, h1d, label="Cut at R=$(Rad)Δx", l=(1.5, :solid), ylabel="h", grid=false, xlabel="x\\(\\phi\\)", xticks = ([0:π/2:2*π;], ["0", "\\pi/2", "\\pi", "3\\pi/2", "2\\pi"])))
 	# simpleRep
 end
+
+# ╔═╡ e01d84fc-cb9e-495c-a346-c88d5d9428fc
+xscalesheat = collect(1:1:512) ./ hmaxD
+
+# ╔═╡ ab3579f2-21b8-4a95-998b-ff940c9c3677
+forShowHM = heatmap(xscalesheat, xscalesheat, hfield ./ hmaxD, aspect_ratio=1, c=:viridis, xlim=(minimum(xscalesheat),maximum(xscalesheat)), ylim=(minimum(xscalesheat),maximum(xscalesheat)),
+xlabel=L"x/H_D",
+ylabel=L"y/H_D",
+colorbar_title=L"h(\mathbf{x})/H_D",
+)
+
+# ╔═╡ c104b355-2a89-4d8c-8b38-8ad504cbde18
+savefig(forShowHM, "../assets/heatmap_R180_r30_a40_t25000.pdf")
+
+# ╔═╡ e3c4daa5-69b7-465a-9e34-7c1a050a5f29
+begin
+	lineCutPlot = plot(0:2π/(length(h1d)-1):2π, 
+		h1d ./ hmaxD, 
+		label="R(t)=$(round(Rad / hmaxD[1], digits=2))/H_D, t=$(round(250000 / taum[1], digits=2))", 
+		l=(2.5, :solid), 
+		ylabel="h\\(\\xi\\)", 
+		ylims = (0, 0.8),
+		xlims = (0, 2π),
+		grid=false, xlabel="x\\(\\phi\\)", 
+		xticks = ([0:π/2:2*π;], ["0", "\\pi/2", "\\pi", "3\\pi/2", "2\\pi"]),
+		legendfontsize = 10,
+		guidefont = (16, :black),
+		tickfont = (12, :black),
+	)
+	for t in [(850000, :dash), (1100000, :dashdot), (1600000, :dashdotdot)]
+		h1dt, Radt = RivuletTools.getRingCurve(data[nset], t[1])
+		plot!(0:2π/(length(h1dt)-1):2π, 
+			h1dt ./ hmaxD, 
+			label="R(t)=$(round(Radt / hmaxD[1], digits=2))/H_D, t=$(round(t[1] / taum[1], digits=2))",
+			l=(2.5, t[2]), 
+		)
+	end
+	lineCutPlot
+end
+
+# ╔═╡ c2354103-b70f-4371-9d71-cc7f8ec69b3d
+savefig(lineCutPlot, "../assets/linecut_R180_r30_a40.pdf")
+
+# ╔═╡ 01d77625-dc7e-4550-a9fc-ab2961606f4d
+psim = initial_data[(initial_data.R0 .== data[nset][1]) .& (initial_data.rr0 .== data[nset][2]) .& (initial_data.angle .== data[nset][9]), :hdrop]
 
 # ╔═╡ cfb78bf5-9f06-4557-a777-c34d908f0e67
 md"
@@ -3576,6 +3623,12 @@ version = "1.4.1+1"
 # ╠═c5949c51-d3f5-40b1-9415-7c40ae596b1b
 # ╠═277d0ee8-bb02-4c5f-a6cb-9c8c01795b65
 # ╠═4fddfc1c-4943-40df-981b-8609c49fa6bb
+# ╠═e01d84fc-cb9e-495c-a346-c88d5d9428fc
+# ╠═ab3579f2-21b8-4a95-998b-ff940c9c3677
+# ╠═c104b355-2a89-4d8c-8b38-8ad504cbde18
+# ╠═e3c4daa5-69b7-465a-9e34-7c1a050a5f29
+# ╠═c2354103-b70f-4371-9d71-cc7f8ec69b3d
+# ╠═01d77625-dc7e-4550-a9fc-ab2961606f4d
 # ╟─cfb78bf5-9f06-4557-a777-c34d908f0e67
 # ╠═cb4a302c-fb04-4362-95d5-7680d8fb2983
 # ╟─30220b96-8154-4ca2-a016-9258860323a5
