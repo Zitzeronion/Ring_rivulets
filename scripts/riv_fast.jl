@@ -167,6 +167,39 @@ begin
 	growthsDrop
 end
 
+# ╔═╡ c8a40929-5318-4d31-8db9-078075886a72
+for R in [180]
+	for rr in [80]
+		for ang in [40]
+			dataCut = subset(growthDF, :R0 => a -> a .== R, :rr0 => c -> c .==  rr, :theta => t -> t .== ang, :substrate => s -> s .== "uniform")
+			println(findfirst(dataCut.deltaH .== 0))
+			println(dataCut.time[findfirst(dataCut.deltaH .== 0)])
+		end
+	end
+end
+
+# ╔═╡ 1665ccd0-47b5-43ce-bf8d-6c8ab5ef4e5b
+begin
+	timeScaleDF = DataFrame()
+	coalTime = Int64[]
+	for R in [80, 120, 150, 160, 180, 200]
+		for rr in [20, 30, 40, 60, 80]
+			for ang in [20, 30, 40]
+				psi0 = subset(initial_data, :R0 => a -> a .== R, :rr0 => b -> b .== rr, :angle => c -> c .== ang)
+				dataCut = subset(growthDF, :R0 => a -> a .== R, :rr0 => c -> c .==  rr, :theta => t -> t .== ang, :substrate => s -> s .== "uniform")
+				hmm = findfirst(dataCut.deltaH .== 0)
+				if isa(hmm, Int)
+					dataCut.time[hmm]
+					println("There should be some")
+				else
+					println("I knew it at R: $(R), rr: $(rr) ang: $(ang)")
+				end
+				push!(coalTime, 0)
+			end
+		end
+	end
+end
+
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
@@ -2173,5 +2206,7 @@ version = "1.4.1+1"
 # ╠═a3190736-9b19-4355-9843-33215b1707de
 # ╠═b92731a3-b78f-4bc4-a40c-8f14d49a2ff5
 # ╠═dd19e06e-999b-4a92-afc3-4020304f7bb2
+# ╠═c8a40929-5318-4d31-8db9-078075886a72
+# ╠═1665ccd0-47b5-43ce-bf8d-6c8ab5ef4e5b
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

@@ -169,30 +169,6 @@ begin
 	
 end
 
-# ╔═╡ 3eaf9941-d510-4a91-99bf-2084bbe3ea40
-begin
-	p = plot()
-	for ang in [1/9, 1/6, 2/9]
-		for R in [180]
-			for rr in [20, 40, 80]
-				h = RivuletTools.torus(512, 512, rr, R, ang, (256,256))
-				plot!(h[256, :], 
-					xlims=(0, 256),
-					ylims=(0, 20),
-					lw = 2,
-					aspect_ratio = 5,
-					xlabel = "x/[Δx]",
-					ylabel = "height",
-					palette = :Paired_10,
-					label="R=$(R)-r=$(rr)-θ=$(Int(round(rad2deg((ang*π)))))",
-				)
-			end
-		end
-	end
-	savefig(p, "../assets/initial_conditions_R180.png")
-	p
-end
-
 # ╔═╡ 1ebb5c9b-df33-4c48-8240-bbff2a06520c
 begin
 	h2 = RivuletTools.torus(512, 512, 20, 180, 2/9, (256,256))
@@ -548,93 +524,13 @@ end
 # ╔═╡ 3128d6eb-375d-4770-8215-6ed7e3ac5b5a
 growthDF = CSV.read("../data/ring_all_sims_nokBT.csv", DataFrame)
 
-# ╔═╡ 103063b6-c5a9-4c5d-829b-4587813bfaf4
-begin
-	incond = (180, 20, 40, "pattern", "uniform")
-	subdata = growthDF[(growthDF.R0 .== incond[1]) .& (growthDF.rr0 .== incond[2]) .& (growthDF.theta .== incond[3]) .& (growthDF.substrate .== incond[4]), :]
-	psi0 = initial_data[(initial_data.R0 .== incond[1]) .& (initial_data.rr0 .== incond[2]) .& (initial_data.angle .== incond[3]), :].psi0[1]	
-	T0 = initial_data[(initial_data.R0 .== incond[1]) .& (initial_data.rr0 .== incond[2]) .& (initial_data.angle .== incond[3]), :].tauMax[1]	
-	H0 = initial_data[(initial_data.R0 .== incond[1]) .& (initial_data.rr0 .== incond[2]) .& (initial_data.angle .== incond[3]), :].hdrop[1]	
-	sigma0 = initial_data[(initial_data.R0 .== incond[1]) .& (initial_data.rr0 .== incond[2]) .& (initial_data.angle .== incond[3]), :].sigmaMax[1]	
-	growth_plot = plot(subdata.time[2:end] ./ T0, subdata.deltaH[2:end] ./ H0, 
-		label="band",
-		xlabel = L"t/\tau_m",
-		ylabel = L"\Delta h / h_d",
-		# xaxis=:log10,
-		yaxis=:log10,
-		# title = latexstring("\$\\psi_0 = {$(round(psi0, digits=3))}\$"),
-		grid = false,
-		legendfontsize = 12,
-		guidefont = (16, :black),
-		tickfont = (12, :black),
-		minorticks = true,
-		legend = :bottomright,
-		w = 2,
-		ylims = (0.003, 1.1),
-		xlims = (0.0, 12)
-		)
-	subdata2 = growthDF[(growthDF.R0 .== incond[1]) .& (growthDF.rr0 .== incond[2]) .& (growthDF.theta .== incond[3]) .& (growthDF.substrate .== incond[5]), :]
-	plot!(subdata2.time[2:end] ./ T0, subdata2.deltaH[2:end] ./ H0, 
-		label="unifrom",
-		l = (2, :dash))
-	plot!(subdata2.time[1:end] ./ T0, (0.18 .* exp.(sigma0 .* subdata2.time[1:end]) .- 0.01) ./ H0, 
-		label="Exponential fit",
-		l = (2,  :dashdot, :black))
-
-	plot!(subdata2.time[1:end] ./ T0, (0.001 .* exp.(0.000008 .* subdata2.time[1:end]) .+ 0.14) ./ H0, 
-		label="",
-		l = (2,  :dashdot, :black))
-
-	# println(sigma0)
-end
-
 # ╔═╡ 41762f92-2017-4059-87b7-dce0bf061de9
-savefig(growth_plot, "../assets/growthRate_R180_r20_th40.pdf")
-
-# ╔═╡ 9624ad58-8ac5-4ed5-89fe-76874dfe18c1
-# ╠═╡ disabled = true
 #=╠═╡
-begin
-	incond = (180, 20, 40, "pattern", "uniform")
-	subdata = growthDF[(growthDF.R0 .== incond[1]) .& (growthDF.rr0 .== incond[2]) .& (growthDF.theta .== incond[3]) .& (growthDF.substrate .== incond[4]), :]
-	psi0 = initial_data[(initial_data.R0 .== incond[1]) .& (initial_data.rr0 .== incond[2]) .& (initial_data.angle .== incond[3]), :].psi0[1]	
-	T0 = initial_data[(initial_data.R0 .== incond[1]) .& (initial_data.rr0 .== incond[2]) .& (initial_data.angle .== incond[3]), :].tauMax[1]	
-	H0 = initial_data[(initial_data.R0 .== incond[1]) .& (initial_data.rr0 .== incond[2]) .& (initial_data.angle .== incond[3]), :].hdrop[1]	
-	sigma0 = initial_data[(initial_data.R0 .== incond[1]) .& (initial_data.rr0 .== incond[2]) .& (initial_data.angle .== incond[3]), :].sigmaMax[1]	
-	growth_plot = plot(subdata.time[2:end] ./ T0, subdata.deltaH[2:end] ./ H0, 
-		label="band",
-		xlabel = L"t/\tau_m",
-		ylabel = L"\Delta h / h_d",
-		# xaxis=:log10,
-		yaxis=:log10,
-		# title = latexstring("\$\\psi_0 = {$(round(psi0, digits=3))}\$"),
-		grid = false,
-		legendfontsize = 12,
-		guidefont = (16, :black),
-		tickfont = (12, :black),
-		minorticks = true,
-		legend = :bottomright,
-		w = 2,
-		ylims = (0.003, 1.1),
-		xlims = (0.0, 12)
-		)
-	subdata2 = growthDF[(growthDF.R0 .== incond[1]) .& (growthDF.rr0 .== incond[2]) .& (growthDF.theta .== incond[3]) .& (growthDF.substrate .== incond[5]), :]
-	plot!(subdata2.time[2:end] ./ T0, subdata2.deltaH[2:end] ./ H0, 
-		label="unifrom",
-		l = (2, :dash))
-	plot!(subdata2.time[1:end] ./ T0, (0.13 .* exp.(sigma0 .* subdata2.time[1:end]) .+ 0.01) ./ H0, 
-		label="Exponential fit",
-		l = (2,  :dashdot, :black))
-
-	plot!(subdata2.time[1:end] ./ T0, (0.001 .* exp.(0.000008 .* subdata2.time[1:end]) .+ 0.14) ./ H0, 
-		label="",
-		l = (2,  :dashdot, :black))
-
-	# println(sigma0)
-end
+savefig(growth_plot, "../assets/growthRate_R180_r20_th40.pdf")
   ╠═╡ =#
 
 # ╔═╡ 13c01d35-6267-4be9-b911-74036b91e031
+#=╠═╡
 begin
 	
 	growth_plot2 = plot(subdata.time[2:end], subdata.L2diff[2:end], 
@@ -664,6 +560,7 @@ begin
 
 	# plot!(subdata2.time[2:end], 0.002 .* exp.(0.000007 .* subdata2.time[2:end]) .+ 0.14, label="",l = (2,  :dashdot, :black))
 end
+  ╠═╡ =#
 
 # ╔═╡ a5cac6d9-d113-4acf-b5b1-675fdb900117
 begin
@@ -1367,52 +1264,6 @@ l = (3, :solid))
 h20040 = measurements[(measurements.R .== 200) .& (measurements.rr .== 40) .& (measurements.kbt .== 0.0), :]
   ╠═╡ =#
 
-# ╔═╡ 87c627a8-2c54-44ff-aa66-d9b5c379f646
-#=╠═╡
-begin
-	markers1 = [:circle, :ut, :s]
-	linesty1 = [:solid, :dash, :dashdot]
-	timescale = collect(25000:25000:2500000)
-	t0 = initial_data[(initial_data.R0 .== 200) .& (initial_data.rr0 .== 40) .& (initial_data.angle .== 20), :t0][1]
-	h0 = initial_data[(initial_data.R0 .== 200) .& (initial_data.rr0 .== 40) .& (initial_data.angle .== 20), :maxh0][1]
-	p = plot(timescale, 
-		h20040[h20040.theta .== 20, :dH], 
-		label="θ=20°", 
-		l=(3, :solid), 
-		xlabel="t", 
-		ylabel="Δh",
-		st = :samplemarkers,
-		step = 5, 	
-		title = "Unscaled",
-		marker = (8, :circle, 0.6),		
-		# yaxis=:log,
-		#xaxis=:log,
-		# ylims = (0, 5),
-		legendfontsize = 12,			# legend font size
-        tickfontsize = 12,	# tick font and size
-        guidefontsize = 13,	# label font and size
-		)
-	for ang in enumerate([30.0, 40.0])
-		plot!(
-		timescale, 
-		h20040[h20040.theta .== ang[2], :dH], 
-		label="θ=$(ceil(Int, ang[2]))°", 
-		l=(3, linesty1[ang[1]+1]), 
-		# xlabel="t/τ", 
-		# ylabel="Δh/h₀",
-		st = :samplemarkers,
-		step = 5, 						
-		marker = (8, markers1[ang[1]+1], 0.6),		
-		# yaxis=:log,
-		# xaxis=:log,
-		)
-	end
-	savefig(p, "../assets/delth_base.png")
-	p
-	
-end
-  ╠═╡ =#
-
 # ╔═╡ c848d2cf-5d36-4437-b53a-e278150e75ef
 #=╠═╡
 begin
@@ -1583,6 +1434,163 @@ begin
 	end
 	savefig(p5, "../assets/delth_filmscaling.png")
 	p5
+	
+end
+  ╠═╡ =#
+
+# ╔═╡ 3eaf9941-d510-4a91-99bf-2084bbe3ea40
+#=╠═╡
+begin
+	p = plot()
+	for ang in [1/9, 1/6, 2/9]
+		for R in [180]
+			for rr in [20, 40, 80]
+				h = RivuletTools.torus(512, 512, rr, R, ang, (256,256))
+				plot!(h[256, :], 
+					xlims=(0, 256),
+					ylims=(0, 20),
+					lw = 2,
+					aspect_ratio = 5,
+					xlabel = "x/[Δx]",
+					ylabel = "height",
+					palette = :Paired_10,
+					label="R=$(R)-r=$(rr)-θ=$(Int(round(rad2deg((ang*π)))))",
+				)
+			end
+		end
+	end
+	savefig(p, "../assets/initial_conditions_R180.png")
+	p
+end
+  ╠═╡ =#
+
+# ╔═╡ 103063b6-c5a9-4c5d-829b-4587813bfaf4
+#=╠═╡
+begin
+	incond = (180, 20, 40, "pattern", "uniform")
+	subdata = growthDF[(growthDF.R0 .== incond[1]) .& (growthDF.rr0 .== incond[2]) .& (growthDF.theta .== incond[3]) .& (growthDF.substrate .== incond[4]), :]
+	psi0 = initial_data[(initial_data.R0 .== incond[1]) .& (initial_data.rr0 .== incond[2]) .& (initial_data.angle .== incond[3]), :].psi0[1]	
+	T0 = initial_data[(initial_data.R0 .== incond[1]) .& (initial_data.rr0 .== incond[2]) .& (initial_data.angle .== incond[3]), :].tauMax[1]	
+	H0 = initial_data[(initial_data.R0 .== incond[1]) .& (initial_data.rr0 .== incond[2]) .& (initial_data.angle .== incond[3]), :].hdrop[1]	
+	sigma0 = initial_data[(initial_data.R0 .== incond[1]) .& (initial_data.rr0 .== incond[2]) .& (initial_data.angle .== incond[3]), :].sigmaMax[1]	
+	growth_plot = plot(subdata.time[2:end] ./ T0, subdata.deltaH[2:end] ./ H0, 
+		label="band",
+		xlabel = L"t/\tau_m",
+		ylabel = L"\Delta h / h_d",
+		# xaxis=:log10,
+		yaxis=:log10,
+		# title = latexstring("\$\\psi_0 = {$(round(psi0, digits=3))}\$"),
+		grid = false,
+		legendfontsize = 12,
+		guidefont = (16, :black),
+		tickfont = (12, :black),
+		minorticks = true,
+		legend = :bottomright,
+		w = 2,
+		ylims = (0.003, 1.1),
+		xlims = (0.0, 12)
+		)
+	subdata2 = growthDF[(growthDF.R0 .== incond[1]) .& (growthDF.rr0 .== incond[2]) .& (growthDF.theta .== incond[3]) .& (growthDF.substrate .== incond[5]), :]
+	plot!(subdata2.time[2:end] ./ T0, subdata2.deltaH[2:end] ./ H0, 
+		label="unifrom",
+		l = (2, :dash))
+	plot!(subdata2.time[1:end] ./ T0, (0.18 .* exp.(sigma0 .* subdata2.time[1:end]) .- 0.01) ./ H0, 
+		label="Exponential fit",
+		l = (2,  :dashdot, :black))
+
+	plot!(subdata2.time[1:end] ./ T0, (0.001 .* exp.(0.000008 .* subdata2.time[1:end]) .+ 0.14) ./ H0, 
+		label="",
+		l = (2,  :dashdot, :black))
+
+	# println(sigma0)
+end
+  ╠═╡ =#
+
+# ╔═╡ 9624ad58-8ac5-4ed5-89fe-76874dfe18c1
+# ╠═╡ disabled = true
+#=╠═╡
+begin
+	incond = (180, 20, 40, "pattern", "uniform")
+	subdata = growthDF[(growthDF.R0 .== incond[1]) .& (growthDF.rr0 .== incond[2]) .& (growthDF.theta .== incond[3]) .& (growthDF.substrate .== incond[4]), :]
+	psi0 = initial_data[(initial_data.R0 .== incond[1]) .& (initial_data.rr0 .== incond[2]) .& (initial_data.angle .== incond[3]), :].psi0[1]	
+	T0 = initial_data[(initial_data.R0 .== incond[1]) .& (initial_data.rr0 .== incond[2]) .& (initial_data.angle .== incond[3]), :].tauMax[1]	
+	H0 = initial_data[(initial_data.R0 .== incond[1]) .& (initial_data.rr0 .== incond[2]) .& (initial_data.angle .== incond[3]), :].hdrop[1]	
+	sigma0 = initial_data[(initial_data.R0 .== incond[1]) .& (initial_data.rr0 .== incond[2]) .& (initial_data.angle .== incond[3]), :].sigmaMax[1]	
+	growth_plot = plot(subdata.time[2:end] ./ T0, subdata.deltaH[2:end] ./ H0, 
+		label="band",
+		xlabel = L"t/\tau_m",
+		ylabel = L"\Delta h / h_d",
+		# xaxis=:log10,
+		yaxis=:log10,
+		# title = latexstring("\$\\psi_0 = {$(round(psi0, digits=3))}\$"),
+		grid = false,
+		legendfontsize = 12,
+		guidefont = (16, :black),
+		tickfont = (12, :black),
+		minorticks = true,
+		legend = :bottomright,
+		w = 2,
+		ylims = (0.003, 1.1),
+		xlims = (0.0, 12)
+		)
+	subdata2 = growthDF[(growthDF.R0 .== incond[1]) .& (growthDF.rr0 .== incond[2]) .& (growthDF.theta .== incond[3]) .& (growthDF.substrate .== incond[5]), :]
+	plot!(subdata2.time[2:end] ./ T0, subdata2.deltaH[2:end] ./ H0, 
+		label="unifrom",
+		l = (2, :dash))
+	plot!(subdata2.time[1:end] ./ T0, (0.13 .* exp.(sigma0 .* subdata2.time[1:end]) .+ 0.01) ./ H0, 
+		label="Exponential fit",
+		l = (2,  :dashdot, :black))
+
+	plot!(subdata2.time[1:end] ./ T0, (0.001 .* exp.(0.000008 .* subdata2.time[1:end]) .+ 0.14) ./ H0, 
+		label="",
+		l = (2,  :dashdot, :black))
+
+	# println(sigma0)
+end
+  ╠═╡ =#
+
+# ╔═╡ 87c627a8-2c54-44ff-aa66-d9b5c379f646
+#=╠═╡
+begin
+	markers1 = [:circle, :ut, :s]
+	linesty1 = [:solid, :dash, :dashdot]
+	timescale = collect(25000:25000:2500000)
+	t0 = initial_data[(initial_data.R0 .== 200) .& (initial_data.rr0 .== 40) .& (initial_data.angle .== 20), :t0][1]
+	h0 = initial_data[(initial_data.R0 .== 200) .& (initial_data.rr0 .== 40) .& (initial_data.angle .== 20), :maxh0][1]
+	p = plot(timescale, 
+		h20040[h20040.theta .== 20, :dH], 
+		label="θ=20°", 
+		l=(3, :solid), 
+		xlabel="t", 
+		ylabel="Δh",
+		st = :samplemarkers,
+		step = 5, 	
+		title = "Unscaled",
+		marker = (8, :circle, 0.6),		
+		# yaxis=:log,
+		#xaxis=:log,
+		# ylims = (0, 5),
+		legendfontsize = 12,			# legend font size
+        tickfontsize = 12,	# tick font and size
+        guidefontsize = 13,	# label font and size
+		)
+	for ang in enumerate([30.0, 40.0])
+		plot!(
+		timescale, 
+		h20040[h20040.theta .== ang[2], :dH], 
+		label="θ=$(ceil(Int, ang[2]))°", 
+		l=(3, linesty1[ang[1]+1]), 
+		# xlabel="t/τ", 
+		# ylabel="Δh/h₀",
+		st = :samplemarkers,
+		step = 5, 						
+		marker = (8, markers1[ang[1]+1], 0.6),		
+		# yaxis=:log,
+		# xaxis=:log,
+		)
+	end
+	savefig(p, "../assets/delth_base.png")
+	p
 	
 end
   ╠═╡ =#
