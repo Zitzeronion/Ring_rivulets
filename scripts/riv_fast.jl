@@ -77,28 +77,6 @@ begin
 		xlims = (0.0, 8)
 	)
 	moreData = [ ]
-	inconds = [(150, 20, 40, 2π/9, :ut), (180, 20, 40, 2π/9, :circ), (150, 20, 30, π/6, :ltriangle), (180, 20, 30, π/6, :dt), (200, 20, 30, π/6, :rect), (150, 20, 20, π/9, :diamond), (200, 20, 20, π/9, :hex),  (180, 20, 20, π/9, :star5), ]
-	for ics in inconds
-		iC = initial_data[(initial_data.R0 .== ics[1]) .& (initial_data.rr0 .== ics[2]) .& (initial_data.angle .== ics[3]), :]
-
-		# ll = (iC.R0[1] + iC.realrr[1] - iC.rdrop[1])
-		ll = iC.hdrop[1]
-		# tt = 3/2*(iC.R0[1] + iC.realrr[1] - iC.rdrop[1])/(0.01 * ics[4]^3)
-		tt = 1/iC.sigmaMax[1]*ics[4]^(1.5)
-		
-	 	dataSamp = growthDF[(growthDF.R0 .== ics[1]) .& (growthDF.rr0 .== ics[2]) .& (growthDF.theta .== ics[3]) .& (growthDF.substrate .== "uniform"), :]
-		scatter!(dataSamp.time[2:end] ./ tt,
-			dataSamp.deltaH[2:end] ./ ll, 
-			label="(θ, ψ₀) = ($(ics[3])°, $(round(iC.psi0[1], digits=3)))",
-			m = (8, ics[5], 0.75)
-			)
-		if ics[5] == :hex
-			push!(tscale, tt)
-			push!(finalH, iC.hdrop[1])
-			times_now .= dataSamp.time
-			# println("length: $(length(dataSamp.time))")
-		end
-	end
 	incondsRet = [(150, 40, 40, 2π/9, :circ), (150, 40, 30, π/6, :rect), (150, 40, 20, π/9, :ut),]
 	for ics in incondsRet
 		iC = initial_data[(initial_data.R0 .== ics[1]) .& (initial_data.rr0 .== ics[2]) .& (initial_data.angle .== ics[3]), :]
@@ -114,8 +92,31 @@ begin
 		m = (8, ics[5], 0.75, :white)
 		)
 	end
+	inconds = [(150, 20, 40, 2π/9, :rt, palette(:default)[1]), (180, 20, 40, 2π/9, :lt, palette(:default)[2]), (150, 20, 30, π/6, :dt, palette(:default)[3]), (180, 20, 30, π/6, :star5, palette(:default)[4]), (200, 20, 30, π/6, :star4, palette(:default)[5]), (150, 20, 20, π/9, :diamond, palette(:default)[6]), (200, 20, 20, π/9, :pentagon, palette(:default)[7]),  (180, 20, 20, π/9, :hex, palette(:default)[8])]
+	for ics in inconds
+		iC = initial_data[(initial_data.R0 .== ics[1]) .& (initial_data.rr0 .== ics[2]) .& (initial_data.angle .== ics[3]), :]
+
+		# ll = (iC.R0[1] + iC.realrr[1] - iC.rdrop[1])
+		ll = iC.hdrop[1]
+		# tt = 3/2*(iC.R0[1] + iC.realrr[1] - iC.rdrop[1])/(0.01 * ics[4]^3)
+		tt = 1/iC.sigmaMax[1]*ics[4]^(1.5)
+		
+	 	dataSamp = growthDF[(growthDF.R0 .== ics[1]) .& (growthDF.rr0 .== ics[2]) .& (growthDF.theta .== ics[3]) .& (growthDF.substrate .== "uniform"), :]
+		scatter!(dataSamp.time[2:end] ./ tt,
+			dataSamp.deltaH[2:end] ./ ll, 
+			label="(θ, ψ₀) = ($(ics[3])°, $(round(iC.psi0[1], digits=3)))",
+			m = (8, ics[5], 0.75, ics[6])
+			)
+		if ics[5] == :hex
+			push!(tscale, tt)
+			push!(finalH, iC.hdrop[1])
+			times_now .= dataSamp.time
+			# println("length: $(length(dataSamp.time))")
+		end
+	end
+	
 	# println(tscale[1], finalH[1])
-	plot!(times_now ./ tscale[1], (0.0125 .* exp.(1 .* times_now ./ tscale[1]) .+ 0.00) ./ finalH[1], label="Exponential fit", l = (2,  :dash, :black))
+	plot!(times_now ./ tscale[1], (0.0125 .* exp.(1 .* times_now ./ tscale[1]) .+ 0.00) ./ finalH[1], label="∝ exp(σₘt)", l = (2,  :dash, :black))
 	#plot!(subdata2.time[1:end] ./ T0, (0.001 .* exp.(0.000008 .* subdata2.time[1:end]) .+ 0.14) ./ H0, 
 		#label="",
 		# l = (2,  :dashdot, :black))
@@ -169,11 +170,13 @@ end
 
 # ╔═╡ c8a40929-5318-4d31-8db9-078075886a72
 for R in [180]
-	for rr in [80]
+	for rr in [82]
 		for ang in [40]
 			dataCut = subset(growthDF, :R0 => a -> a .== R, :rr0 => c -> c .==  rr, :theta => t -> t .== ang, :substrate => s -> s .== "uniform")
-			println(findfirst(dataCut.deltaH .== 0))
-			println(dataCut.time[findfirst(dataCut.deltaH .== 0)])
+			println(dataCut)
+			println(dataCut.time == Int64[]) 
+			# println(findfirst(dataCut.deltaH .== 0))
+			# println(dataCut.time[findfirst(dataCut.deltaH .== 0)])
 		end
 	end
 end
@@ -187,18 +190,26 @@ begin
 			for ang in [20, 30, 40]
 				psi0 = subset(initial_data, :R0 => a -> a .== R, :rr0 => b -> b .== rr, :angle => c -> c .== ang)
 				dataCut = subset(growthDF, :R0 => a -> a .== R, :rr0 => c -> c .==  rr, :theta => t -> t .== ang, :substrate => s -> s .== "uniform")
-				hmm = findfirst(dataCut.deltaH .== 0)
-				if isa(hmm, Int)
-					dataCut.time[hmm]
-					println("There should be some")
+				# Check if data exists
+				if dataCut.time == Int64[]
+					continue
 				else
-					println("I knew it at R: $(R), rr: $(rr) ang: $(ang)")
+					hmm = findfirst(dataCut.deltaH .== 0)
+					if isa(hmm, Int)
+						dataCut.time[hmm]
+						println("There should be some")
+					else
+						println("I knew it at R: $(R), rr: $(rr) ang: $(ang)")
+					end
+					push!(coalTime, 0)
 				end
-				push!(coalTime, 0)
 			end
 		end
 	end
 end
+
+# ╔═╡ 5c242f7f-48fe-405c-9432-45bbc5b691ff
+palette(:tab10)[1]
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -2208,5 +2219,6 @@ version = "1.4.1+1"
 # ╠═dd19e06e-999b-4a92-afc3-4020304f7bb2
 # ╠═c8a40929-5318-4d31-8db9-078075886a72
 # ╠═1665ccd0-47b5-43ce-bf8d-6c8ab5ef4e5b
+# ╠═5c242f7f-48fe-405c-9432-45bbc5b691ff
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
