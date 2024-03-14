@@ -316,7 +316,6 @@ The third term adds white noise to initial condition, $\mathcal{N}$ is a gaussia
 We further require that any $h(\mathbf{x}) < 0$ is set to $h_{\ast}$.
 The lubrication approximation does in fact not allow us to use the initial conditions in refs.~\cite{nguyenCompetitionCollapseBreakup2012, wuBreakupPatternedNanoscale2010} but are in agreement with Gonz{\'a}lez et al.~\cite{gonzalezStabilityLiquidRing2013}.
 
-
 Our main interest is focused on the impact of a pattern on the evolution of the ring-rivulet, Eq.~(\ref{eq:torus}). 
 As indicated in Fig.~\ref{fig:ringschema} we use different patterns.
 A natural starting point that allows to compare to Refs.~\cite{gonzalezStabilityLiquidRing2013, nguyenCompetitionCollapseBreakup2012, wuBreakupPatternedNanoscale2010} is
@@ -344,7 +343,17 @@ The numerical experiments therefore create a dynamic response of the initial con
 
 \section{Dynamics of a ring-rivulet}
 \label{sec:dynamics}
-The time resolved dynamics of initial fluid structures Eq.~(\ref{eq:torus}) are surprisingly rich.
+\begin{figure*}
+    \centering
+    \includegraphics[width=1.0\textwidth]{assets/heatcirc.png}
+    \caption{(a) Heatmap of the film thickness at $t=1.68\tau_m$ for $\psi_0 = 0.21$. 
+    All length scales are normalized by $H_D = 25.67$. 
+    The red ring in the middle of the rivulet is depict as blue line plot in (b).
+    In (b) we show circular cuts normalized to $2\pi$, shown in different colors and line styles, for different time steps normalized by Eq.~(\ref{eq:tau_m}) at $\xi(h_{\max})$.
+    The ring-rivulet initially chooses a breakup mode that lead to eight droplets, however with time it breaks into three distinct droplets, indicated by the three maxima of the purple curve.}
+    \label{fig:ThreeDToOneD}
+\end{figure*}
+The time resolved dynamics of initial fluid structures Eq.~(\ref{eq:torus}) are surprisingly rich, with one case outlined in Fig.~\ref{fig:ThreeDToOneD}.
 It has been shown that the torus geometry is an unstable fluid state~\cite{gonzalezStabilityLiquidRing2013, mehrabianCapillaryBreakupLiquid2013} which is prone to Rayleigh-Plateau and other contact line instabilities. 
 The fluid interface itself admits three distinct curvatures, two horizontal ones at the two triple lines between substrate fluid and gas, $\kappa_a = 1/(R+r)$ and $\kappa_b = 1/(R-r)$ as indicated in Fig.~\ref{fig:ringschema}, and one vertical along the liquid-gas interface $\kappa_r = 1/r$.
 We remark that both $R$ and $r$ are time dependent quantities that change as the rivulet retracts.
@@ -354,45 +363,57 @@ The result can either be a single droplet due to contraction, which is also refe
 Within our numerical experiments we indeed observe both scenarios.
 
 \subsection{Stability and time scales}\label{subsec:stability}
+One of the dynamical properties that we are interested in is the stability of the ring-rivulet and the associated time scales.
+In previous studies~\cite{gonzalezStabilityLiquidRing2013} the focus was set on the three-phase contact lines and the LSA predictions agreed well with the slip model simulations.
+Among the many results of this work is the fact that the varicos modes are always growing stronger than the zigzag modes.
+The stability, then, is associated with the width of the ring-rivulet $w = 2r$ as well as the ratio of radii $\psi_0 = 2r/R_0 = w/R_0$.
+When the width approaches zero, $w \rightarrow 0$, the rivulet breaks up and is likely to form independent droplets.
+
+We use a slightly different measure to access the stability of the rivulet. 
+Instead of directly working with the three-dimensional data we take a circular cut (red circle in Fig.~\ref{fig:ThreeDToOneD}(a)) along the rivuletand measure
+\begin{equation}\label{eq:delta-h-measure}
+    \Delta h = (h_{\max} - h_{\min})_{\xi = \xi(h_{\max})},
+\end{equation}
+which can be computed from Fig.~\ref{fig:ThreeDToOneD}(b).
+This measure has the advantage that it is well within the rivulet and thus should filter out a constant background from the precursor film $h_{\ast}$.
+
 \begin{figure}
     \centering
     \includegraphics[width=0.45\textwidth]{assets/growth-breakup.pdf}
-    \caption{Thickness difference $\Delta h$ normalized by $R_0 - R_d$ along the curve at radius $\xi(h_{\max})$ over time normalized by $\tau_{\text{rim}}$~\cite{edwardsNotSpreadingReverse2016} for $\theta(\xi) = \theta_0$ (Eq.~(\ref{eq:theta_const})). 
+    \caption{Thickness difference $\Delta h$ normalized by the height of a spherical cap droplet that contains all liquid $H_D$ along the curve at radius $\xi(h_{\max})$ over time normalized by $\tau_{m}$~\cite{wuBreakupPatternedNanoscale2010} for $\theta(\xi) = \theta_0$ (Eq.~(\ref{eq:theta_const})). 
     Different symbols depict different initial conditions, with full symbols showing simulations in which the rivulet breaks up in multiple droplets. 
     Empty symbols depict the growth for simulations where the rivulet contracts to a single droplet. 
     As a guide to the eye we add the black dashed curve which shows an exponential growth as predicted by LSA.
     }
     \label{fig:first_growth}
 \end{figure}
-
-One of the dynamical properties that we are interested in is the stability of the ring-rivulet and the associated time scales.
-In previous studies~\cite{gonzalezStabilityLiquidRing2013} the focus was set on the three-phase contact lines and the LSA predictions agreed well with the slip model simulations.
-Among the many results of this work is the fact that the varicos modes are always growing stronger than the zigzag modes.
-The stability, then, is associated with the width of the ring-rivulet $w = 2r$ as well as the ratio of radii $\psi_0 = w/R_0$.
-When the width approaches zero, $w \rightarrow 0$, the rivulet breaks up and is likely to form independent droplets.
-
-We use a slightly different measure to access the stability of the rivulet. 
-Instead of directly working with the three-dimensional data we take a circular cut along the rivulet and measure
-\begin{equation}\label{eq:delta-h-measure}
-    \Delta h = (h_{\max} - h_{\min})_{\xi = \xi(h_{\max})},
+As a criteria for a break up using a circular cut we assume $\Delta h \approx 2\max{h(\mathbf{x},0)}$. 
+We know from the LSA that $\Delta h$ should grow exponentially~\cite{wuBreakupPatternedNanoscale2010, gonzalezStabilityLiquidRing2013, nguyenCompetitionCollapseBreakup2012}.
+To address this statement we use the growth rate $\sigma_m$ which reads
+\begin{equation}\label{eq:growth-sigma}
+    \sigma_m = \frac{\gamma a \theta^{3/2}\sqrt{\theta - \sin(2\theta)/2}}{6\mu\sin(\theta)\sqrt{A}}, 
 \end{equation}
-as shown in Fig.~\ref{fig:first_growth}.
-This measure has the advantage that it is well within the rivulet and thus should filter out a constant background from the precursor film $h_{\ast}$.
-In case of break up we expect $\Delta h \approx 2\max{h(\mathbf{x},0)}$ and know from the LSA that $\Delta h$ should grow exponentially.
-Our data shows good agreement with an exponential growth in Fig.~\ref{fig:first_growth}, where the filled symbols are numerical experiments that lead to break up of the rivulet, while the empty symbols display the collapse into a single droplet.
-As the behavior is not only sensitve to $\psi_0$ but also to $\theta$, we use the time scale~\cite{edwardsNotSpreadingReverse2016}
-\begin{equation}\label{eq:tau-rim}
-    \tau_{rim} = 9\mu\frac{R_0 - R_f}{\gamma \theta^3},      
+where $a$ is a numerical constant which is set to $a = 0.0379$ according to Ref.~\cite{wuBreakupPatternedNanoscale2010} and $A$ is half of the area of the cross-section of the rivulet as shown in Fig.~\ref{fig:ringschema}(c).
+We like to mention that this growth-rate differs from ref~\cite{wuBreakupPatternedNanoscale2010} by a factor of $\theta^{-3/2}$.
+From Eq.~(\ref{eq:growth-sigma}) we can derive a timescale $\tau_m$ by simply inverting the growth rate  
+\begin{equation}\label{eq:tau_m}
+    \tau_{m} = \frac{1}{\sigma_m} = \frac{6\mu\sin(\theta)\sqrt{A}}{\gamma a \theta^{3/2}\sqrt{\theta - \sin(2\theta)/2}}.      
 \end{equation}
-where $R_f$ is the base radius of a spherical cap droplet that contains all liquid inside the rivulet.
-The $\Delta h$ values allow us clearly to distinguish between a breakup, as such exponential growth, and a collapse, indicated by a time independent constant value.
+In Fig.~\ref{fig:first_growth} we show $\Delta h$ data for Eq.~(\ref{eq:theta_const}) normalized by their respective $H_D$ as the different symbols.
+On x-axis we display the time normalized with $\tau_m$.  
+We find a very good collapse of our data with this rescaling and as a guide to eye we add a black dashed line that is proportional to $e^{\sigma_m t}$.
+Interestingly the full symbols follow the same exponential growth, Eq.~(\ref{eq:growth-sigma}), the empty symbols on the other hand do not show a pronounced growth, except the open triangles ($\triangle$, $\psi_0 = 0.173$). 
+
+
+and is shown as dashed line in Fig.~\ref{fig:first_growth}.
+The filled symbols are numerical experiments that lead to break up of the rivulet using Eq.~(\ref{eq:theta_const}), while the empty symbols display the collapse into a single droplet.
+It turns out that the behavior is not only sensitive to the geometry, $\psi_0$ but also to $\theta$ and therefore we introduce the time scale
+
+
+
+The $\Delta h$ values along $\xi(h_{\max})$ of the rivulet allow us to clearly distinguish between initial conditions that lead to breakups and droplet fragmentation, as such following the dashed line in Fig.~\ref{fig:first_growth}, and a collapse into a single droplet as shown by the open symbols in Fig.~\ref{fig:first_growth}.
+The open triangles ($\triangle$, $\psi_0 = 0.173$) actually mark an edge case in which $\Delta h$ grows with a similar slope as the filled symbols, however the time scale on which the instability grows is too long as compared to the collapse time scale. 
 We will get back to this point in Sec.~\ref{subsec:wettability} where we discuss the banded case, Eq.~(\ref{eq:theta_band}) and show that collapse time scale for larger $\psi_0$ are simply shorter than the breakup time scale.
-The scaling of Eq.~(\ref{eq:tau-rim}) suggest that the capillary velocity 
-\begin{equation}
-    U_{Ca} = \frac{\gamma\theta^3}{9\mu},
-\end{equation}
-is relevant for this problem and while mostly used for retracting droplets seems to hold true for ring-rivulets.
-
 
 
 \subsection{Retracting rivulets}\label{subsec:retract}
