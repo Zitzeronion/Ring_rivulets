@@ -172,8 +172,12 @@ end
 begin
 	timeScaleDF = DataFrame()
 	coalTime = Int64[]
+	breakupTime = Int64[]
+	angs = Int64[]
+	Rs = Int64[]
+	rrs = Int64[]
 	for R in [80, 120, 150, 160, 180, 200]
-		for rr in [20, 30, 40, 60, 80]
+		for rr in [20, 22, 25, 30, 40, 60, 80]
 			for ang in [20, 30, 40]
 				psi0 = subset(initial_data, :R0 => a -> a .== R, :rr0 => b -> b .== rr, :angle => c -> c .== ang)
 				dataCut = subset(growthDF, :R0 => a -> a .== R, :rr0 => c -> c .==  rr, :theta => t -> t .== ang, :substrate => s -> s .== "uniform")
@@ -182,17 +186,33 @@ begin
 					continue
 				else
 					hmm = findfirst(dataCut.deltaH .== 0)
+					hoo = findfirst(dataCut.hmin .<= 0.056)
 					if isa(hmm, Int)
-						dataCut.time[hmm]
-						println("There should be some")
-					else
-						println("I knew it at R: $(R), rr: $(rr) ang: $(ang)")
+						push!(coalTime, dataCut.time[hmm])
+						push!(breakupTime, -1)
+						#println("Time: $(dataCut.time[hmm]) at R: $(R), rr: $(rr) ang: $(ang)")
+					elseif isa(hoo, Int)
+						#println("I knew it at R: $(R), rr: $(rr) ang: $(ang)")
+						push!(breakupTime, dataCut.time[hoo])
+						push!(coalTime, -1)
+					else 
+						#println("Nothing to see here")
+						push!(breakupTime, -1)
+						push!(coalTime, -1)
 					end
-					push!(coalTime, 0)
 				end
+				push!(angs, ang)
+				push!(Rs, R)
+				push!(rrs, rr)
 			end
 		end
 	end
+	timeScaleDF.collapsT = coalTime
+	timeScaleDF.breakupT = breakupTime
+	timeScaleDF.R0 = Rs
+	timeScaleDF.rr0 = rrs
+	timeScaleDF.theta = angs
+	CSV.write("../data/CollapseBreakupTimes.csv",timeScaleDF)
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
