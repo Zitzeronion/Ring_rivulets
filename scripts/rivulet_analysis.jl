@@ -249,7 +249,9 @@ begin
 	set = 8
 	data0 = RivuletTools.read_data(R=data[set][1], r=data[set][2], kbT=data[set][3], year=data[set][4], month=data[set][5], day=data[set][6], hour=data[set][7], minute=data[set][8], θ=data[set][9])
 	# println(typeof(dataH), " ", typeof(dataH) == Dict{String, Any})
-	RivuletTools.heatmap_data(data0, t=25000)
+	figureE = RivuletTools.heatmap_data(data0, t=25000)
+	println("R: $(data[set][1]), rr: $(data[set][2]), theta: $(data[set][9]), kbt: $(data[set][3])")
+	figureE
 end
 
 # ╔═╡ a1ee76ab-bf27-466e-8324-01ecde09931c
