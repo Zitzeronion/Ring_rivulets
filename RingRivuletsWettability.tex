@@ -427,10 +427,12 @@ They furthermore found a very good approximation that can be computed from initi
 Therefore, the number of droplets is simply set by the initial conditions.
 This results has been tested by Nguyen et al.~\cite{nguyenCompetitionCollapseBreakup2012} using MD simulations and shown to agree well with the numerical experiments. 
 
-However, Gonz{\'a}lez et al.~\cite{gonzalezStabilityLiquidRing2013} further point out that the LSA and thus $n_{\max}$ fall short if one considers a disjoining pressure model, see e.g., Eq.~(\ref{eq:disjoinpressure}).
-They report that although initially the rivulet adapts to its most unstable mode it does not necessary yield $n_{\max}$ droplets, especially for $\psi_0 > 0.15$ and point out that Wu et al.~\cite{wuCompetingLiquidPhase2011} found a similar mismatch in their experiments.
-We perform a similar analysis and counted the number of droplets during our numerical experiments.
-The result is shown in Fig.~\ref{fig:max_drops}, where the black line is given by Eq.~(\ref{eq:maxDrops}) and different symbols refer to different patterns, see Eqs.(~\ref{eq:theta_const},\ref{eq:theta_band}).
+However, Gonz{\'a}lez et al.~\cite{gonzalezStabilityLiquidRing2013} pointed out as well that the LSA and thus $n_{\max}$ fall short if one considers a disjoining pressure model, see e.g., Eq.~(\ref{eq:disjoinpressure}).
+They report that although initially the rivulet adapts to its most unstable mode it does not necessary break up into $n_{\max}$ droplets, especially for $\psi_0 > 0.15$. 
+They also point towards the experiments of Wu et al.~\cite{wuCompetingLiquidPhase2011} where a similar mismatch was observed.
+We perform a similar analysis and count the number of droplets during our numerical experiments and adopted the scheme introduced by Gonz{\'a}lez et al.~\cite{gonzalezStabilityLiquidRing2013}, thus count the collapse as zero droplets, one off center droplet as one, two droplets as two and so on.
+The result is shown in Fig.~\ref{fig:max_drops}, where the black line is given by Eq.~(\ref{eq:maxDrops}) and different symbols refer to different patterns, see Eqs.(~\ref{eq:theta_const}-\ref{eq:theta_band}).
+
 
 \subsection{Wettability patterns}\label{subsec:wettability}
 
@@ -452,7 +454,7 @@ For footnotes in the main text of the article please number the footnotes to avo
 There are no conflicts to declare.
 
 \section*{Acknowledgements}
-The authors acknowledge financial support from the Independent Research Fund Denmark through a DFF Sapere Aude Research Leader grant (grant number 9063-00018B).
+S. Z. and J. R. acknowledge the financial support from the Independent Research Fund Denmark through a DFF Sapere Aude Research Leader grant (grant number 9063-00018B).
 
 
 
