@@ -176,10 +176,14 @@ begin
 	angs = Int64[]
 	Rs = Int64[]
 	rrs = Int64[]
+	psis = Float64[]
+	R0s = Float64[]
+	Rfs = Float64[]
+	tau_m = Float64[]
 	for R in [80, 120, 150, 160, 180, 200]
 		for rr in [20, 22, 25, 30, 40, 60, 80]
 			for ang in [20, 30, 40]
-				psi0 = subset(initial_data, :R0 => a -> a .== R, :rr0 => b -> b .== rr, :angle => c -> c .== ang)
+				inC = subset(initial_data, :R0 => a -> a .== R, :rr0 => b -> b .== rr, :angle => c -> c .== ang)
 				dataCut = subset(growthDF, :R0 => a -> a .== R, :rr0 => c -> c .==  rr, :theta => t -> t .== ang, :substrate => s -> s .== "uniform")
 				# Check if data exists
 				if dataCut.time == Int64[]
@@ -204,6 +208,10 @@ begin
 				push!(angs, ang)
 				push!(Rs, R)
 				push!(rrs, rr)
+				push!(psis, inC.psi0[1])
+				push!(R0s, R + inC.realrr[1])
+				push!(Rfs, inC.rdrop[1])
+				push!(tau_m, inC.tauMax[1])
 			end
 		end
 	end
@@ -212,8 +220,91 @@ begin
 	timeScaleDF.R0 = Rs
 	timeScaleDF.rr0 = rrs
 	timeScaleDF.theta = angs
+	timeScaleDF.psi0 = psis
+	timeScaleDF.Rstart = R0s
+	timeScaleDF.Rdrop = Rfs
+	timeScaleDF.tauM = tau_m
 	CSV.write("../data/CollapseBreakupTimes.csv",timeScaleDF)
 end
+
+# ╔═╡ 70da024e-4bf6-4a92-ae48-073df610ff2e
+timeScaleDF
+
+# ╔═╡ 68577639-24f9-4dc6-a5e5-49957c63af15
+begin
+	collapses = subset(timeScaleDF, :collapsT => a -> a .> 0)
+	breakup = subset(timeScaleDF, :collapsT => a -> a .== -1)
+end
+
+# ╔═╡ ab30944a-c4f1-4b3a-9fae-b1d6a69c7a48
+begin
+	tau_rim_here = (3/2 .* (collapses.Rstart .- collapses.Rdrop) ./ (0.01 * (deg2rad.(collapses.theta)).^3))
+	plot(xlabel="ψ₀", 
+		ylabel = "τ",
+		yaxis=:log10,
+		grid = false,
+		legendfontsize = 11,
+		guidefont = (16, :black),
+		tickfont = (12, :black),
+		minorticks = true,
+		legend = :topright,
+		ylims = (0.5, 10),
+		xlims = (0.0, 0.8)
+	)
+	scatter!(collapses.psi0, 
+		collapses.collapsT ./ collapses.tauM, 
+		label="collapse",
+		m = (8, :circ, 0.75)
+	)
+	scatter!(breakup.psi0, 
+		breakup.breakupT ./ breakup.tauM, 
+		label="breakup",
+		m = (8, :star5, 0.75)
+	)
+	xaxis = collect(0.001:0.001:1)
+	# plot!(xaxis, exp.(xaxis), label="fit1")
+	# scatter!(breakup.psi0, breakup.breakupT ./ breakup.tauM, label="breakup")
+	# scatter!(collapses.psi0, tau_rim_here ./ collapses.tauM, label="paper")
+	# println((3/2 .* (collapses.Rstart[1] .- collapses.Rdrop[1]) ./ (0.01 * (deg2rad.(collapses.theta[1])).^3)))
+end
+
+# ╔═╡ 058d3f7f-b03b-4dcd-8a20-72fe20e10990
+begin
+	timescalesPlot = plot(
+		#xlabel="ψ₀", 
+		#ylabel = "τ",
+		yaxis=:log10,
+		grid = false,
+		legendfontsize = 11,
+		guidefont = (16, :black),
+		tickfont = (12, :black),
+		minorticks = true,
+		legend = :topright,
+		ylims = (0.5, 10),
+		xlims = (0.0, 0.8)
+	)
+	scatter!(collapses.psi0, 
+		collapses.collapsT ./ collapses.tauM, 
+		label="collapse",
+		m = (8, :circ, 0.75),
+		xlabel="ψ₀", 
+		ylabel = "τ",
+	)
+	scatter!(breakup.psi0, 
+		breakup.breakupT ./ breakup.tauM, 
+		label="breakup",
+		m = (8, :star5, 0.75)
+	)
+	# xaxis = collect(0.001:0.001:1)
+	plot!(xaxis, 0.32 .* exp.(15.5 .* xaxis), l = (2, :black, :dash), label="∝ exp(ψ₀)")
+	plot!(xaxis, 16 .* exp.(-5.8 .* xaxis), l = (2, :black, :dashdot), label="∝exp(-ψ₀)")
+	# scatter!(breakup.psi0, breakup.breakupT ./ breakup.tauM, label="breakup")
+	# scatter!(collapses.psi0, tau_rim_here ./ collapses.tauM, label="paper")
+	# println((3/2 .* (collapses.Rstart[1] .- collapses.Rdrop[1]) ./ (0.01 * (deg2rad.(collapses.theta[1])).^3)))
+end
+
+# ╔═╡ a095a147-2348-4f1b-94b1-77a5e137bb8f
+savefig(timescalesPlot, "../assets/uniform_timescales.pdf")
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -2222,5 +2313,10 @@ version = "1.4.1+1"
 # ╠═b92731a3-b78f-4bc4-a40c-8f14d49a2ff5
 # ╠═dd19e06e-999b-4a92-afc3-4020304f7bb2
 # ╠═1665ccd0-47b5-43ce-bf8d-6c8ab5ef4e5b
+# ╠═70da024e-4bf6-4a92-ae48-073df610ff2e
+# ╠═68577639-24f9-4dc6-a5e5-49957c63af15
+# ╠═ab30944a-c4f1-4b3a-9fae-b1d6a69c7a48
+# ╠═058d3f7f-b03b-4dcd-8a20-72fe20e10990
+# ╠═a095a147-2348-4f1b-94b1-77a5e137bb8f
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
