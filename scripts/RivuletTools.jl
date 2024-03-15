@@ -958,7 +958,7 @@ function t0_data(;γ=0.01, μ=1/6, hmin = 0.05)
 	# Loop through initial conditions
 	for angle in [2/9, 1/6, 1/9, 1/18]
 		for R in [80, 120, 150, 160, 180, 200]
-			for rr in [20, 30, 40, 60, 80, 100]
+			for rr in [20, 22, 25, 30, 40, 60, 80, 100]
 				# Create initial condition
 				h = RivuletTools.torus(512, 512, rr, R, angle, (256, 256))
 				slice = h[256, 256:end]
@@ -1065,7 +1065,7 @@ end
 
 function height2fft(data, t; output = false)
 	initial_data = t0_data()
-	h_drop = initial_data[(initial_data.angle .== data[9]) .& (initial_data.R0 .== data[1]) .& (initial_data.rr0 .== data[2]), :].hdrop[1]
+	h_drop = initial_data[(initial_data.angle .== data[9]) .& (initial_data.R0 .== data[1]) .& (initial_data.rr0 .== data[2]), :hdrop]
 	height1D, _ = getRingCurve(data, t)
 	hNorm = height1D ./ h_drop
 	L = length(height1D)
