@@ -7,6 +7,9 @@ using InteractiveUtils
 # ╔═╡ 98443f3c-d712-11ee-0e87-0d4cb8ba0aea
 using FileIO, PlutoUI, Plots, DataFrames, CSV, JLD2, Images, ImageSegmentation, Random, FFTW, LaTeXStrings, CategoricalArrays, StatsPlots
 
+# ╔═╡ 2bbe79a6-41f1-4cd2-b7c2-f369e1452b2c
+using Distributions
+
 # ╔═╡ 265292da-57e8-455e-9093-855069961f3d
 begin
 	# Functions are stored in the local module!
@@ -233,15 +236,16 @@ timeScaleDF
 # ╔═╡ 68577639-24f9-4dc6-a5e5-49957c63af15
 begin
 	collapses = subset(timeScaleDF, :collapsT => a -> a .> 0)
-	breakup = subset(timeScaleDF, :collapsT => a -> a .== -1)
+	breakup = subset(timeScaleDF, :breakupT => a -> a .> 0)
 end
 
 # ╔═╡ ab30944a-c4f1-4b3a-9fae-b1d6a69c7a48
 begin
-	tau_rim_here = (3/2 .* (collapses.Rstart .- collapses.Rdrop) ./ (0.01 * (deg2rad.(collapses.theta)).^3))
-	plot(xlabel="ψ₀", 
+	tau_rim_C = (3/2 .* (collapses.Rstart .- collapses.Rdrop) ./ (0.01 * (deg2rad.(collapses.theta)).^3))
+	tau_rim_B = (3/2 .* (breakup.Rstart .- breakup.Rdrop) ./ (0.01 * (deg2rad.(breakup.theta)).^3))
+	somePlot = plot(xlabel="ψ₀", 
 		ylabel = "τ",
-		yaxis=:log10,
+		# yaxis=:log10,
 		grid = false,
 		legendfontsize = 11,
 		guidefont = (16, :black),
@@ -249,62 +253,82 @@ begin
 		minorticks = true,
 		legend = :topright,
 		ylims = (0.5, 10),
-		xlims = (0.0, 0.8)
+		xlims = (0.0, 0.81)
 	)
 	scatter!(collapses.psi0, 
-		collapses.collapsT ./ collapses.tauM, 
+		collapses.collapsT ./ tau_rim_C, #collapses.tauM, 
 		label="collapse",
 		m = (8, :circ, 0.75)
 	)
 	scatter!(breakup.psi0, 
-		breakup.breakupT ./ breakup.tauM, 
+		breakup.breakupT ./ tau_rim_B, #breakup.tauM, 
 		label="breakup",
 		m = (8, :star5, 0.75)
 	)
 	xaxis = collect(0.001:0.001:1)
+	plot!(xaxis,55 .* xaxis .- 2.5)
 	# plot!(xaxis, exp.(xaxis), label="fit1")
 	# scatter!(breakup.psi0, breakup.breakupT ./ breakup.tauM, label="breakup")
 	# scatter!(collapses.psi0, tau_rim_here ./ collapses.tauM, label="paper")
 	# println((3/2 .* (collapses.Rstart[1] .- collapses.Rdrop[1]) ./ (0.01 * (deg2rad.(collapses.theta[1])).^3)))
+	somePlot
 end
+
+# ╔═╡ d89a7e55-d54f-4cfb-80ce-94a8eb1a6e26
+res = 1 .* LogNormal(-2.,1.) .+ 0.1
+
+# ╔═╡ e9eb1038-cc54-4e62-8e45-1ff3f50c5841
+plot(res, xlim=(0,1))
 
 # ╔═╡ 058d3f7f-b03b-4dcd-8a20-72fe20e10990
 begin
+	expo = 0.1
 	timescalesPlot = plot(
 		#xlabel="ψ₀", 
 		#ylabel = "τ",
-		yaxis=:log10,
+		# 
+		# xaxis=:log10,
 		grid = false,
 		legendfontsize = 11,
 		guidefont = (16, :black),
 		tickfont = (12, :black),
 		minorticks = true,
 		legend = :topright,
-		ylims = (0.5, 10),
+		ylims = (0.5, 20),
 		xlims = (0.0, 0.8)
 	)
 	scatter!(collapses.psi0, 
-		collapses.collapsT ./ collapses.tauM, 
+		collapses.collapsT ./ collapses.tauM ./ deg2rad.(collapses.theta).^expo, 
 		label="collapse",
 		m = (8, :circ, 0.75),
 		xlabel="ψ₀", 
 		ylabel = "τ",
+		# yaxis=:log10,
 	)
 	scatter!(breakup.psi0, 
-		breakup.breakupT ./ breakup.tauM, 
+		breakup.breakupT ./ breakup.tauM ./ deg2rad.(breakup.theta).^expo, 
 		label="breakup",
 		m = (8, :star5, 0.75)
 	)
 	# xaxis = collect(0.001:0.001:1)
 	plot!(xaxis, 0.32 .* exp.(15.5 .* xaxis), l = (2, :black, :dash), label="∝ exp(ψ₀)")
 	plot!(xaxis, 16 .* exp.(-5.8 .* xaxis), l = (2, :black, :dashdot), label="∝exp(-ψ₀)")
+	# w = 14
+	plot!(xaxis, (25 .* exp.(-8 .* xaxis) .+ 0.2) - 26 .* exp.(-15. .* xaxis), label="try")
+	# plot!(res, label="try2")
 	# scatter!(breakup.psi0, breakup.breakupT ./ breakup.tauM, label="breakup")
 	# scatter!(collapses.psi0, tau_rim_here ./ collapses.tauM, label="paper")
 	# println((3/2 .* (collapses.Rstart[1] .- collapses.Rdrop[1]) ./ (0.01 * (deg2rad.(collapses.theta[1])).^3)))
 end
 
 # ╔═╡ a095a147-2348-4f1b-94b1-77a5e137bb8f
-savefig(timescalesPlot, "../assets/uniform_timescales.pdf")
+# savefig(timescalesPlot, "../assets/uniform_timescales.pdf")
+
+# ╔═╡ f4b660fb-3d3b-45aa-b80f-1db1da2b0b62
+hnew = RivuletTools.read_data(R=200, r=80, kbT=0.0, year=2024, month=3, day=16, hour=7, minute=4, θ=10 ,nm=(3,2), arrested=false)
+
+# ╔═╡ 3acaa735-7821-490f-83f5-698b7e69f567
+heatmap(reshape(hnew["h_7500000"],512,512), aspect_ratio=1)
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -312,6 +336,7 @@ PLUTO_PROJECT_TOML_CONTENTS = """
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 CategoricalArrays = "324d7699-5711-5eae-9e2f-1d82baa6b597"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 FFTW = "7a1cc6ca-52ef-59f5-83cd-3a7055c09341"
 FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
 ImageSegmentation = "80713f31-8817-5129-9cf8-209ff8fb23e1"
@@ -327,6 +352,7 @@ StatsPlots = "f3b207a7-027a-5e70-b257-86293d7955fd"
 CSV = "~0.10.12"
 CategoricalArrays = "~0.10.8"
 DataFrames = "~1.6.1"
+Distributions = "~0.25.107"
 FFTW = "~1.8.0"
 FileIO = "~1.16.2"
 ImageSegmentation = "~1.8.2"
@@ -344,7 +370,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.9.3"
 manifest_format = "2.0"
-project_hash = "73572a2d7c41b4b3875640bce4319ce378c85342"
+project_hash = "89aa256743f420f89609c81b433097cb52213ce9"
 
 [[deps.AbstractFFTs]]
 deps = ["LinearAlgebra"]
@@ -2316,7 +2342,12 @@ version = "1.4.1+1"
 # ╠═70da024e-4bf6-4a92-ae48-073df610ff2e
 # ╠═68577639-24f9-4dc6-a5e5-49957c63af15
 # ╠═ab30944a-c4f1-4b3a-9fae-b1d6a69c7a48
+# ╠═2bbe79a6-41f1-4cd2-b7c2-f369e1452b2c
+# ╠═d89a7e55-d54f-4cfb-80ce-94a8eb1a6e26
+# ╠═e9eb1038-cc54-4e62-8e45-1ff3f50c5841
 # ╠═058d3f7f-b03b-4dcd-8a20-72fe20e10990
 # ╠═a095a147-2348-4f1b-94b1-77a5e137bb8f
+# ╠═f4b660fb-3d3b-45aa-b80f-1db1da2b0b62
+# ╠═3acaa735-7821-490f-83f5-698b7e69f567
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

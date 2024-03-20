@@ -544,7 +544,7 @@ To get this data we run the function `RivuletTools.measure_data()` that collects
 # ╔═╡ df519afa-309a-4633-860d-2fe40a384fa9
 for to_analyse in [(data, "dynamics_uniform", false), (data_arrested, "dynamics_patterned", true)]
 	run_me = false
-	RivuletTools.measure_data(to_analyse[1], to_analyse[2], run_me, to_analyse[3], "")
+	RivuletTools.measure_data(to_analyse[1], to_analyse[2], run_me, to_analyse[3], "", (false, 30, 40))
 end
 
 # ╔═╡ 3128d6eb-375d-4770-8215-6ed7e3ac5b5a
@@ -681,8 +681,8 @@ begin
     	:ndrops,
     	group = :substrate,
     	# title = "",
-    	xlabel = L"\psi_0",
-    	ylabel = L"n_{max}",
+    	xlabel = "ψ₀",
+    	ylabel = "n max",
 		legendfontsize = 12,
 		guidefont = (16, :black),
 		tickfont = (12, :black),
@@ -695,7 +695,7 @@ begin
 	# xlabel = L"\psi_0",
 	# ylabel = L"n_{max}",
 	label = "Eq. (18)",
-	xlims= (0, 1.05),
+	xlims= (0, 0.805),
 	ylims = (0, 30),
 	minorticks = true,
 	l = (:black, 2),
@@ -951,7 +951,7 @@ There is data on
 # ╔═╡ 3273792c-41fb-4225-a4f7-2f1c9d58be4a
 for to_analyse in [(data_gamma05, "gamma05_uniform", "gamma05_"), (data_gamma20, "gamma20_uniform", "gamma20_")]
 	run_me = false
-	RivuletTools.measure_data(to_analyse[1], to_analyse[2], run_me, false, to_analyse[3])
+	RivuletTools.measure_data(to_analyse[1], to_analyse[2], run_me, false, to_analyse[3], (false, 30, 40))
 end
 
 # ╔═╡ 144e23e9-ce3d-4ed6-be2c-dff1fed39e59
