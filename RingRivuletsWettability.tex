@@ -345,7 +345,7 @@ The numerical experiments therefore create a dynamic response of the initial con
 \label{sec:dynamics}
 \begin{figure*}
     \centering
-    \includegraphics[width=1.0\textwidth]{assets/heatcirc.png}
+    \includegraphics[width=0.95\textwidth]{assets/heatcirc.png}
     \caption{(a) Heatmap of the film thickness at $t=1.68\tau_m$ for $\psi_0 = 0.21$. 
     All length scales are normalized by $H_D = 25.67$. 
     The red ring in the middle of the rivulet is depict as blue line plot in (b).
@@ -407,7 +407,7 @@ Therefore, the $\Delta h$ values along $\xi(h_{\max})$ of the rivulet allow us t
 The open triangles ($\triangle$, $\psi_0 = 0.173$) actually mark an edge case in which $\Delta h$ grows with a similar slope as the filled symbols, however the timescale on which the instability grows is too long as compared to the collapse timescale. 
 We will get back to this point in Sec.~\ref{subsec:wettability} where we discuss the banded case, Eq.~(\ref{eq:theta_band}) and show that the collapse is fast for larger $\psi_0$s as compared to the breakup instability.
 
-\subsection{Droplets and breakup modes}\label{subsec:drop-counting}
+\subsection{Droplets and time scales}\label{subsec:drop-counting}
 \begin{figure}
     \centering
     \includegraphics[width=0.45\textwidth]{assets/LSA_droplets.pdf}
@@ -417,21 +417,44 @@ We will get back to this point in Sec.~\ref{subsec:wettability} where we discuss
     \label{fig:max_drops}
 \end{figure}
 
-Given the initial conditions of the ring-rivulet can we predict how many droplets are formed after the rivulet breaks up?
-While this may sound like a funny question it bares great impact for nanostructuring and self assembly, thus predicting this quantity is of great interest.
-The answer to this question was addressed by Gonz{\'a}lez et al.~\cite{gonzalezStabilityLiquidRing2013} and yield a complex system of equations that predict the number of droplets $n_{\max}$ based on the most unstable mode.
-They furthermore found a very good approximation that can be computed from initial conditions given by 
+Given the initial conditions of the ring-rivulet can we predict if there is a collapse or a brake up and if the rivulet breaks during contraction how many droplets are formed?
+While this may sound like a funny question it bares great impact for nanostructuring and/or self-assembly, thus having predictive power is of great interest.
+Both questions were addressed by Gonz{\'a}lez et al.~\cite{gonzalezStabilityLiquidRing2013}. 
+The maximal number of droplets $n_{\max}$ can be computed with a complex system of equations which are based on the most unstable mode.
+They furthermore found a surprisingly good approximation that can be calculated from initial conditions, 
 \begin{equation}\label{eq:maxDrops}
     n_{\max, app} = \frac{\pi}{2\psi_0}.
 \end{equation}
-Therefore, the number of droplets is simply set by the initial conditions.
-This results has been tested by Nguyen et al.~\cite{nguyenCompetitionCollapseBreakup2012} using MD simulations and shown to agree well with the numerical experiments. 
+Therefore, it seems as if the number of droplets is simply set at $t=0$.
+This result has been tested and shown to agree well with MD simulations by Nguyen et al.~\cite{nguyenCompetitionCollapseBreakup2012}. 
 
 However, Gonz{\'a}lez et al.~\cite{gonzalezStabilityLiquidRing2013} pointed out as well that the LSA and thus $n_{\max}$ fall short if one considers a disjoining pressure model, see e.g., Eq.~(\ref{eq:disjoinpressure}).
 They report that although initially the rivulet adapts to its most unstable mode it does not necessary break up into $n_{\max}$ droplets, especially for $\psi_0 > 0.15$. 
-They also point towards the experiments of Wu et al.~\cite{wuCompetingLiquidPhase2011} where a similar mismatch was observed.
+They also point towards the experiments of Wu et al.~\cite{wuCompetingLiquidPhase2011} where a similar mismatch with theoretical predictions was observed.
+
 We perform a similar analysis and count the number of droplets during our numerical experiments and adopted the scheme introduced by Gonz{\'a}lez et al.~\cite{gonzalezStabilityLiquidRing2013}, thus count the collapse as zero droplets, one off center droplet as one, two droplets as two and so on.
-The result is shown in Fig.~\ref{fig:max_drops}, where the black line is given by Eq.~(\ref{eq:maxDrops}) and different symbols refer to different patterns, see Eqs.(~\ref{eq:theta_const}-\ref{eq:theta_band}).
+The result is shown in Fig.~\ref{fig:max_drops}, where the black line is given by Eq.~(\ref{eq:maxDrops}) and the different symbols refer to different patterns, see Eqs.(~\ref{eq:theta_const}-\ref{eq:theta_band}).
+Our results agree with the observations made by Gonz{\'a}lez et al.~\cite{gonzalezStabilityLiquidRing2013} and in Fig.~\ref{fig:ThreeDToOneD} we actually observe a transition from $n = 8$ (blue curve) to $n = 3$ (purple curve).
+
+% We can further quantify this behavior in terms of time scales for both the collapse and the breakup of the ring-rivulet.
+In Fig.~\ref{fig:max_drops} we see that for larger $\psi_0$-values theory and our numerical experiments do not agree.
+In fact, for $\psi_0 > 0.22$ the ring-rivulet on the homogeneous substrate favors the collapse $n = 0$, with a few outliers. 
+It is therefore fair to assumes that the growth-rate of the instability is slower than the the rate of collapse, thus $t_b > t_c$ for $\psi_0 > 0.22$, see Fig.~\ref{fig:first_growth} empty symbols.
+In Fig.~\ref{fig:timescaleDifference} we measured these time scales as function of $\psi_0$ and normalized them with their respective $\tau_m$ Eq.~(\ref{eq:tau_m}).
+\begin{figure}
+    \centering
+    \includegraphics[width = 0.45\textwidth]{assets/uniform_timescales.pdf}
+    \caption{Breakup and collapse times $\tau$ for all numerical experiments on a uniform substrate, Eq.~(\ref{eq:theta_const}).
+        On the x-axis we use the dimensionless length scale $\psi_0$ and the y-axis displays either the breakup- or collapse time $\tau$ with stars (\textcolor{jlorange}{$\star$}) or bullets (\textcolor{jlblue}{$\bullet$}) respectively.
+        The dashed line serves as a guide to eye and shows an exponential growth that is in agreement with the breakup data. 
+        The dash-dotted line shows and exponential decay which can be motivated by the collapse data.
+        % We do not observe breakup events for ring-rivulets with $\psi_0 > 0.22$. 
+        }
+    \label{fig:timescaleDifference}
+\end{figure}
+First, the data suggest that there is no clear boundary that distinguishes between collapse and breakup.
+We find a region around $\psi_0 \approx 0.2$ where the collapse times and the breakup times are of similar magnitude.
+On the left side of $\psi_0 \approx 0.2$ rivulets are more likely to break up into multiple droplet, while on the right side the collapse is the more likely outcome of a numerical experiment.
 
 
 \subsection{Wettability patterns}\label{subsec:wettability}
