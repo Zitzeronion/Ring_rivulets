@@ -287,15 +287,15 @@ begin
 		#xlabel="ψ₀", 
 		#ylabel = "τ",
 		# 
-		# xaxis=:log10,
+		yaxis=:log10,
 		grid = false,
 		legendfontsize = 11,
 		guidefont = (16, :black),
 		tickfont = (12, :black),
 		minorticks = true,
 		legend = :topright,
-		ylims = (0.5, 20),
-		xlims = (0.0, 0.8)
+		ylims = (0.5, 10),
+		#xlims = (0.01, 0.8)
 	)
 	scatter!(collapses.psi0, 
 		collapses.collapsT ./ collapses.tauM ./ deg2rad.(collapses.theta).^expo, 
@@ -310,11 +310,14 @@ begin
 		label="breakup",
 		m = (8, :star5, 0.75)
 	)
-	# xaxis = collect(0.001:0.001:1)
-	plot!(xaxis, 0.32 .* exp.(15.5 .* xaxis), l = (2, :black, :dash), label="∝ exp(ψ₀)")
-	plot!(xaxis, 16 .* exp.(-5.8 .* xaxis), l = (2, :black, :dashdot), label="∝exp(-ψ₀)")
+	xaxislin = collect(0.0:0.001:1)
+	plot!(xaxislin, 0.32 .* exp.(15.5 .* xaxislin), l = (2, :black, :dash), label="∝ exp(ψ₀)")
+	plot!(xaxislin, 16 .* exp.(-5.8 .* xaxislin), l = (2, :black, :dashdot), label="∝exp(-ψ₀)")
 	# w = 14
-	plot!(xaxis, (25 .* exp.(-8 .* xaxis) .+ 0.2) - 26 .* exp.(-15. .* xaxis), label="try")
+	n = -1.2
+	plot!(xaxislin, (((0.15 .* exp.(22 .* xaxislin))).^(n) + ((90 .* exp.(-10. .* xaxislin) .+ 0.2)).^(n)).^(1/n),l = (2, :black, :solid), label="Ulf")
+	# plot!(xaxis, (25 .* exp.(-8 .* xaxis) .+ 0.2) - 26 .* exp.(-15. .* xaxis), label="try2")
+	# plot!(xaxis, xaxis.^(2) .+ xaxis, label="try2")
 	# plot!(res, label="try2")
 	# scatter!(breakup.psi0, breakup.breakupT ./ breakup.tauM, label="breakup")
 	# scatter!(collapses.psi0, tau_rim_here ./ collapses.tauM, label="paper")
@@ -324,11 +327,27 @@ end
 # ╔═╡ a095a147-2348-4f1b-94b1-77a5e137bb8f
 # savefig(timescalesPlot, "../assets/uniform_timescales.pdf")
 
+# ╔═╡ e2018388-8732-4186-bb8e-20fff9e73eaa
+dataArr = RivuletTools.data_arrested
+
 # ╔═╡ f4b660fb-3d3b-45aa-b80f-1db1da2b0b62
-hnew = RivuletTools.read_data(R=200, r=80, kbT=0.0, year=2024, month=3, day=16, hour=7, minute=4, θ=10 ,nm=(3,2), arrested=false)
+begin
+	Dset = 88
+	hnew = RivuletTools.read_data(R=dataArr[Dset][1], r=dataArr[Dset][2], kbT=dataArr[Dset][3], year=dataArr[Dset][4], month=dataArr[Dset][5], day=dataArr[Dset][6], hour=dataArr[Dset][7], minute=dataArr[Dset][8], θ=dataArr[Dset][9], nm=(3,2), arrested=true)
+	println("R: $(dataArr[Dset][1]) rr: $(dataArr[Dset][2]) theta: $(dataArr[Dset][9]) kbt: $(dataArr[Dset][3])")
+end
+
+# ╔═╡ cfa56378-beb9-46d5-96f6-3c8d4300b469
+hfield = reshape(hnew["h_7500000"],512,512)
 
 # ╔═╡ 3acaa735-7821-490f-83f5-698b7e69f567
-heatmap(reshape(hnew["h_7500000"],512,512), aspect_ratio=1)
+heatmap(hfield, aspect_ratio=1)
+
+# ╔═╡ 201fb28b-902b-4ebe-88f6-ef5ea400acbc
+begin
+	scatter(1:256, hfield[1:256,256], ylims=(0,8), xlims=(50, 150))
+	#plot()
+end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -2347,7 +2366,10 @@ version = "1.4.1+1"
 # ╠═e9eb1038-cc54-4e62-8e45-1ff3f50c5841
 # ╠═058d3f7f-b03b-4dcd-8a20-72fe20e10990
 # ╠═a095a147-2348-4f1b-94b1-77a5e137bb8f
+# ╠═e2018388-8732-4186-bb8e-20fff9e73eaa
 # ╠═f4b660fb-3d3b-45aa-b80f-1db1da2b0b62
+# ╠═cfa56378-beb9-46d5-96f6-3c8d4300b469
 # ╠═3acaa735-7821-490f-83f5-698b7e69f567
+# ╠═201fb28b-902b-4ebe-88f6-ef5ea400acbc
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
