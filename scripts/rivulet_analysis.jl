@@ -745,6 +745,12 @@ Test me
 # ╔═╡ 8bdffe16-02af-46bd-a568-0e238cc76b6c
 RivuletTools.do_gif(RivuletTools.read_data(R=180, r=20, kbT=0.0, year=2024, month=2, day=22, hour=13, minute=5, θ=40, gradient=(true, 10, 40), nm=(3,2)), "gradient_first", timeMax=2500000)
 
+# ╔═╡ a48e9529-bc20-4b46-a861-d6ae09e41d2c
+forGradientDF = CSV.read("../data/ring_all_sims_nokBT.csv", DataFrame)
+
+# ╔═╡ 4e19b5fa-984c-4dd0-a956-6371b53f58f6
+
+
 # ╔═╡ 8886f394-ff90-4fbd-8dec-874f6a4ded83
 dropset = 44
 
@@ -3539,6 +3545,8 @@ version = "1.4.1+1"
 # ╠═b9cf9e47-d8da-4416-b67d-7c806595ceb9
 # ╠═5d722b85-4e5b-4dc3-9b8d-eb3b6cf33941
 # ╠═8bdffe16-02af-46bd-a568-0e238cc76b6c
+# ╠═a48e9529-bc20-4b46-a861-d6ae09e41d2c
+# ╠═4e19b5fa-984c-4dd0-a956-6371b53f58f6
 # ╠═8886f394-ff90-4fbd-8dec-874f6a4ded83
 # ╟─d9556b99-ac13-4278-8fc2-085728a2cfa9
 # ╠═543dea77-0aea-49e6-811a-5a87218d6632

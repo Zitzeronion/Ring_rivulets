@@ -327,6 +327,80 @@ end
 # ╔═╡ a095a147-2348-4f1b-94b1-77a5e137bb8f
 # savefig(timescalesPlot, "../assets/uniform_timescales.pdf")
 
+# ╔═╡ 920cb851-4f6e-443d-a1c7-adf1035b91c1
+md"## Linear wettability gradients"
+
+# ╔═╡ c92ecb8d-99ed-43f2-bf73-5fbe5c55d58e
+begin
+	plain = growthDF[(growthDF.substrate .== "uniform") .& (growthDF.theta .== 40) .& (growthDF.R0 .== 180) .& (growthDF.rr0 .== 20), :]
+	band = growthDF[(growthDF.substrate .== "pattern") .& (growthDF.theta .== 40) .& (growthDF.R0 .== 180) .& (growthDF.rr0 .== 20), :]
+	plain20 = growthDF[(growthDF.substrate .== "uniform") .& (growthDF.theta .== 20) .& (growthDF.R0 .== 180) .& (growthDF.rr0 .== 80), :]
+	band20 = growthDF[(growthDF.substrate .== "pattern") .& (growthDF.theta .== 20) .& (growthDF.R0 .== 180) .& (growthDF.rr0 .== 80), :]
+	g1040 = growthDF[growthDF.substrate .== "grad_1040", :]
+	g2040 = growthDF[growthDF.substrate .== "grad_2040", :]
+	g3040 = growthDF[growthDF.substrate .== "grad_3040", :]
+	g4020 = growthDF[growthDF.substrate .== "grad_4020", :]
+	g3020 = growthDF[growthDF.substrate .== "grad_3020", :]
+end
+
+# ╔═╡ 4be53ec0-8cd9-484f-b59b-52acd1707fdb
+begin
+	initial40 = subset(initial_data, :R0 => a -> a .== 180, :rr0 => b -> b .== 20, :angle => c -> c .== 40)
+	ll = initial40.hdrop[1]
+	# tt = 3/2*(iC.R0[1] + iC.realrr[1] - iC.rdrop[1])/(0.01 * ics[4]^3)
+	tt = 1/initial40.sigmaMax[1]*(2π/9)^(1.5)
+	#initial = subset(initial_data, :R0 => a -> a .== 180, :rr0 => b -> b .== 20, :angle => c -> c .== 40)
+	Roft = plot(xlabel = L"t/\tau_m", ylabel = L"R(t)/H_D",
+		# yaxis=:log10,
+		# xaxis=:log10,
+		grid = false,
+		legendfontsize = 10,
+		guidefont = (16, :black),
+		tickfont = (12, :black),
+		minorticks = true,
+		legend = :bottomright,
+		# w = 2,
+		ylims = (0.0, 10),
+		xlims = (0.0, 42)
+	)
+	plot!(plain.time ./ tt, plain.R_t ./ ll, label="Eq.(7)", l=(2.5, :solid))
+	plot!(band.time ./ tt, band.R_t ./ ll, label="Eq.(8)", l = (2.5, :dash))
+	plot!(g1040.time ./ tt, g1040.R_t ./ ll, label="Eq.(9), 10-40", l = (2.5, :dashdot))
+	plot!(g2040.time ./ tt, g2040.R_t ./ ll, label="Eq.(9), 20-40", l = (2.5, :dot))
+	plot!(g3040.time ./ tt, g3040.R_t ./ ll, label="Eq.(9), 30-40", l = (2.5, :dashdotdot))
+end
+
+# ╔═╡ 3b9e37c1-466d-4ce8-9133-599c3f3deb42
+savefig(Roft, "../assets/radius_time_gradient_negative.pdf")
+
+# ╔═╡ d434cf17-7a19-40b0-936b-56cb37ed76d4
+begin
+	initial20 = subset(initial_data, :R0 => a -> a .== 180, :rr0 => b -> b .== 80, :angle => c -> c .== 20)
+	ll2 = initial20.hdrop[1]
+	tt2 = 1/initial20.sigmaMax[1]*(π/9)^(1.5)
+	
+	Roftpos = plot(xlabel = L"t/\tau_m", ylabel = L"R(t)/H_D",
+		# yaxis=:log10,
+		# xaxis=:log10,
+		grid = false,
+		legendfontsize = 10,
+		guidefont = (16, :black),
+		tickfont = (12, :black),
+		minorticks = true,
+		legend = :bottomleft,
+		# w = 2,
+		ylims = (4, 12),
+		xlims = (0, 7.5)
+	)
+	plot!(plain20.time ./ tt2, plain20.R_t ./ ll2, label="Eq.(7)", l=(2.5, :solid))
+	plot!(band20.time ./ tt2, band20.R_t ./ ll2, label="Eq.(8)", l = (2.5, :dash))
+	plot!(g4020.time ./ tt2, g4020.R_t ./ ll2, label="Eq.(9), 40-20", l = (2.5, :dashdot))
+	plot!(g4020.time ./ tt2, g3020.R_t ./ ll2, label="Eq.(9), 30-20", l = (2.5, :dot))
+end
+
+# ╔═╡ 23b6e6e6-4a81-48bb-897f-5586c95d7b48
+savefig(Roft, "../assets/radius_time_gradient_positive.pdf")
+
 # ╔═╡ e2018388-8732-4186-bb8e-20fff9e73eaa
 dataArr = RivuletTools.data_arrested
 
@@ -2366,6 +2440,12 @@ version = "1.4.1+1"
 # ╠═e9eb1038-cc54-4e62-8e45-1ff3f50c5841
 # ╠═058d3f7f-b03b-4dcd-8a20-72fe20e10990
 # ╠═a095a147-2348-4f1b-94b1-77a5e137bb8f
+# ╠═920cb851-4f6e-443d-a1c7-adf1035b91c1
+# ╠═c92ecb8d-99ed-43f2-bf73-5fbe5c55d58e
+# ╠═4be53ec0-8cd9-484f-b59b-52acd1707fdb
+# ╠═3b9e37c1-466d-4ce8-9133-599c3f3deb42
+# ╠═d434cf17-7a19-40b0-936b-56cb37ed76d4
+# ╠═23b6e6e6-4a81-48bb-897f-5586c95d7b48
 # ╠═e2018388-8732-4186-bb8e-20fff9e73eaa
 # ╠═f4b660fb-3d3b-45aa-b80f-1db1da2b0b62
 # ╠═cfa56378-beb9-46d5-96f6-3c8d4300b469
