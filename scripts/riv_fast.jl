@@ -399,7 +399,7 @@ begin
 end
 
 # ╔═╡ 23b6e6e6-4a81-48bb-897f-5586c95d7b48
-savefig(Roft, "../assets/radius_time_gradient_positive.pdf")
+savefig(Roftpos, "../assets/radius_time_gradient_positive.pdf")
 
 # ╔═╡ e2018388-8732-4186-bb8e-20fff9e73eaa
 dataArr = RivuletTools.data_arrested
