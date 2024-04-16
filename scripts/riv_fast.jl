@@ -311,11 +311,11 @@ begin
 		m = (8, :star5, 0.75)
 	)
 	xaxislin = collect(0.0:0.001:1)
-	plot!(xaxislin, 0.32 .* exp.(15.5 .* xaxislin), l = (2, :black, :dash), label="∝ exp(ψ₀)")
-	plot!(xaxislin, 16 .* exp.(-5.8 .* xaxislin), l = (2, :black, :dashdot), label="∝exp(-ψ₀)")
+	plot!(xaxislin, 0.32 .* exp.(15.5 .* xaxislin), l = (2, :black, :dash), label="∝ exp(aψ₀)")
+	plot!(xaxislin, 16 .* exp.(-5.8 .* xaxislin), l = (2, :black, :dashdot), label="∝exp(-bψ₀)")
 	# w = 14
-	n = -1.2
-	plot!(xaxislin, (((0.15 .* exp.(22 .* xaxislin))).^(n) + ((90 .* exp.(-10. .* xaxislin) .+ 0.2)).^(n)).^(1/n),l = (2, :black, :solid), label="Ulf")
+	# n = -1.2
+	# plot!(xaxislin, (((0.15 .* exp.(22 .* xaxislin))).^(n) + ((90 .* exp.(-10. .* xaxislin) .+ 0.2)).^(n)).^(1/n),l = (2, :black, :solid), label="Ulf")
 	# plot!(xaxis, (25 .* exp.(-8 .* xaxis) .+ 0.2) - 26 .* exp.(-15. .* xaxis), label="try2")
 	# plot!(xaxis, xaxis.^(2) .+ xaxis, label="try2")
 	# plot!(res, label="try2")
@@ -325,7 +325,7 @@ begin
 end
 
 # ╔═╡ a095a147-2348-4f1b-94b1-77a5e137bb8f
-# savefig(timescalesPlot, "../assets/uniform_timescales.pdf")
+savefig(timescalesPlot, "../assets/uniform_timescales.pdf")
 
 # ╔═╡ 920cb851-4f6e-443d-a1c7-adf1035b91c1
 md"## Linear wettability gradients"
@@ -363,15 +363,51 @@ begin
 		ylims = (0.0, 10),
 		xlims = (0.0, 42)
 	)
-	plot!(plain.time ./ tt, plain.R_t ./ ll, label="Eq.(7)", l=(2.5, :solid))
-	plot!(band.time ./ tt, band.R_t ./ ll, label="Eq.(8)", l = (2.5, :dash))
-	plot!(g1040.time ./ tt, g1040.R_t ./ ll, label="Eq.(9), 10-40", l = (2.5, :dashdot))
-	plot!(g2040.time ./ tt, g2040.R_t ./ ll, label="Eq.(9), 20-40", l = (2.5, :dot))
-	plot!(g3040.time ./ tt, g3040.R_t ./ ll, label="Eq.(9), 30-40", l = (2.5, :dashdotdot))
+	plot!(plain.time ./ tt, plain.R_t ./ ll, label="Eq.(7), θ = 40°", l=(2.5, :solid))
+	plot!(band.time ./ tt, band.R_t ./ ll, label="Eq.(8), θ = 40°", l = (2.5, :dash))
+	plot!(g1040.time ./ tt, g1040.R_t ./ ll, label="Eq.(9), g(10°,40°)", l = (2.5, :dashdot))
+	plot!(g2040.time ./ tt, g2040.R_t ./ ll, label="Eq.(9), g(20°,40°)", l = (2.5, :dot))
+	plot!(g3040.time ./ tt, g3040.R_t ./ ll, label="Eq.(9), g(30°,40°)", l = (2.5, :dashdotdot))
 end
 
 # ╔═╡ 3b9e37c1-466d-4ce8-9133-599c3f3deb42
 savefig(Roft, "../assets/radius_time_gradient_negative.pdf")
+
+# ╔═╡ 69c0e684-69da-4419-bfa9-40f17016579a
+begin
+	tthere = 1
+	plot(xlabel = L"t/\tau_m", ylabel = L"R(t)/H_D",
+		# yaxis=:log10,
+		# xaxis=:log10,
+		grid = false,
+		legendfontsize = 10,
+		guidefont = (16, :black),
+		tickfont = (12, :black),
+		minorticks = true,
+		legend = :bottomright,
+		# w = 2,
+		ylims = (0.0, 10),
+		# xlims = (0.0, 42)
+	)
+	plot!(plain.time ./ tthere, plain.R_t ./ ll, label="Eq.(7)", l=(2.5, :solid))
+	plot!(band.time ./ tthere, band.R_t ./ ll, label="Eq.(8)", l = (2.5, :dash))
+	plot!(g1040.time ./ tthere, g1040.R_t ./ ll, label="Eq.(9), 10-40", l = (2.5, :dashdot))
+	plot!(g2040.time ./ tthere, g2040.R_t ./ ll, label="Eq.(9), 20-40", l = (2.5, :dot))
+	plot!(g3040.time ./ tthere, g3040.R_t ./ ll, label="Eq.(9), 30-40", l = (2.5, :dashdotdot))
+end
+
+# ╔═╡ 3997894e-991f-431a-b680-4d6620aae2cc
+begin
+	dataGrad = RivuletTools.data_gradient
+	gset = 2
+	himg = RivuletTools.read_data(R=dataGrad[gset][1], r=dataGrad[gset][2], kbT=dataGrad[gset][3], year=dataGrad[gset][4], month=dataGrad[gset][5], day=dataGrad[gset][6], hour=dataGrad[gset][7], minute=dataGrad[gset][8], θ=dataGrad[gset][9], nm=(3,2), gradient=(true, dataGrad[gset][10],dataGrad[gset][11]))
+	# println("R: $(dataGrad[gset][1]) rr: $(dataGrad[gset][2]) theta: $(dataGrad[gset][9])")
+	hfg = reshape(himg["h_500000"],512,512)
+	samplePlot = heatmap(hfg, aspect_ratio=1, c=:viridis,xlims=(1,512), ylims=(1,512), legend=:none)
+
+	savefig(samplePlot, "../assets/grad2040_t5k.pdf")
+	samplePlot
+end
 
 # ╔═╡ d434cf17-7a19-40b0-936b-56cb37ed76d4
 begin
@@ -2444,6 +2480,8 @@ version = "1.4.1+1"
 # ╠═c92ecb8d-99ed-43f2-bf73-5fbe5c55d58e
 # ╠═4be53ec0-8cd9-484f-b59b-52acd1707fdb
 # ╠═3b9e37c1-466d-4ce8-9133-599c3f3deb42
+# ╠═69c0e684-69da-4419-bfa9-40f17016579a
+# ╠═3997894e-991f-431a-b680-4d6620aae2cc
 # ╠═d434cf17-7a19-40b0-936b-56cb37ed76d4
 # ╠═23b6e6e6-4a81-48bb-897f-5586c95d7b48
 # ╠═e2018388-8732-4186-bb8e-20fff9e73eaa
