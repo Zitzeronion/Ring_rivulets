@@ -302,7 +302,7 @@ begin
 		label="collapse",
 		m = (8, :circ, 0.75),
 		xlabel="ψ₀", 
-		ylabel = "τ",
+		ylabel = "τᵣ/τₘ",
 		# yaxis=:log10,
 	)
 	scatter!(breakup.psi0, 
