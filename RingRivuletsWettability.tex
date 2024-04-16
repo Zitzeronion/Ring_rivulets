@@ -357,7 +357,7 @@ Therefore, the $\Delta h$ values along $\xi(h_{\max})$ of the rivulet allow us t
 The open triangles ($\triangle$, $\psi_0 = 0.173$) actually mark an edge case in which $\Delta h$ grows with a similar slope as the filled symbols, however the timescale on which the instability grows is too long as compared to the collapse timescale. 
 We will get back to this point in Sec.~\ref{subsec:wettability} where we discuss the banded case, Eq.~(\ref{eq:theta_band}) and show that the collapse is fast for larger $\psi_0$s as compared to the breakup instability.
 
-\subsection{Droplets and time scales}\label{subsec:drop-counting}
+\subsection{Breakup modes and droplets}\label{subsec:drop-counting}
 \begin{figure}
     \centering
     \includegraphics[width=0.45\textwidth]{assets/LSA_droplets.pdf}
@@ -407,30 +407,35 @@ We find a region around $\psi_0 \approx 0.2$ where the collapse times and the br
 On the left side, the rivulets are more likely to break up into multiple droplet, while on the right side the collapse is the more likely outcome of a numerical experiment.
 
 \subsection{Wettability patterns}\label{subsec:wettability}
-In the previous sections we focused on value of $\psi_0$ and $\Delta h$ and considered a homogeneous contact angle, except for the star symbols (\textcolor{jlorange}{$\star$}) in Fig.~\ref{fig:max_drops}.
+In the previous sections we focused on the role of curvatures and thus used $\psi_0$ as a control parameter. 
 From Eq.~(\ref{eq:torus}) we know that the initial width of ring-rivulet is a function of $\theta$.
-A lower contact angle yields a smaller rivulet, both in height and width for the same $r_0$ value.
-Fig.~\ref{fig:first_growth} shows that upon rescaling time with Eq.~(\ref{eq:tau_m}) which is a function of $\theta$ the breakup data collapses and follows the predicted $\sigma$ line. 
+A lower contact angle yields a smaller rivulet, both in height and width for the same $r_0$ value, which in turn affects $\psi_0$.
+Fig.~\ref{fig:first_growth} shows that upon rescaling time with Eq.~(\ref{eq:tau_m}) which is a function of $\theta$ the breakup data collapses and follows the predicted $\sigma$ line.
+We also saw that Eq.~(\ref{eq:maxDrops}) holds true for $\psi_0 \leq 0.25$, for larger $\psi_0$ collapse is more likely.
 
-In order to further investigate the stability of the ring-rivulet we now allow the contact angle to be a function of space, thus using an effective model of a patterned substrate. 
-Small amounts of liquids on patterned substrates have been studied extensively see for example Refs.~\cite{savvaDropletMotionInclined2013, vellingiriDropletSpreadingChemically2011, wangWettingEffectPatterned2023, wuInvestigationEquilibriumDroplet2019}.
-Here we use two types of patterning, see Eqs.~(\ref{eq:theta_band}-\ref{eq:theta_grad}), where the first one serves as an effective boundary which pins the contact line and the second one helps us to understand the force balance between wetting and retraction of the ring rivulet.
+In order to further investigate the ring-rivulet we now make the contact angle a function of space, thus using an effective model of a patterned substrate. 
+Small amounts of liquids on patterned substrates have been studied extensively, see for example Refs.~\cite{savvaDropletMotionInclined2013, vellingiriDropletSpreadingChemically2011, wangWettingEffectPatterned2023, wuInvestigationEquilibriumDroplet2019} to name but a few.
+We discuss two types of patterns, where the first one serves as an effective boundary which pins the contact line and the second one helps us to understand the force balance between wetting and retraction of the ring rivulet, see Eqs.~(\ref{eq:theta_band}-\ref{eq:theta_grad}).
 
 \subsubsection{Banded pattern}\label{subsubsec:banded}
+TODO: Add text set context with Edwards et al.~\cite{edwardsControllingBreakupToroidal2021}.
 
 \subsubsection{Linear wettability gradients}\label{subsubsec:linwettgrad}
+
+See Figs.~\ref{fig:negativewetgrad}-\ref{fig:positivewetgrad}.
 \begin{figure}
     \centering
-    \includegraphics[width=0.48\textwidth]{assets/radius_time_gradient_negative.pdf}
+    \includegraphics[width=0.48\textwidth]{assets/grad_heatmap.pdf}
     \caption{Negative wettability gradient $R(t)$}
     \label{fig:negativewetgrad}
 \end{figure}
+
 
 \begin{figure}
     \centering
     \includegraphics[width=0.48\textwidth]{assets/radius_time_gradient_positive.pdf}
     \caption{Positive wettability gradient $R(t)$}
-    \label{fig:negativewetgrad}
+    \label{fig:positivewetgrad}
 \end{figure}
 
 \section{Conclusions}\label{sec:conclu}
@@ -493,6 +498,9 @@ Without loss of generality we set $\rho_0 = 1$ and thus the dynamic viscosity is
 
 The numerical domain consists of a square lattice with $512\Delta x$ in both horizontal directions.
 We further use biperiodic boundary conditions at the edges of the domain. 
+
+
+
 
 
 \end{document}
