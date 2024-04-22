@@ -282,7 +282,7 @@ Here the ring-rivulet has the same contact angle as its immediate surrounding an
 The addition of $\delta\xi$ widens the band and allow the ring-rivulet to contract a bit.  
 Lastly, we consider a linear radial wettability gradient towards the middle
 \begin{equation}\label{eq:theta_grad}
-    \theta(\xi) = \frac{\theta_{a}-\theta_{b}}{R} \xi + \theta_{b},
+    \theta(\xi) = \frac{\theta_{a}-\theta_{b}}{R_0} \xi + \theta_{b},
 \end{equation}
 where $\theta_{a}\neq\theta_{b}$.
 We consider both possibilities, thus a negative wettability gradient ($\theta_a > \theta_b$) and a positive wettability gradient ($\theta_a < \theta_b$).
@@ -408,25 +408,38 @@ On the left side, the rivulets are more likely to break up into multiple droplet
 
 \subsection{Wettability patterns}\label{subsec:wettability}
 In the previous sections we focused on the role of curvatures and thus used $\psi_0$ as a control parameter. 
-From Eq.~(\ref{eq:torus}) we know that the initial width of ring-rivulet is a function of $\theta$.
-A lower contact angle yields a smaller rivulet, both in height and width for the same $r_0$ value, which in turn affects $\psi_0$.
+$\psi_0$ is however a function of $\theta$, see Eq.~(\ref{eq:torus}).
+A lower contact angle yields a smaller rivulet, both in height and width for the same $r_0$ value, thus different curvatures.
 Fig.~\ref{fig:first_growth} shows that upon rescaling time with Eq.~(\ref{eq:tau_m}) which is a function of $\theta$ the breakup data collapses and follows the predicted $\sigma$ line.
-We also saw that Eq.~(\ref{eq:maxDrops}) holds true for $\psi_0 \leq 0.25$, for larger $\psi_0$ collapse is more likely.
+We also saw that Eq.~(\ref{eq:maxDrops}) holds true for $\psi_0 \leq 0.25$, for larger $\psi_0$ values the collapse is the more likely outcome.
 
 In order to further investigate the ring-rivulet we now make the contact angle a function of space, thus using an effective model of a patterned substrate. 
 Small amounts of liquids on patterned substrates have been studied extensively, see for example Refs.~\cite{savvaDropletMotionInclined2013, vellingiriDropletSpreadingChemically2011, wangWettingEffectPatterned2023, wuInvestigationEquilibriumDroplet2019} to name but a few.
 We discuss two types of patterns, where the first one serves as an effective boundary which pins the contact line and the second one helps us to understand the force balance between wetting and retraction of the ring rivulet, see Eqs.~(\ref{eq:theta_band}-\ref{eq:theta_grad}).
 
 \subsubsection{Banded pattern}\label{subsubsec:banded}
-TODO: Add text set context with Edwards et al.~\cite{edwardsControllingBreakupToroidal2021}.
+The first pattern Eq.~(\ref{eq:theta_band}) constrains the ring-rivulet to its initial area with some additional margin $\delta\xi$.
+This is realized by using $\theta_a \in (10^{\circ}, 20^{\circ}, 30^{\circ}, 40^{\circ})$ and $\theta_b = 60^{\circ}$.
+While this choice seem to contracting the long wave approximation, we actually do not see the film penetrating the $\theta_b$ region in our numerical experiments.
+Thus, the substrate area $\delta\xi$ away from the ring-rivulet can be understood as an effective barrier. 
+Edwards et al.~\cite{edwardsControllingBreakupToroidal2021} performed a somewhat similar experiments where they were able to remove the coalescence mode with elaborate surface coatings and further used electrowetting to modify the contact angles.
+
+This setup has the advantage that it allows us to remove the coalescence mode from the ring-rivulet.
+Because the initial configuration is unstable, the rivulet will eventually rupture and form droplets.
+We see this fact in Fig.~\ref{fig:max_drops}, where the blue bullets indicate numerical experiments with the banded pattern.
+In contrast to the uniform substrate and with the removed coalescence mode, we see no $n_{\max} = 0$ event and breakup up to $\psi_0 \approx 0.4$.
+We also see that the predicted number of droplets Eq.~(\ref{eq:maxDrops}) seem not to be as good as for the constant contact angle case.
+This can be motivated by the restriction of the flow, as the ring-rivulet can not contract. 
+
 
 \subsubsection{Linear wettability gradients}\label{subsubsec:linwettgrad}
-
 See Figs.~\ref{fig:negativewetgrad}-\ref{fig:positivewetgrad}.
 \begin{figure}
     \centering
     \includegraphics[width=0.48\textwidth]{assets/grad_heatmap.pdf}
-    \caption{Negative wettability gradient $R(t)$}
+    \caption{Evolution of the radius of the ring-rivulet $R(t)$ normalized by the droplet height $H_D$ for different contact angle cases (linestyles and colors).
+    The first argument of $g()$ is the contact angle in the center of the numerical domain and the second argument is the contact angle at $R_0$ and beyond. 
+    Besides the lines we show heatmap snapshots of the film thickness $h(\mathbf{x},t)$ where yellow indicates a large value and dark blue a small value (colorbars are not scaled).}
     \label{fig:negativewetgrad}
 \end{figure}
 
