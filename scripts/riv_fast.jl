@@ -230,6 +230,70 @@ begin
 	CSV.write("../data/CollapseBreakupTimes.csv",timeScaleDF)
 end
 
+# ╔═╡ c666d253-bffc-4632-ac6b-85867d1416ca
+begin
+	timeScaleDF2 = DataFrame()
+	breakupTime2 = Int64[]
+	coalTime2 = Int64[]
+	angs2 = Int64[]
+	Rs2 = Int64[]
+	rrs2 = Int64[]
+	psis2 = Float64[]
+	R0s2 = Float64[]
+	Rfs2 = Float64[]
+	tau_m2 = Float64[]
+	for R in [80, 120, 150, 160, 180, 200]
+		for rr in [20, 22, 25, 30, 40, 60, 80]
+			for ang in [10, 20, 30, 40]
+				inC = subset(initial_data, :R0 => a -> a .== R, :rr0 => b -> b .== rr, :angle => c -> c .== ang)
+				dataCut = subset(growthDF, :R0 => a -> a .== R, :rr0 => c -> c .==  rr, :theta => t -> t .== ang, :substrate => s -> s .== "pattern")
+				# Check if data exists
+				if dataCut.time == Int64[]
+					continue
+				else
+					hmm = findfirst(dataCut.deltaH .== 0)
+					hoo = findfirst(dataCut.hmin .<= 0.056)
+					if isa(hmm, Int)
+						push!(coalTime2, dataCut.time[hmm])
+						push!(breakupTime2, -1)
+						#println("Time: $(dataCut.time[hmm]) at R: $(R), rr: $(rr) ang: $(ang)")
+					elseif isa(hoo, Int)
+						#println("I knew it at R: $(R), rr: $(rr) ang: $(ang)")
+						push!(breakupTime2, dataCut.time[hoo])
+						push!(coalTime2, -1)
+					else 
+						#println("Nothing to see here")
+						push!(breakupTime2, -1)
+						push!(coalTime2, -1)
+					end
+				end
+				push!(angs2, ang)
+				push!(Rs2, R)
+				push!(rrs2, rr)
+				push!(psis2, inC.psi0[1])
+				push!(R0s2, R + inC.realrr[1])
+				push!(Rfs2, inC.rdrop[1])
+				push!(tau_m2, inC.tauMax[1])
+			end
+		end
+	end
+	# println(length(coalTime2), "\n", coalTime2)
+	# println(length(Rs2), "\n", Rs2)
+	timeScaleDF2.collapsT = coalTime2
+	timeScaleDF2.breakupT = breakupTime2
+	timeScaleDF2.R0 = Rs2
+	timeScaleDF2.rr0 = rrs2
+	timeScaleDF2.theta = angs2
+	timeScaleDF2.psi0 = psis2
+	timeScaleDF2.Rstart = R0s2
+	timeScaleDF2.Rdrop = Rfs2
+	timeScaleDF2.tauM = tau_m2
+	CSV.write("../data/CollapseBreakupTimes_band.csv",timeScaleDF2)
+end
+
+# ╔═╡ eb90e8ff-580e-4b88-928b-91cdcb425107
+timeScaleDF2
+
 # ╔═╡ 70da024e-4bf6-4a92-ae48-073df610ff2e
 timeScaleDF
 
@@ -295,7 +359,7 @@ begin
 		minorticks = true,
 		legend = :topright,
 		ylims = (0.5, 10),
-		#xlims = (0.01, 0.8)
+		xlims = (0.001, 0.8)
 	)
 	scatter!(collapses.psi0, 
 		collapses.collapsT ./ collapses.tauM ./ deg2rad.(collapses.theta).^expo, 
@@ -365,9 +429,9 @@ begin
 	)
 	plot!(plain.time ./ tt, plain.R_t ./ ll, label="Eq.(7), θ = 40°", l=(2.5, :solid))
 	plot!(band.time ./ tt, band.R_t ./ ll, label="Eq.(8), θ = 40°", l = (2.5, :dash))
-	plot!(g1040.time ./ tt, g1040.R_t ./ ll, label="Eq.(9), g(10°,40°)", l = (2.5, :dashdot))
-	plot!(g2040.time ./ tt, g2040.R_t ./ ll, label="Eq.(9), g(20°,40°)", l = (2.5, :dot))
-	plot!(g3040.time ./ tt, g3040.R_t ./ ll, label="Eq.(9), g(30°,40°)", l = (2.5, :dashdotdot))
+	plot!(g1040.time ./ tt, g1040.R_t ./ ll, label="Eq.(9), (10°,40°)", l = (2.5, :dashdot))
+	plot!(g2040.time ./ tt, g2040.R_t ./ ll, label="Eq.(9), (20°,40°)", l = (2.5, :dot))
+	plot!(g3040.time ./ tt, g3040.R_t ./ ll, label="Eq.(9), (30°,40°)", l = (2.5, :dashdotdot))
 end
 
 # ╔═╡ 3b9e37c1-466d-4ce8-9133-599c3f3deb42
@@ -458,6 +522,72 @@ begin
 	scatter(1:256, hfield[1:256,256], ylims=(0,8), xlims=(50, 150))
 	#plot()
 end
+
+# ╔═╡ f6de6f22-1932-4c30-a113-278338b95b24
+dfDrops = CSV.read("../data/maxdroplets-corrected.csv", DataFrame)
+
+# ╔═╡ f5e6de8f-6461-4163-8689-4ecea441b6d3
+begin
+	@df dfDrops scatter(
+    	:psi0,
+    	:ndrops,
+    	group = :theta,
+    	# title = "",
+    	xlabel = L"\psi_0",
+    	ylabel = L"n_{max}",
+    	m = (0.5, [:circle :star :hex :ut], 12),
+    	# bg = RGB(0.2, 0.2, 0.2)
+	)
+	psisD = collect(0.001:0.001:1)
+	plot!(psisD, π ./ (2 .* psisD), 
+	# xlabel = L"\psi_0",
+	# ylabel = L"n_{max}",
+	label = "LSA",
+	xlims= (0, 1.05),
+	ylims = (0, 30),
+	minorticks = true,
+	l = (:black, 2),
+	grid = false)
+end
+
+# ╔═╡ 3b84d4f3-1819-4864-9ca1-371916838369
+dataBand = subset(dfDrops, :substrate => a -> a .== "patterned")
+
+# ╔═╡ a715d45a-552d-4795-88ef-a151e1b71688
+begin
+	Band10 = subset(dfDrops, :substrate => a -> a .== "patterned", :theta => b -> b .== 10)
+	Band20 = subset(dfDrops, :substrate => a -> a .== "patterned", :theta => b -> b .== 20)
+	Band30 = subset(dfDrops, :substrate => a -> a .== "patterned", :theta => b -> b .== 30)
+	Band40 = subset(dfDrops, :substrate => a -> a .== "patterned", :theta => b -> b .== 40)
+end
+
+# ╔═╡ e89c8f60-d5fa-4957-a98d-e4bbb0df81e0
+begin
+	dropsband = plot(xlabel = "ψ₀", ylabel = "n_max",
+		# yaxis=:log10,
+		# xaxis=:log10,
+		grid = false,
+		legendfontsize = 10,
+		guidefont = (16, :black),
+		tickfont = (12, :black),
+		minorticks = true,
+		legend = :topright,
+		# w = 2,
+		ylims = (0.0, 30),
+		xlims = (0.0, 1.01)
+	)
+	scatter!(Band10.psi0, Band10.ndrops, m=(12, :circ, 0.6), label="Δθ = 50°")
+	scatter!(Band20.psi0, Band20.ndrops, m=(12, :d, 0.6), label="Δθ = 40°")
+	scatter!(Band30.psi0, Band30.ndrops, m=(12, :hex, 0.6), label="Δθ = 30°")
+	scatter!(Band40.psi0, Band40.ndrops, m=(12, :ut, 0.6), label="Δθ = 20°")
+	plot!(psisD, π ./ (2 .* psisD), 
+		label = "LSA",
+		l = (:black, 2),
+		grid = false)
+end
+
+# ╔═╡ 57eb4247-9733-4b93-83da-b5405545c43b
+savefig(dropsband, "../assets/maxdropsBand.pdf")
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -2468,6 +2598,8 @@ version = "1.4.1+1"
 # ╠═b92731a3-b78f-4bc4-a40c-8f14d49a2ff5
 # ╠═dd19e06e-999b-4a92-afc3-4020304f7bb2
 # ╠═1665ccd0-47b5-43ce-bf8d-6c8ab5ef4e5b
+# ╠═c666d253-bffc-4632-ac6b-85867d1416ca
+# ╠═eb90e8ff-580e-4b88-928b-91cdcb425107
 # ╠═70da024e-4bf6-4a92-ae48-073df610ff2e
 # ╠═68577639-24f9-4dc6-a5e5-49957c63af15
 # ╠═ab30944a-c4f1-4b3a-9fae-b1d6a69c7a48
@@ -2489,5 +2621,11 @@ version = "1.4.1+1"
 # ╠═cfa56378-beb9-46d5-96f6-3c8d4300b469
 # ╠═3acaa735-7821-490f-83f5-698b7e69f567
 # ╠═201fb28b-902b-4ebe-88f6-ef5ea400acbc
+# ╠═f6de6f22-1932-4c30-a113-278338b95b24
+# ╠═f5e6de8f-6461-4163-8689-4ecea441b6d3
+# ╠═3b84d4f3-1819-4864-9ca1-371916838369
+# ╠═a715d45a-552d-4795-88ef-a151e1b71688
+# ╠═e89c8f60-d5fa-4957-a98d-e4bbb0df81e0
+# ╠═57eb4247-9733-4b93-83da-b5405545c43b
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
