@@ -292,7 +292,7 @@ begin
 end
 
 # ╔═╡ eb90e8ff-580e-4b88-928b-91cdcb425107
-timeScaleDF2
+timeScaleDF2corr = CSV.read("../data/CollapseBreakupTimes_band_plus10.csv", DataFrame)
 
 # ╔═╡ 70da024e-4bf6-4a92-ae48-073df610ff2e
 timeScaleDF
@@ -389,53 +389,55 @@ savefig(timescalesPlot, "../assets/uniform_timescales.pdf")
 
 # ╔═╡ bb861b57-fc7d-43ae-a899-693064da0434
 begin
-	breakupBand30 = subset(timeScaleDF2, :breakupT => a -> a .> 0, :theta => b -> b .==30)
-	breakupBand20 = subset(timeScaleDF2, :breakupT => a -> a .> 0, :theta => b -> b .==20)
-	breakupBand10 = subset(timeScaleDF2, :breakupT => a -> a .> 0, :theta => b -> b .==10)
-	breakupBand40 = subset(timeScaleDF2, :breakupT => a -> a .> 0, :theta => b -> b .==40)
+	breakupBand30 = subset(timeScaleDF2corr, :breakupT => a -> a .> 0, :theta => b -> b .==30)
+	breakupBand20 = subset(timeScaleDF2corr, :breakupT => a -> a .> 0, :theta => b -> b .==20)
+	breakupBand10 = subset(timeScaleDF2corr, :breakupT => a -> a .> 0, :theta => b -> b .==10)
+	breakupBand40 = subset(timeScaleDF2corr, :breakupT => a -> a .> 0, :theta => b -> b .==40)
 end
 
 # ╔═╡ 6b9bf7a8-7b6d-40e6-8d01-96e4fdf05a96
 begin
-	expo
 	timescalesBandPlot = plot(
 		xlabel="ψ₀", 
 		ylabel ="τᵣ/τₘ",
-		# yaxis=:log10,
+		# xaxis=:log10,
 		grid = false,
 		legendfontsize = 11,
 		guidefont = (16, :black),
 		tickfont = (12, :black),
 		minorticks = true,
-		legend = :topright,
-		# ylims = (0.5, 10),
-		# xlims = (0.001, 0.8)
+		legend = :topleft,
+		ylims = (0, 20),
+		xlims = (0.0, 0.26)
 	)
 	scatter!(breakupBand40.psi0, 
-		breakupBand40.breakupT ./ breakupBand40.tauM ./ deg2rad.(breakupBand40.theta).^expo, 
+		breakupBand40.breakupT ./ breakupBand40.tauM, 
 		label="Δθ = 20",
 		m = (8, :circ, 0.75),
 		# yaxis=:log10,
 	)
 	scatter!(breakupBand30.psi0, 
-		breakupBand30.breakupT ./ breakupBand30.tauM ./ deg2rad.(breakupBand30.theta).^expo, 
+		breakupBand30.breakupT ./ breakupBand30.tauM, 
 		label="Δθ = 30",
 		m = (8, :circ, 0.75)
 	)
 	scatter!(breakupBand20.psi0, 
-		breakupBand20.breakupT ./ breakupBand20.tauM ./ deg2rad.(breakupBand20.theta).^expo, 
+		breakupBand20.breakupT ./ breakupBand20.tauM, 
 		label="Δθ = 40",
 		m = (8, :circ, 0.75)
 	)
-	#scatter!(breakupBand10.psi0, 
-	#	breakupBand10.breakupT ./ breakupBand10.tauM ./ deg2rad.(breakupBand10.theta).^expo, 
-	#	label="Δθ = 50",
-	#	m = (8, :star5, 0.75)
-	# )
+	scatter!(breakupBand10.psi0, 
+			breakupBand10.breakupT ./ breakupBand10.tauM, 
+			label="Δθ = 50",
+			m = (8, :circ, 0.75)
+	)
 	# plot!(xaxislin, 0.32 .* exp.(15.5 .* xaxislin), l = (2, :black, :dash), label="∝ exp(aψ₀)")
 	# plot!(xaxislin, 16 .* exp.(-5.8 .* xaxislin), l = (2, :black, :dashdot), label="∝exp(-bψ₀)")
 	
 end
+
+# ╔═╡ e8f374b6-c06c-42a7-a279-64a85d403d98
+savefig(timescalesPlot, "../assets/bandBreakup_timescales.pdf")
 
 # ╔═╡ 920cb851-4f6e-443d-a1c7-adf1035b91c1
 md"## Linear wettability gradients"
@@ -552,20 +554,20 @@ dataArr = RivuletTools.data_arrested
 
 # ╔═╡ f4b660fb-3d3b-45aa-b80f-1db1da2b0b62
 begin
-	Dset = 88
+	Dset = 89
 	hnew = RivuletTools.read_data(R=dataArr[Dset][1], r=dataArr[Dset][2], kbT=dataArr[Dset][3], year=dataArr[Dset][4], month=dataArr[Dset][5], day=dataArr[Dset][6], hour=dataArr[Dset][7], minute=dataArr[Dset][8], θ=dataArr[Dset][9], nm=(3,2), arrested=true)
 	println("R: $(dataArr[Dset][1]) rr: $(dataArr[Dset][2]) theta: $(dataArr[Dset][9]) kbt: $(dataArr[Dset][3])")
 end
 
 # ╔═╡ cfa56378-beb9-46d5-96f6-3c8d4300b469
-hfield = reshape(hnew["h_7500000"],512,512)
+hfield = reshape(hnew["h_2500000"],512,512)
 
 # ╔═╡ 3acaa735-7821-490f-83f5-698b7e69f567
 heatmap(hfield, aspect_ratio=1)
 
 # ╔═╡ 201fb28b-902b-4ebe-88f6-ef5ea400acbc
 begin
-	scatter(1:256, hfield[1:256,256], ylims=(0,8), xlims=(50, 150))
+	scatter(1:256, hfield[1:256,256], ylims=(0,1), xlims=(50, 150))
 	#plot()
 end
 
@@ -2683,6 +2685,7 @@ version = "1.4.1+1"
 # ╠═a095a147-2348-4f1b-94b1-77a5e137bb8f
 # ╠═bb861b57-fc7d-43ae-a899-693064da0434
 # ╠═6b9bf7a8-7b6d-40e6-8d01-96e4fdf05a96
+# ╠═e8f374b6-c06c-42a7-a279-64a85d403d98
 # ╠═920cb851-4f6e-443d-a1c7-adf1035b91c1
 # ╠═c92ecb8d-99ed-43f2-bf73-5fbe5c55d58e
 # ╠═4be53ec0-8cd9-484f-b59b-52acd1707fdb
