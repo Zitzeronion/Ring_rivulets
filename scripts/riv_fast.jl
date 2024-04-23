@@ -66,7 +66,7 @@ begin
 	times_now = zeros(101)
 	tscale = []
 	finalH = []
-	growths = plot(xlabel = L"t/\tau_m", ylabel = L"\Delta h / H_D",
+	growths = plot(xlabel = "t/τₘ", ylabel = "Δh/H_D",
 		yaxis=:log10,
 		# xaxis=:log10,
 		grid = false,
@@ -338,15 +338,11 @@ begin
 	somePlot
 end
 
-# ╔═╡ d89a7e55-d54f-4cfb-80ce-94a8eb1a6e26
-res = 1 .* LogNormal(-2.,1.) .+ 0.1
-
-# ╔═╡ e9eb1038-cc54-4e62-8e45-1ff3f50c5841
-plot(res, xlim=(0,1))
-
 # ╔═╡ 058d3f7f-b03b-4dcd-8a20-72fe20e10990
 begin
-	expo = 0.1
+	expo = 1.0
+	hmmterm = deg2rad.(collapses.theta).^expo
+	hmmterm2 = deg2rad.(breakup.theta).^expo
 	timescalesPlot = plot(
 		#xlabel="ψ₀", 
 		#ylabel = "τ",
@@ -362,7 +358,7 @@ begin
 		xlims = (0.001, 0.8)
 	)
 	scatter!(collapses.psi0, 
-		collapses.collapsT ./ collapses.tauM ./ deg2rad.(collapses.theta).^expo, 
+		collapses.collapsT ./ collapses.tauM ./ 1.0, 
 		label="collapse",
 		m = (8, :circ, 0.75),
 		xlabel="ψ₀", 
@@ -370,7 +366,7 @@ begin
 		# yaxis=:log10,
 	)
 	scatter!(breakup.psi0, 
-		breakup.breakupT ./ breakup.tauM ./ deg2rad.(breakup.theta).^expo, 
+		breakup.breakupT ./ breakup.tauM ./ 1.0, 
 		label="breakup",
 		m = (8, :star5, 0.75)
 	)
@@ -390,6 +386,56 @@ end
 
 # ╔═╡ a095a147-2348-4f1b-94b1-77a5e137bb8f
 savefig(timescalesPlot, "../assets/uniform_timescales.pdf")
+
+# ╔═╡ bb861b57-fc7d-43ae-a899-693064da0434
+begin
+	breakupBand30 = subset(timeScaleDF2, :breakupT => a -> a .> 0, :theta => b -> b .==30)
+	breakupBand20 = subset(timeScaleDF2, :breakupT => a -> a .> 0, :theta => b -> b .==20)
+	breakupBand10 = subset(timeScaleDF2, :breakupT => a -> a .> 0, :theta => b -> b .==10)
+	breakupBand40 = subset(timeScaleDF2, :breakupT => a -> a .> 0, :theta => b -> b .==40)
+end
+
+# ╔═╡ 6b9bf7a8-7b6d-40e6-8d01-96e4fdf05a96
+begin
+	expo
+	timescalesBandPlot = plot(
+		xlabel="ψ₀", 
+		ylabel ="τᵣ/τₘ",
+		# yaxis=:log10,
+		grid = false,
+		legendfontsize = 11,
+		guidefont = (16, :black),
+		tickfont = (12, :black),
+		minorticks = true,
+		legend = :topright,
+		# ylims = (0.5, 10),
+		# xlims = (0.001, 0.8)
+	)
+	scatter!(breakupBand40.psi0, 
+		breakupBand40.breakupT ./ breakupBand40.tauM ./ deg2rad.(breakupBand40.theta).^expo, 
+		label="Δθ = 20",
+		m = (8, :circ, 0.75),
+		# yaxis=:log10,
+	)
+	scatter!(breakupBand30.psi0, 
+		breakupBand30.breakupT ./ breakupBand30.tauM ./ deg2rad.(breakupBand30.theta).^expo, 
+		label="Δθ = 30",
+		m = (8, :circ, 0.75)
+	)
+	scatter!(breakupBand20.psi0, 
+		breakupBand20.breakupT ./ breakupBand20.tauM ./ deg2rad.(breakupBand20.theta).^expo, 
+		label="Δθ = 40",
+		m = (8, :circ, 0.75)
+	)
+	#scatter!(breakupBand10.psi0, 
+	#	breakupBand10.breakupT ./ breakupBand10.tauM ./ deg2rad.(breakupBand10.theta).^expo, 
+	#	label="Δθ = 50",
+	#	m = (8, :star5, 0.75)
+	# )
+	# plot!(xaxislin, 0.32 .* exp.(15.5 .* xaxislin), l = (2, :black, :dash), label="∝ exp(aψ₀)")
+	# plot!(xaxislin, 16 .* exp.(-5.8 .* xaxislin), l = (2, :black, :dashdot), label="∝exp(-bψ₀)")
+	
+end
 
 # ╔═╡ 920cb851-4f6e-443d-a1c7-adf1035b91c1
 md"## Linear wettability gradients"
@@ -555,6 +601,7 @@ dataBand = subset(dfDrops, :substrate => a -> a .== "patterned")
 
 # ╔═╡ a715d45a-552d-4795-88ef-a151e1b71688
 begin
+	uni = subset(dfDrops, :substrate => a -> a .== "uniform")
 	Band10 = subset(dfDrops, :substrate => a -> a .== "patterned", :theta => b -> b .== 10)
 	Band20 = subset(dfDrops, :substrate => a -> a .== "patterned", :theta => b -> b .== 20)
 	Band30 = subset(dfDrops, :substrate => a -> a .== "patterned", :theta => b -> b .== 30)
@@ -581,13 +628,41 @@ begin
 	scatter!(Band30.psi0, Band30.ndrops, m=(12, :hex, 0.6), label="Δθ = 30°")
 	scatter!(Band40.psi0, Band40.ndrops, m=(12, :ut, 0.6), label="Δθ = 20°")
 	plot!(psisD, π ./ (2 .* psisD), 
-		label = "LSA",
+		label = "Eq. (13)",
 		l = (:black, 2),
 		grid = false)
 end
 
 # ╔═╡ 57eb4247-9733-4b93-83da-b5405545c43b
 savefig(dropsband, "../assets/maxdropsBand.pdf")
+
+# ╔═╡ 89de8b16-5b76-45a3-8cd4-ee39db929cc1
+begin
+	alldrops = plot(xlabel = "ψ₀", ylabel = "n_max",
+		# yaxis=:log10,
+		# xaxis=:log10,
+		grid = false,
+		legendfontsize = 10,
+		guidefont = (16, :black),
+		tickfont = (12, :black),
+		minorticks = true,
+		legend = :topright,
+		# w = 2,
+		ylims = (0.0, 30),
+		xlims = (0.0, 1.)
+	)
+	scatter!(uni.psi0, uni.ndrops, m=(12, :star, 0.6, palette(:default)[2]), label="Eq. (7)")
+	scatter!(dataBand.psi0, dataBand.ndrops, m=(12, :circ, 0.6, palette(:default)[1]), label="Eq. (8)")
+	# scatter!(Band30.psi0, Band30.ndrops, m=(12, :hex, 0.6), label="")
+	# scatter!(Band40.psi0, Band40.ndrops, m=(12, :ut, 0.6), label="Δθ = 20°")
+	plot!(psisD, π ./ (2 .* psisD), 
+		label = "Eq. (13)",
+		l = (:black, 2),
+		grid = false)
+end
+
+# ╔═╡ fb494dd2-5848-4d71-8438-39eda3fb50ae
+savefig(alldrops, "../assets/maxdropsUniBand.pdf")
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -2604,10 +2679,10 @@ version = "1.4.1+1"
 # ╠═68577639-24f9-4dc6-a5e5-49957c63af15
 # ╠═ab30944a-c4f1-4b3a-9fae-b1d6a69c7a48
 # ╠═2bbe79a6-41f1-4cd2-b7c2-f369e1452b2c
-# ╠═d89a7e55-d54f-4cfb-80ce-94a8eb1a6e26
-# ╠═e9eb1038-cc54-4e62-8e45-1ff3f50c5841
 # ╠═058d3f7f-b03b-4dcd-8a20-72fe20e10990
 # ╠═a095a147-2348-4f1b-94b1-77a5e137bb8f
+# ╠═bb861b57-fc7d-43ae-a899-693064da0434
+# ╠═6b9bf7a8-7b6d-40e6-8d01-96e4fdf05a96
 # ╠═920cb851-4f6e-443d-a1c7-adf1035b91c1
 # ╠═c92ecb8d-99ed-43f2-bf73-5fbe5c55d58e
 # ╠═4be53ec0-8cd9-484f-b59b-52acd1707fdb
@@ -2627,5 +2702,7 @@ version = "1.4.1+1"
 # ╠═a715d45a-552d-4795-88ef-a151e1b71688
 # ╠═e89c8f60-d5fa-4957-a98d-e4bbb0df81e0
 # ╠═57eb4247-9733-4b93-83da-b5405545c43b
+# ╠═89de8b16-5b76-45a3-8cd4-ee39db929cc1
+# ╠═fb494dd2-5848-4d71-8438-39eda3fb50ae
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
