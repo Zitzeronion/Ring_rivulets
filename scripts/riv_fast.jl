@@ -74,8 +74,9 @@ begin
 		guidefont = (16, :black),
 		tickfont = (12, :black),
 		minorticks = true,
-		legend = :bottomright,
+		legend = :outerright,
 		# w = 2,
+		size=(800,400),
 		ylims = (0.0004, 1.01),
 		xlims = (0.0, 8)
 	)
@@ -85,8 +86,8 @@ begin
 		iC = initial_data[(initial_data.R0 .== ics[1]) .& (initial_data.rr0 .== ics[2]) .& (initial_data.angle .== ics[3]), :]
 
 		
-		ll = (iC.R0[1] + iC.realrr[1] - iC.rdrop[1])
-		tt = 3/2*(iC.R0[1] + iC.realrr[1] - iC.rdrop[1])/(0.01 * ics[4]^3)
+		ll = iC.hdrop[1]
+		tt = 1/iC.sigmaMax[1]*ics[4]^(1.5)
 		
 	 	dataSamp = growthDF[(growthDF.R0 .== ics[1]) .& (growthDF.rr0 .== ics[2]) .& (growthDF.theta .== ics[3]) .& (growthDF.substrate .== "uniform"), :]
 		scatter!(dataSamp.time[2:end] ./ tt, 
@@ -397,6 +398,8 @@ end
 
 # ╔═╡ 6b9bf7a8-7b6d-40e6-8d01-96e4fdf05a96
 begin
+	normfactors = [breakupBand40.tauM*(2π/9)^(1.5), breakupBand30.tauM*(π/6)^(1.5), breakupBand20.tauM*(π/9)^(1.5), breakupBand10.tauM*(π/18)^(1.5)]
+	normfactors2 = [1, 1, 1, 1]
 	timescalesBandPlot = plot(
 		xlabel="ψ₀", 
 		ylabel ="τᵣ/τₘ",
@@ -411,27 +414,27 @@ begin
 		xlims = (0.0, 0.26)
 	)
 	scatter!(breakupBand40.psi0, 
-		breakupBand40.breakupT ./ breakupBand40.tauM, 
+		breakupBand40.breakupT ./ normfactors[1], 
 		label="Δθ = 20",
 		m = (8, :circ, 0.75),
 		# yaxis=:log10,
 	)
 	scatter!(breakupBand30.psi0, 
-		breakupBand30.breakupT ./ breakupBand30.tauM, 
+		breakupBand30.breakupT ./ normfactors[2], 
 		label="Δθ = 30",
 		m = (8, :circ, 0.75)
 	)
 	scatter!(breakupBand20.psi0, 
-		breakupBand20.breakupT ./ breakupBand20.tauM, 
+		breakupBand20.breakupT ./ normfactors[3], 
 		label="Δθ = 40",
 		m = (8, :circ, 0.75)
 	)
 	scatter!(breakupBand10.psi0, 
-			breakupBand10.breakupT ./ breakupBand10.tauM, 
+			breakupBand10.breakupT ./ normfactors[4], 
 			label="Δθ = 50",
 			m = (8, :circ, 0.75)
 	)
-	# plot!(xaxislin, 0.32 .* exp.(15.5 .* xaxislin), l = (2, :black, :dash), label="∝ exp(aψ₀)")
+	plot!(xaxislin,  .+ (65 .* xaxislin), l = (2, :black, :dash), label="∝ cψ₀")
 	# plot!(xaxislin, 16 .* exp.(-5.8 .* xaxislin), l = (2, :black, :dashdot), label="∝exp(-bψ₀)")
 	
 end
@@ -441,6 +444,12 @@ savefig(timescalesPlot, "../assets/bandBreakup_timescales.pdf")
 
 # ╔═╡ 920cb851-4f6e-443d-a1c7-adf1035b91c1
 md"## Linear wettability gradients"
+
+# ╔═╡ 5b6ac82a-28c7-428d-9209-74e0acaa5edd
+(1/6)/0.01
+
+# ╔═╡ 505230c0-8040-4a89-8e68-4bef09257888
+(0.01 * 180) / (1/36)
 
 # ╔═╡ c92ecb8d-99ed-43f2-bf73-5fbe5c55d58e
 begin
@@ -554,7 +563,7 @@ dataArr = RivuletTools.data_arrested
 
 # ╔═╡ f4b660fb-3d3b-45aa-b80f-1db1da2b0b62
 begin
-	Dset = 89
+	Dset = 9
 	hnew = RivuletTools.read_data(R=dataArr[Dset][1], r=dataArr[Dset][2], kbT=dataArr[Dset][3], year=dataArr[Dset][4], month=dataArr[Dset][5], day=dataArr[Dset][6], hour=dataArr[Dset][7], minute=dataArr[Dset][8], θ=dataArr[Dset][9], nm=(3,2), arrested=true)
 	println("R: $(dataArr[Dset][1]) rr: $(dataArr[Dset][2]) theta: $(dataArr[Dset][9]) kbt: $(dataArr[Dset][3])")
 end
@@ -2687,6 +2696,8 @@ version = "1.4.1+1"
 # ╠═6b9bf7a8-7b6d-40e6-8d01-96e4fdf05a96
 # ╠═e8f374b6-c06c-42a7-a279-64a85d403d98
 # ╠═920cb851-4f6e-443d-a1c7-adf1035b91c1
+# ╠═5b6ac82a-28c7-428d-9209-74e0acaa5edd
+# ╠═505230c0-8040-4a89-8e68-4bef09257888
 # ╠═c92ecb8d-99ed-43f2-bf73-5fbe5c55d58e
 # ╠═4be53ec0-8cd9-484f-b59b-52acd1707fdb
 # ╠═3b9e37c1-466d-4ce8-9133-599c3f3deb42
