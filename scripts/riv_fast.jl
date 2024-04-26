@@ -70,9 +70,9 @@ begin
 		yaxis=:log10,
 		# xaxis=:log10,
 		grid = false,
-		legendfontsize = 10,
-		guidefont = (16, :black),
-		tickfont = (12, :black),
+		legendfontsize = 12,
+		guidefont = (18, :black),
+		tickfont = (14, :black),
 		minorticks = true,
 		legend = :outerright,
 		# w = 2,
@@ -440,7 +440,7 @@ begin
 end
 
 # ╔═╡ e8f374b6-c06c-42a7-a279-64a85d403d98
-savefig(timescalesPlot, "../assets/bandBreakup_timescales.pdf")
+savefig(timescalesBandPlot, "../assets/bandBreakup_timescales.pdf")
 
 # ╔═╡ 920cb851-4f6e-443d-a1c7-adf1035b91c1
 md"## Linear wettability gradients"
