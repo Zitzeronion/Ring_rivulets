@@ -419,18 +419,24 @@ We discuss two types of patterns, where the first one serves as an effective bou
 
 \subsubsection{Banded pattern}\label{subsubsec:banded}
 The first pattern Eq.~(\ref{eq:theta_band}) constrains the ring-rivulet to its initial area with some additional margin $\delta\xi$.
-This is realized by using $\theta_a \in (10^{\circ}, 20^{\circ}, 30^{\circ}, 40^{\circ})$ and $\theta_b = 60^{\circ}$.
+This is realized by using $\theta_a \in [10^{\circ}, 20^{\circ}, 30^{\circ}, 40^{\circ}]$ and $\theta_b = 60^{\circ}$, which yields a contact angle contrast $\Delta\theta \in [50^{\circ}, 40^{\circ}, 30^{\circ}, 20^{\circ}]$.
 While this choice seem to contracting the long wave approximation, we actually do not see the film penetrating the $\theta_b$ region in our numerical experiments.
-Thus, the substrate area $\delta\xi$ away from the ring-rivulet can be understood as an effective barrier. 
-Edwards et al.~\cite{edwardsControllingBreakupToroidal2021} performed a somewhat similar experiments where they were able to remove the coalescence mode with elaborate surface coatings and further used electrowetting to modify the contact angles.
+Thus, the substrate area $\delta\xi$ away from the center of ring-rivulet can be understood as an effective barrier. 
+Edwards et al.~\cite{edwardsControllingBreakupToroidal2021} performed a somewhat similar experiments where they were able to remove the coalescence mode with elaborate surface coatings and further used electrowetting to dynamically modify the contact angles.
 
-This setup has the advantage that it allows us to remove the coalescence mode from the ring-rivulet.
-Because the initial configuration is unstable, the rivulet will eventually rupture and form droplets.
+The contact angle barrier effectively removes the coalescence mode from the dynamics.
+Because the initial configuration is unstable, the rivulet will eventually rupture and form droplets, this however can be on rather long time scales depending on $\psi_0$.
 We see this fact in Fig.~\ref{fig:max_drops}, where the blue bullets indicate numerical experiments with the banded pattern.
-In contrast to the uniform substrate and with the removed coalescence mode, we see no $n_{\max} = 0$ event and breakup up to $\psi_0 \approx 0.4$.
-We also see that the predicted number of droplets Eq.~(\ref{eq:maxDrops}) seem not to be as good as for the constant contact angle case.
-This can be motivated by the restriction of the flow, as the ring-rivulet can not contract. 
+In contrast to the uniform substrate and with the removed coalescence mode, we see no $n_{\max} = 0$ event and breakup events up to $\psi_0 \approx 0.4$.
+We also see that the predicted number of droplets Eq.~(\ref{eq:maxDrops}) does not fit the data as good as for the uniform substrate.
+One possible explanation is the restriction of the flow, as the ring-rivulet can not contract. 
 
+\begin{figure}
+    \centering
+    \includegraphics[width=0.48\textwidth]{assets/bandBreakup_timescales.pdf}
+    \caption{Caption}
+    \label{fig:bandBreakupT}
+\end{figure}
 
 \subsubsection{Linear wettability gradients}\label{subsubsec:linwettgrad}
 See Figs.~\ref{fig:negativewetgrad}-\ref{fig:positivewetgrad}.
