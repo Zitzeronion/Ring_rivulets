@@ -410,8 +410,8 @@ begin
 		tickfont = (12, :black),
 		minorticks = true,
 		legend = :topleft,
-		ylims = (0, 20),
-		xlims = (0.0, 0.26)
+		ylims = (0, 30),
+		xlims = (0.0, 0.301)
 	)
 	scatter!(breakupBand40.psi0, 
 		breakupBand40.breakupT ./ normfactors[1], 
@@ -434,7 +434,7 @@ begin
 			label="Δθ = 50",
 			m = (8, :circ, 0.75)
 	)
-	plot!(xaxislin,  .+ (65 .* xaxislin), l = (2, :black, :dash), label="∝ cψ₀")
+	plot!(xaxislin,  .+ (85 .* xaxislin), l = (2, :black, :dash), label="∝ cψ₀")
 	# plot!(xaxislin, 16 .* exp.(-5.8 .* xaxislin), l = (2, :black, :dashdot), label="∝exp(-bψ₀)")
 	
 end
@@ -563,13 +563,13 @@ dataArr = RivuletTools.data_arrested
 
 # ╔═╡ f4b660fb-3d3b-45aa-b80f-1db1da2b0b62
 begin
-	Dset = 9
+	Dset = 101
 	hnew = RivuletTools.read_data(R=dataArr[Dset][1], r=dataArr[Dset][2], kbT=dataArr[Dset][3], year=dataArr[Dset][4], month=dataArr[Dset][5], day=dataArr[Dset][6], hour=dataArr[Dset][7], minute=dataArr[Dset][8], θ=dataArr[Dset][9], nm=(3,2), arrested=true)
 	println("R: $(dataArr[Dset][1]) rr: $(dataArr[Dset][2]) theta: $(dataArr[Dset][9]) kbt: $(dataArr[Dset][3])")
 end
 
 # ╔═╡ cfa56378-beb9-46d5-96f6-3c8d4300b469
-hfield = reshape(hnew["h_2500000"],512,512)
+hfield = reshape(hnew["h_7500000"],512,512)
 
 # ╔═╡ 3acaa735-7821-490f-83f5-698b7e69f567
 heatmap(hfield, aspect_ratio=1)
