@@ -434,7 +434,7 @@ begin
 			label="Δθ = 50",
 			m = (8, :circ, 0.75)
 	)
-	plot!(xaxislin,  .+ (85 .* xaxislin), l = (2, :black, :dash), label="∝ cψ₀")
+	plot!(xaxislin, 0.0 .+ (85 .* xaxislin), l = (2, :black, :dash), label="∝ cψ₀")
 	# plot!(xaxislin, 16 .* exp.(-5.8 .* xaxislin), l = (2, :black, :dashdot), label="∝exp(-bψ₀)")
 	
 end
