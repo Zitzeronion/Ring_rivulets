@@ -411,7 +411,7 @@ begin
 		minorticks = true,
 		legend = :topleft,
 		ylims = (0, 30),
-		xlims = (0.0, 0.301)
+		xlims = (0.0, 0.35)
 	)
 	scatter!(breakupBand40.psi0, 
 		breakupBand40.breakupT ./ normfactors[1], 
@@ -440,7 +440,7 @@ begin
 end
 
 # ╔═╡ e8f374b6-c06c-42a7-a279-64a85d403d98
-savefig(timescalesBandPlot, "../assets/bandBreakup_timescales.pdf")
+# savefig(timescalesBandPlot, "../assets/bandBreakup_timescales.pdf")
 
 # ╔═╡ 920cb851-4f6e-443d-a1c7-adf1035b91c1
 md"## Linear wettability gradients"
@@ -563,7 +563,7 @@ dataArr = RivuletTools.data_arrested
 
 # ╔═╡ f4b660fb-3d3b-45aa-b80f-1db1da2b0b62
 begin
-	Dset = 101
+	Dset = 29
 	hnew = RivuletTools.read_data(R=dataArr[Dset][1], r=dataArr[Dset][2], kbT=dataArr[Dset][3], year=dataArr[Dset][4], month=dataArr[Dset][5], day=dataArr[Dset][6], hour=dataArr[Dset][7], minute=dataArr[Dset][8], θ=dataArr[Dset][9], nm=(3,2), arrested=true)
 	println("R: $(dataArr[Dset][1]) rr: $(dataArr[Dset][2]) theta: $(dataArr[Dset][9]) kbt: $(dataArr[Dset][3])")
 end
@@ -645,7 +645,7 @@ begin
 end
 
 # ╔═╡ 57eb4247-9733-4b93-83da-b5405545c43b
-savefig(dropsband, "../assets/maxdropsBand.pdf")
+# savefig(dropsband, "../assets/maxdropsBand.pdf")
 
 # ╔═╡ 89de8b16-5b76-45a3-8cd4-ee39db929cc1
 begin
