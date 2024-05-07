@@ -339,6 +339,9 @@ begin
 	somePlot
 end
 
+# ╔═╡ 5235a548-ce73-4f62-9e24-2076a6419f7d
+collapses
+
 # ╔═╡ 058d3f7f-b03b-4dcd-8a20-72fe20e10990
 begin
 	expo = 1.0
@@ -362,13 +365,19 @@ begin
 		collapses.collapsT ./ collapses.tauM ./ 1.0, 
 		label="collapse",
 		m = (8, :circ, 0.75),
+		color = cgrad(:Dark2_4, 4, categorical = true), 
+		#palette(:default)[1:4],
+		zcolor = collapses.theta,
 		xlabel="ψ₀", 
-		ylabel = "τᵣ/τₘ",
+		ylabel = "τ/τₘ",
 		# yaxis=:log10,
 	)
 	scatter!(breakup.psi0, 
 		breakup.breakupT ./ breakup.tauM ./ 1.0, 
 		label="breakup",
+		color = cgrad(:Dark2_4, 4, categorical = true), 
+		#palette(:default)[1:4],
+		zcolor = breakup.theta,
 		m = (8, :star5, 0.75)
 	)
 	xaxislin = collect(0.0:0.001:1)
@@ -662,10 +671,22 @@ begin
 		ylims = (0.0, 30),
 		xlims = (0.0, 1.)
 	)
-	scatter!(uni.psi0, uni.ndrops, m=(12, :star, 0.6, palette(:default)[2]), label="Eq. (7)")
-	scatter!(dataBand.psi0, dataBand.ndrops, m=(12, :circ, 0.6, palette(:default)[1]), label="Eq. (8)")
-	# scatter!(Band30.psi0, Band30.ndrops, m=(12, :hex, 0.6), label="")
-	# scatter!(Band40.psi0, Band40.ndrops, m=(12, :ut, 0.6), label="Δθ = 20°")
+	scatter!(uni.psi0, 
+		uni.ndrops, 
+		m=(12, :star, 0.6),
+		color = cgrad(:Dark2_4, 4, categorical = true), 
+		#palette(:default)[1:4],
+		zcolor = uni.theta,
+		label="Uniform")
+	
+	scatter!(dataBand.psi0, 
+		dataBand.ndrops, 
+		m=(12, :circ, 0.6), 
+		color = cgrad(:Dark2_4, 4, categorical = true), 
+		#palette(:default)[1:4],
+		zcolor = dataBand.theta,
+		label="Band")
+	
 	plot!(psisD, π ./ (2 .* psisD), 
 		label = "Eq. (13)",
 		l = (:black, 2),
@@ -2690,6 +2711,7 @@ version = "1.4.1+1"
 # ╠═68577639-24f9-4dc6-a5e5-49957c63af15
 # ╠═ab30944a-c4f1-4b3a-9fae-b1d6a69c7a48
 # ╠═2bbe79a6-41f1-4cd2-b7c2-f369e1452b2c
+# ╠═5235a548-ce73-4f62-9e24-2076a6419f7d
 # ╠═058d3f7f-b03b-4dcd-8a20-72fe20e10990
 # ╠═a095a147-2348-4f1b-94b1-77a5e137bb8f
 # ╠═bb861b57-fc7d-43ae-a899-693064da0434
