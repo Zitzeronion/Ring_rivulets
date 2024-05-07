@@ -360,14 +360,15 @@ We will get back to this point in Sec.~\ref{subsec:wettability} where we discuss
 \subsection{Breakup modes and droplets}\label{subsec:drop-counting}
 \begin{figure}
     \centering
-    \includegraphics[width=0.45\textwidth]{assets/maxdropsUniBand.pdf}
+    \includegraphics[width=0.45\textwidth]{assets/maxdropsUniBandCC.pdf}
     \caption{Number of maximal droplets $n_{max}$ over reduced aspect ratio $\psi_0$.
-    Different symbols show different substrates, where Eq.~(\ref{eq:theta_const}) is shown by blue bullets (\textcolor{jlblue}{$\bullet$}) and Eq.~(\ref{eq:theta_band}) by orange stars (\textcolor{jlorange}{$\star$}).
+    Different symbols show different substrates, where Eq.~(\ref{eq:theta_const}) is shown by blue bullets (\textcolor{black}{$\bullet$}) and Eq.~(\ref{eq:theta_band}) by orange stars (\textcolor{black}{$\star$}).
     We compare our results to the linear stability analysis (LSA) from Gonz{\'a}lez et al.~\cite{gonzalezStabilityLiquidRing2013}}
     \label{fig:max_drops}
 \end{figure}
 
-Given the initial conditions of the ring-rivulet can we predict if there is a collapse or a brake up and if the rivulet breaks during contraction how many droplets are formed?
+Given the initial conditions of the ring-rivulet can we predict if there is a collapse or a breakup? 
+Can we further predict in the case of breakup how many droplets are formed?
 While this may sound like a funny question it bares great impact for nanostructuring and/or self-assembly, thus having predictive power is of great interest.
 Both questions were addressed by Gonz{\'a}lez et al.~\cite{gonzalezStabilityLiquidRing2013}. 
 The maximal number of droplets $n_{\max}$ can be computed with a complex system of equations which are based on the most unstable mode.
@@ -375,25 +376,26 @@ They furthermore found a surprisingly good approximation that can be calculated 
 \begin{equation}\label{eq:maxDrops}
     n_{\max, app} = \frac{\pi}{2\psi_0}.
 \end{equation}
-Therefore, it seems as if the number of droplets is simply set at $t=0$.
+Therefore, it seems as if the number of droplets is simply set at $t=0$ by geometry of the rivulet.
 This result has been tested and shown to agree well with MD simulations by Nguyen et al.~\cite{nguyenCompetitionCollapseBreakup2012}. 
 
-However, Gonz{\'a}lez et al.~\cite{gonzalezStabilityLiquidRing2013} pointed out as well that the LSA and thus $n_{\max}$ fall short if one considers a disjoining pressure model, see e.g., Eq.~(\ref{eq:disjoinpressure}).
+However, Gonz{\'a}lez et al.~\cite{gonzalezStabilityLiquidRing2013} pointed out that the LSA and thus $n_{\max}$ fall short if one considers a disjoining pressure model, see Eq.~(\ref{eq:disjoinpressure}).
 They report that although initially the rivulet adapts to its most unstable mode it does not necessary break up into $n_{\max}$ droplets, especially for $\psi_0 > 0.15$. 
 They also point towards the experiments of Wu et al.~\cite{wuCompetingLiquidPhase2011} where a similar mismatch with theoretical predictions was observed.
 
 We perform a similar analysis and count the number of droplets during our numerical experiments and adopted the scheme introduced by Gonz{\'a}lez et al.~\cite{gonzalezStabilityLiquidRing2013}, thus count the collapse as zero droplets, one off center droplet as one, two droplets as two and so on.
-The result is shown in Fig.~\ref{fig:max_drops}, where the black line is given by Eq.~(\ref{eq:maxDrops}) and the different symbols refer to different patterns, see Eqs.(~\ref{eq:theta_const}-\ref{eq:theta_band}).
-Our results agree with the observations made by Gonz{\'a}lez et al.~\cite{gonzalezStabilityLiquidRing2013} and in Fig.~\ref{fig:ThreeDToOneD} we actually observe a transition from $n = 8$ (blue curve) to $n = 3$ (purple curve).
+The result is shown in Fig.~\ref{fig:max_drops}, where the black line is given by Eq.~(\ref{eq:maxDrops}) and the different symbols refer to different patterns, see Eqs.~(\ref{eq:theta_const}-\ref{eq:theta_band}).
+Our results tend to agree with the observations made by Gonz{\'a}lez et al.~\cite{gonzalezStabilityLiquidRing2013}.
+In Fig.~\ref{fig:ThreeDToOneD} we actually observe a transition from $n = 8$ (blue curve) to $n = 3$ (purple curve), observing only three droplets after breakup.
 
 % We can further quantify this behavior in terms of time scales for both the collapse and the breakup of the ring-rivulet.
-In Fig.~\ref{fig:max_drops} we see that for larger $\psi_0$-values theory and our numerical experiments do not agree.
-In fact, for $\psi_0 > 0.22$ the ring-rivulet on the homogeneous substrate favors the collapse $n = 0$, with a few outliers. 
-It is therefore fair to assumes that the growth-rate of the instability is slower than the the rate of collapse, thus $t_b > t_c$ for $\psi_0 > 0.22$, see Fig.~\ref{fig:first_growth} empty symbols.
-In Fig.~\ref{fig:timescaleDifference} we measured these time scales as function of $\psi_0$ and normalized them with their respective $\tau_m$ Eq.~(\ref{eq:tau_m}).
+In Fig.~\ref{fig:max_drops} we see that for larger $\psi_0$-values theory and our numerical experiments do not match.
+In fact, for $\psi_0 > 0.22$ the ring-rivulet on the homogeneous substrate (\textcolor{jlorange}{$\star$}) favours the collapse $n = 0$. 
+It is therefore fair to assumes that the growth-rate of the instability is slower than the rate of collapse, thus $t_b > t_c$ for $\psi_0 > 0.22$, see Fig.~\ref{fig:first_growth} empty symbols.
+In Fig.~\ref{fig:timescaleDifference} we measured these time scales as function of $\psi_0$ and normalized them with their respective $\tau_m$, Eq.~(\ref{eq:tau_m}).
 \begin{figure}
     \centering
-    \includegraphics[width = 0.45\textwidth]{assets/uniform_timescales.pdf}
+    \includegraphics[width = 0.45\textwidth]{assets/uniform_timescalesCC.pdf}
     \caption{Breakup and collapse times $\tau$ for all numerical experiments on a uniform substrate, Eq.~(\ref{eq:theta_const}).
         On the x-axis we use the dimensionless length scale $\psi_0$ and the y-axis displays either the breakup- or collapse time $\tau$ with stars (\textcolor{jlorange}{$\star$}) or bullets (\textcolor{jlblue}{$\bullet$}) respectively.
         The dashed line serves as a guide to eye and shows an exponential growth that is in agreement with the breakup data. 
@@ -404,44 +406,52 @@ In Fig.~\ref{fig:timescaleDifference} we measured these time scales as function 
 \end{figure}
 First, the data suggest that there is no clear boundary that distinguishes between collapse and breakup.
 We find a region around $\psi_0 \approx 0.2$ where the collapse times and the breakup times are of similar magnitude.
-On the left side, the rivulets are more likely to break up into multiple droplet, while on the right side the collapse is the more likely outcome of a numerical experiment.
+For smaller $\psi_0$, the rivulets are more likely to break up into multiple droplet, while for larger $\psi_0$ the collapse is the more likely outcome of a numerical experiment.
 
 \subsection{Wettability patterns}\label{subsec:wettability}
-In the previous sections we focused on the role of curvatures and thus used $\psi_0$ as a control parameter. 
-$\psi_0$ is however a function of $\theta$, see Eq.~(\ref{eq:torus}).
-A lower contact angle yields a smaller rivulet, both in height and width for the same $r_0$ value, thus different curvatures.
-Fig.~\ref{fig:first_growth} shows that upon rescaling time with Eq.~(\ref{eq:tau_m}) which is a function of $\theta$ the breakup data collapses and follows the predicted $\sigma$ line.
-We also saw that Eq.~(\ref{eq:maxDrops}) holds true for $\psi_0 \leq 0.25$, for larger $\psi_0$ values the collapse is the more likely outcome.
+In the previous sections we focused on the role of curvatures and thus used $\psi_0$ indifferent of the wettability. 
+The concrete initial condition and thus $\psi_0$ is however a function of $\theta$, see Eq.~(\ref{eq:torus}).
+A lower contact angle yields a smaller rivulet, both in height and width for the same $r_0$ value.
+Fig.~\ref{fig:first_growth} shows that upon rescaling time with Eq.~(\ref{eq:tau_m}), which is a function of $\theta$, the breakup data collapses and follows the predicted $\sigma$ line.
+We also saw that Eq.~(\ref{eq:maxDrops}) holds true for $\psi_0 \leq 0.25$, for larger $\psi_0$ values the collapse is the more likely outcome on a uniform substrate.
 
 In order to further investigate the ring-rivulet we now make the contact angle a function of space, thus using an effective model of a patterned substrate. 
 Small amounts of liquids on patterned substrates have been studied extensively, see for example Refs.~\cite{savvaDropletMotionInclined2013, vellingiriDropletSpreadingChemically2011, wangWettingEffectPatterned2023, wuInvestigationEquilibriumDroplet2019} to name but a few.
-We discuss two types of patterns, where the first one serves as an effective boundary which pins the contact line and the second one helps us to understand the force balance between wetting and retraction of the ring rivulet, see Eqs.~(\ref{eq:theta_band}-\ref{eq:theta_grad}).
+We discuss two types of patterns, where the first one serves as an effective boundary which removes the collapse mode and the second one helps us to understand the force balance between wetting and retraction of the ring-rivulet, see Eqs.~(\ref{eq:theta_band}-\ref{eq:theta_grad}).
 
 \subsubsection{Banded pattern}\label{subsubsec:banded}
 The first pattern Eq.~(\ref{eq:theta_band}) constrains the ring-rivulet to its initial area with some additional margin $\delta\xi$.
 This is realized by using $\theta_a \in [10^{\circ}, 20^{\circ}, 30^{\circ}, 40^{\circ}]$ and $\theta_b = 60^{\circ}$, which yields a contact angle contrast $\Delta\theta \in [50^{\circ}, 40^{\circ}, 30^{\circ}, 20^{\circ}]$.
 While this choice seem to contracting the long wave approximation, we actually do not see the film penetrating the $\theta_b$ region in our numerical experiments.
-Thus, the substrate area $\delta\xi$ away from the center of ring-rivulet can be understood as an effective barrier. 
-Edwards et al.~\cite{edwardsControllingBreakupToroidal2021} performed a somewhat similar experiments where they were able to remove the coalescence mode with elaborate surface coatings and further used electrowetting to dynamically modify the contact angles.
-
-The contact angle barrier effectively removes the coalescence mode from the dynamics.
-Because the initial configuration is unstable, the rivulet will eventually rupture and form droplets, this however can be on rather long time scales depending on $\psi_0$.
-We see this fact in Fig.~\ref{fig:max_drops}, where the blue bullets indicate numerical experiments with the banded pattern.
-In contrast to the uniform substrate and with the removed coalescence mode, we see no $n_{\max} = 0$ event and breakup events up to $\psi_0 \approx 0.4$.
-We also see that the predicted number of droplets Eq.~(\ref{eq:maxDrops}) does not fit the data as good as for the uniform substrate.
-One possible explanation is the restriction of the flow, as the ring-rivulet can not contract. 
+Thus, the substrate area $\pm\delta\xi$ away from the ring-rivulets base can be understood as an effective barrier. 
+Edwards et al.~\cite{edwardsControllingBreakupToroidal2021} performed related experiments where they were able to remove the coalescence mode with elaborate surface coatings and used electrowetting to dynamically modify the contact angle.
 
 \begin{figure}
     \centering
     \includegraphics[width=0.48\textwidth]{assets/bandBreakup_timescales.pdf}
-    \caption{Breakup times normalized by their respective $\tau_m$ for the banded case Eq.~\ref{eq:theta_band}.
+    \caption{Breakup times $\tau_b$ normalized by their respective $\tau_m$ for the banded case Eq.~\ref{eq:theta_band}.
     Different colors depict different contact angle contrasts $\Delta\theta$.
-    The dashed line is a linear function of $\psi_0$ with $La = \gamma\rho R_0/\mu^2$ as slope.}
+    The dashed line is a linear function of $\psi_0$. %with $La = \gamma\rho R_0/\mu^2$ as slope.
+    }
     \label{fig:bandBreakupT}
 \end{figure}
+Because the initial configuration is unstable, the ring-rivulet will eventually rupture and form droplets, this however can be on long time scales depending on $\psi_0$.
+In Fig.~\ref{fig:bandBreakupT} we measure the rupture times $\tau_b$ normalized by their respective $\tau_m$ for different initial conditions on the banded substrate.
+Different colors indicate different contact angle contrasts $\Delta\theta$ and although there is not a complete collapse of the data, it seems that there is a linear trend between $\tau_b/\tau_m$ and $\psi_0$.
+To highlight this statement we add a linear fit in Fig.~\ref{fig:bandBreakupT} as a black dashed line. 
 
+Although having numerical experiments run up to $t = 25\tau_m$ we do not always observe the breakup. 
+This is indicated in by the $n_{\max} = 1$ data Fig.~\ref{fig:max_drops}, where the blue bullets (\textcolor{jlblue}{$\bullet$}) show data from the banded pattern. 
+In those simulations the ring-rivulet has not ruptured at the end of the simulation time.
+However, $\Delta h$ measurements show growth in most cases.
+In contrast to the uniform substrate we do not see any $n_{\max} = 0$ event. 
+We also see that the predicted number of droplets Eq.~(\ref{eq:maxDrops}) does not fit the data as good as for the uniform substrate. 
+Similarly to the uniform substrate and in agreement with pervious work~\cite{gonzalezStabilityLiquidRing2013} we sometimes see an evolution as shown in Fig.~\ref{fig:ThreeDToOneD}.
+Thus, having $n = n_{\max}$ for early time scales but at rupture the system chooses $n < n_{\max}$.
 
 \subsubsection{Linear wettability gradients}\label{subsubsec:linwettgrad}
+So far we have shown that our numerical experiments can reproduce known results and that upon using a patterned substrate we are able to remove the coalescence mode.
+
 See Figs.~\ref{fig:negativewetgrad}-\ref{fig:positivewetgrad}.
 \begin{figure}
     \centering
