@@ -186,7 +186,7 @@ begin
 	tau_m = Float64[]
 	for R in [80, 120, 150, 160, 180, 200]
 		for rr in [20, 22, 25, 30, 40, 60, 80]
-			for ang in [20, 30, 40]
+			for ang in [10, 20, 30, 40]
 				inC = subset(initial_data, :R0 => a -> a .== R, :rr0 => b -> b .== rr, :angle => c -> c .== ang)
 				dataCut = subset(growthDF, :R0 => a -> a .== R, :rr0 => c -> c .==  rr, :theta => t -> t .== ang, :substrate => s -> s .== "uniform")
 				# Check if data exists
@@ -228,7 +228,7 @@ begin
 	timeScaleDF.Rstart = R0s
 	timeScaleDF.Rdrop = Rfs
 	timeScaleDF.tauM = tau_m
-	CSV.write("../data/CollapseBreakupTimes.csv",timeScaleDF)
+	CSV.write("../data/CollapseBreakupTimes_with10.csv",timeScaleDF)
 end
 
 # ╔═╡ c666d253-bffc-4632-ac6b-85867d1416ca
@@ -358,7 +358,7 @@ begin
 		tickfont = (12, :black),
 		minorticks = true,
 		legend = :topright,
-		ylims = (0.5, 10),
+		ylims = (0.3, 10),
 		xlims = (0.001, 0.8)
 	)
 	scatter!(collapses.psi0, 
