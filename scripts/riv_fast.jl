@@ -424,23 +424,23 @@ begin
 	)
 	scatter!(breakupBand40.psi0, 
 		breakupBand40.breakupT ./ normfactors[1], 
-		label="Δθ = 20",
+		label="Δθ = 20°",
 		m = (8, :circ, 0.75),
 		# yaxis=:log10,
 	)
 	scatter!(breakupBand30.psi0, 
 		breakupBand30.breakupT ./ normfactors[2], 
-		label="Δθ = 30",
+		label="Δθ = 30°",
 		m = (8, :circ, 0.75)
 	)
 	scatter!(breakupBand20.psi0, 
 		breakupBand20.breakupT ./ normfactors[3], 
-		label="Δθ = 40",
+		label="Δθ = 40°",
 		m = (8, :circ, 0.75)
 	)
 	scatter!(breakupBand10.psi0, 
 			breakupBand10.breakupT ./ normfactors[4], 
-			label="Δθ = 50",
+			label="Δθ = 50°",
 			m = (8, :circ, 0.75)
 	)
 	plot!(xaxislin, 0.0 .+ (85 .* xaxislin), l = (2, :black, :dash), label="∝ cψ₀")
@@ -449,7 +449,7 @@ begin
 end
 
 # ╔═╡ e8f374b6-c06c-42a7-a279-64a85d403d98
-# savefig(timescalesBandPlot, "../assets/bandBreakup_timescales.pdf")
+savefig(timescalesBandPlot, "../assets/bandBreakup_timescales_2.pdf")
 
 # ╔═╡ 920cb851-4f6e-443d-a1c7-adf1035b91c1
 md"## Linear wettability gradients"
@@ -568,26 +568,48 @@ end
 savefig(Roftpos, "../assets/radius_time_gradient_positive.pdf")
 
 # ╔═╡ e2018388-8732-4186-bb8e-20fff9e73eaa
-dataArr = RivuletTools.data_arrested
+begin
+	dataArr = RivuletTools.data_arrested
+	dataGra = RivuletTools.data_gradient
+end
 
 # ╔═╡ f4b660fb-3d3b-45aa-b80f-1db1da2b0b62
 begin
-	Dset = 29
+	Dset = 56
 	hnew = RivuletTools.read_data(R=dataArr[Dset][1], r=dataArr[Dset][2], kbT=dataArr[Dset][3], year=dataArr[Dset][4], month=dataArr[Dset][5], day=dataArr[Dset][6], hour=dataArr[Dset][7], minute=dataArr[Dset][8], θ=dataArr[Dset][9], nm=(3,2), arrested=true)
 	println("R: $(dataArr[Dset][1]) rr: $(dataArr[Dset][2]) theta: $(dataArr[Dset][9]) kbt: $(dataArr[Dset][3])")
+end
+
+# ╔═╡ 55558cfb-52ae-4a88-8288-036e7c5c94c6
+begin
+	Gset = 5
+	hnewgrad = RivuletTools.read_data(R=dataGra[Gset][1], r=dataGra[Gset][2], kbT=dataGra[Gset][3], year=dataGra[Gset][4], month=dataGra[Gset][5], day=dataGra[Gset][6], hour=dataGra[Gset][7], minute=dataGra[Gset][8], θ=dataGra[Gset][9], nm=(3,2), arrested=false, gradient=(true, 40, 20))
+	println("R: $(dataGra[Gset][1]) rr: $(dataGra[Gset][2]) theta: $(dataGra[Gset][9]) kbt: $(dataGra[Gset][3])")
 end
 
 # ╔═╡ cfa56378-beb9-46d5-96f6-3c8d4300b469
 hfield = reshape(hnew["h_7500000"],512,512)
 
 # ╔═╡ 3acaa735-7821-490f-83f5-698b7e69f567
-heatmap(hfield, aspect_ratio=1)
+bandpsi03 = heatmap(hfield, aspect_ratio=1)
+
+# ╔═╡ 0d9cc1bd-7774-41e7-88b6-61bf06dab1a3
+savefig(bandpsi03, "../assets/heatmap_7500000_180_80_20_band.pdf")
 
 # ╔═╡ 201fb28b-902b-4ebe-88f6-ef5ea400acbc
 begin
 	scatter(1:256, hfield[1:256,256], ylims=(0,1), xlims=(50, 150))
 	#plot()
 end
+
+# ╔═╡ d8e8424e-064c-4552-8d97-d787a73d84ed
+begin
+	hgradf = reshape(hnewgrad["h_7500000"], 512, 512)
+	neggrad4020 = heatmap(hgradf, aspect_ratio=1)
+end
+
+# ╔═╡ ada85a83-b4aa-46f6-a707-0c95fc6aa541
+savefig(neggrad4020, "../assets/heatmap_7500000_180_80_4020_grad.pdf")
 
 # ╔═╡ f6de6f22-1932-4c30-a113-278338b95b24
 dfDrops = CSV.read("../data/maxdroplets-corrected.csv", DataFrame)
@@ -2729,9 +2751,13 @@ version = "1.4.1+1"
 # ╠═23b6e6e6-4a81-48bb-897f-5586c95d7b48
 # ╠═e2018388-8732-4186-bb8e-20fff9e73eaa
 # ╠═f4b660fb-3d3b-45aa-b80f-1db1da2b0b62
+# ╠═55558cfb-52ae-4a88-8288-036e7c5c94c6
 # ╠═cfa56378-beb9-46d5-96f6-3c8d4300b469
 # ╠═3acaa735-7821-490f-83f5-698b7e69f567
+# ╠═0d9cc1bd-7774-41e7-88b6-61bf06dab1a3
 # ╠═201fb28b-902b-4ebe-88f6-ef5ea400acbc
+# ╠═d8e8424e-064c-4552-8d97-d787a73d84ed
+# ╠═ada85a83-b4aa-46f6-a707-0c95fc6aa541
 # ╠═f6de6f22-1932-4c30-a113-278338b95b24
 # ╠═f5e6de8f-6461-4163-8689-4ecea441b6d3
 # ╠═3b84d4f3-1819-4864-9ca1-371916838369
