@@ -248,26 +248,38 @@ This stable configuration can either be several disconnected droplets if the riv
   \label{fig:ringschema}
 \end{figure}
 
-The initial thickness profile $h(\mathbf{x}, t=0)$ of the film is set by an implicit equation for a torus with radial symmetry along the z-axis according to
+The initial thickness profile $h_0(\mathbf{x})=h(\mathbf{x}, t=0)$ of the film is set by an implicit
+\textcolor{red}{AS: Why is it implicit?} equation for a \textcolor{red}{toroidal cap} with radial symmetry along the z-axis \textcolor{red}{and centred in the origin of the coordinate system} according to
+\textcolor{red}{
 \begin{equation}\label{eq:torus}
-    h(\mathbf{x}, t=0) = \sqrt{r_0^2 - \left(R_0-\xi\right)^2} - r_0\cos(\theta) + \varepsilon(\mathbf{x})\mathcal{N},
+h_0(\mathbf{x}) = 
+\left\{
+\begin{array}{ll}
+\left(\sqrt{r^2 - \left(R-\xi\right)^2} - r\cos(\theta)\right)(1+\varepsilon\mathcal{N})  & \mbox{if } |R-\xi|<r \sin(\theta)\\
+h_{\ast} & \mbox{otherwise}
+\end{array}
+\right.
 \end{equation}
-where $\xi = \sqrt{(x-x_0)^2+(y-y_0)^2}$ is a radial coordinate, $R_0$ is the major radius and $r_0$ is the minor radius of the torus.
-The center of the torus is at $(x_0,y_0)$ and for all numerical experiments set to the center of the numerical domain.
-Eq.~(\ref{eq:torus}) allows for negative thickness values, however, we only consider the upper half of the torus as shown in Fig.~\ref{fig:ringschema}. 
-The second term in Eq.~(\ref{eq:torus}) is to cut the upper half to a smaller contact angle.
-The third term adds white noise to the initial condition, $\mathcal{N}$ is a gaussian with zero mean and $\varepsilon(\mathbf{x})$ is an amplitude that is 
-\begin{equation}
-    \varepsilon(\mathbf{x}) =
-    \begin{cases}
-        10^{-2}\quad \textbf{if}~h(\mathbf{x}) > h_{\ast}\\
-        0~~\quad\quad \textbf{else}
-    \end{cases}
-    .
-\end{equation} 
-We further require that any $h(\mathbf{x}) < 0$ is set to $h_{\ast}$.
-The lubrication approximation does in fact not allow us to use the initial conditions in Refs.~\cite{nguyenCompetitionCollapseBreakup2012, wuBreakupPatternedNanoscale2010} or use contact angles as large as in Edwards et al.~\cite{edwardsControllingBreakupToroidal2021} but are in agreement with Gonz{\'a}lez et al.~\cite{gonzalezStabilityLiquidRing2013}.
-
+}
+where \textcolor{red}{$\xi = \sqrt{x^2+y^2}$} is a radial coordinate, $R$ is the major radius and $r$ is the minor radius of the torus.
+%The center of the torus is at $(x_0,y_0)$ and for all numerical experiments set to the 
+%center of the numerical domain.
+%Eq.~(\ref{eq:torus}) allows for negative thickness values, however, we only consider the %upper half of the torus as shown in Fig.~\ref{fig:ringschema}. 
+%The second term in Eq.~(\ref{eq:torus}) is to cut the upper half to a smaller contact angle.
+\textcolor{red}{$\mathcal{N}$ is a Gaussian random variable with zero mean and 
+unit variance and  $\varepsilon = 10^{-2}$.}
+%\begin{equation}
+%    \varepsilon(\mathbf{x}) =
+%    \begin{cases}
+%        10^{-2}\quad \textbf{if}~h(\mathbf{x}) > h_{\ast}\\
+%       0~~\quad\quad \textbf{else}
+%    \end{cases}
+%\end{equation} 
+%We further require that any $h(\mathbf{x}) < 0$ is set to $h_{\ast}$.
+%The lubrication approximation does in fact not allow us to use the initial conditions in 
+%Refs.~\cite{nguyenCompetitionCollapseBreakup2012, wuBreakupPatternedNanoscale2010} or use 
+%contact angles as large as in Edwards et al.~\cite{edwardsControllingBreakupToroidal2021} 
+%but are in agreement with Gonz{\'a}lez et al.~\cite{gonzalezStabilityLiquidRing2013}.
 Our main interest is focused on the impact of a pattern on the evolution of the ring-rivulet. 
 As indicated with two $\theta$ values in Fig.~\ref{fig:ringschema} we use different wettability patterns.
 A natural starting point that allows to compare to Refs.~\cite{gonzalezStabilityLiquidRing2013, nguyenCompetitionCollapseBreakup2012, wuBreakupPatternedNanoscale2010} is $\theta(\xi) = \theta_0$,where $\theta_0$ is a constant.
@@ -295,10 +307,13 @@ The numerical experiments therefore create a dynamic response of the initial con
 \begin{figure*}
     \centering
     \includegraphics[width=0.95\textwidth]{assets/heatcirc.png}
-    \caption{(a) Heatmap of the film thickness at $t=1.68\tau_m$ for $\psi_0 = 0.21$. 
+    \caption{(a) \textcolor{red}{AS: in the label 
+    there should be $h(x,y)$} Heatmap of the film thickness at $t=1.68\tau_m$ for $\psi_0 = 0.21$. 
     All length scales are normalized by $H_D = 25.67$. 
     The red ring in the middle of the rivulet is depicted as blue line plot in (b).
-    In (b) we show circular cuts normalized to $2\pi$, shown in different colors and line styles, for different time steps normalized by Eq.~(\ref{eq:tau_m}) at $\xi(h_{\max})$.
+    In (b) we show circular cuts normalized to $2\pi$, shown in different colors and line styles, for different time steps normalized by Eq.~(\ref{eq:tau_m}) at $\xi(h_{\max})$ \textcolor{red}{I do not understand this: what does it mean $h(\xi)|_{h_{max}}$ and $x(\phi)$? I think 
+    easier to understand labels would be $h(\xi=R,\phi)$ 
+    and $\phi$}.
     The ring-rivulet initially chooses a breakup mode that lead to eight droplets, however with time it breaks into three distinct droplets, indicated by the three maxima of the purple curve.}
     \label{fig:ThreeDToOneD}
 \end{figure*}
@@ -318,13 +333,17 @@ Among the many results of this work is the fact that the varicos modes are alway
 The stability, then, is associated with the width of the ring-rivulet $w = 2r$ as well as the ratio of radii $\psi_0 = 2r/R_0 = w/R_0$.
 When the width approaches zero, $w \rightarrow 0$, the rivulet breaks up and is likely to form independent droplets.
 
-We use a slightly different measure to access the stability of the rivulet. 
-Instead of directly working with the three-dimensional data we take a circular cut (red circle in Fig.~\ref{fig:ThreeDToOneD}(a)) along the rivulet and measure
+\textcolor{red}{Owing to the axial symmetry of the problem, we will 
+work in polar coordinate $(\xi, \phi)$ and assess the breakup of the rivulet
+looking at the difference between the maximum and minimum over $\phi$ of 
+the height field $h$ at $\xi=R$, namely:}
+%We use a slightly different measure to access the stability of the rivulet. 
+%Instead of directly working with the three-dimensional data we take a circular cut %(red circle in Fig.~\ref{fig:ThreeDToOneD}(a)) along the rivulet and measure
 \begin{equation}\label{eq:delta-h-measure}
-    \Delta h = (h_{\max} - h_{\min})_{\xi = \xi(h_{\max})},
+       \Delta h(t) = \max_{\phi}h(R,\phi,t) - \min_{\phi}h(R,\phi,t).
 \end{equation}
-which can be computed from Fig.~\ref{fig:ThreeDToOneD}(b).
-This measure has the advantage that it is well within the rivulet and thus should filter out a constant background from the precursor film $h_{\ast}$, see Eq.~(\ref{eq:disjoinpressure}).
+%which can be computed from Fig.~\ref{fig:ThreeDToOneD}(b).
+%This measure has the advantage that it is well within the rivulet and thus should %filter out a constant background from the precursor film $h_{\ast}$, see %Eq.~(\ref{eq:disjoinpressure}).
 
 \begin{figure}
     \centering
@@ -336,7 +355,8 @@ This measure has the advantage that it is well within the rivulet and thus shoul
     }
     \label{fig:first_growth}
 \end{figure}
-As a criterion for a break up using a circular cut we assume $\Delta h \approx 2\max{h(\mathbf{x},0)}$. 
+\textocolor{red}{As a criterion for a breakup we assume 
+$\Delta h(\tau_b) \approx 2r(1-\cos(\theta)$ (i.e. the maximum height in the initial profile).}
 In previous studies, it has been shown that the break up follows and exponential growth~\cite{wuBreakupPatternedNanoscale2010, gonzalezStabilityLiquidRing2013, nguyenCompetitionCollapseBreakup2012}.
 % TODO: Needs to be explained better and worked out why it fits so well!
 To address this statement we use the growth rate $\sigma_m$ which reads
@@ -361,8 +381,9 @@ We will get back to this point in Sec.~\ref{subsec:wettability} where we discuss
 \begin{figure}
     \centering
     \includegraphics[width=0.45\textwidth]{assets/maxdropsUniBandCC.pdf}
-    \caption{Number of maximal droplets $n_{max}$ over reduced aspect ratio $\psi_0$.
-    Different symbols show different substrates, where the uniform substrate is shown by blue bullets (\textcolor{black}{$\bullet$}) and Eq.~(\ref{eq:theta_band}) by orange stars (\textcolor{black}{$\star$}).
+    \caption{\textcolor{red}{Maximum number of droplets} $n_{max}$ over reduced aspect ratio $\psi_0$.
+    Different symbols show different substrates, where the uniform substrate is shown by blue bullets 
+    \textcolor{red}{AS: The caption does not seem consistent with the figure. Please check}(\textcolor{black}{$\bullet$}) and Eq.~(\ref{eq:theta_band}) by orange stars (\textcolor{black}{$\star$}).
     We compare our results to the linear stability analysis (LSA) from Gonz{\'a}lez et al.~\cite{gonzalezStabilityLiquidRing2013}}
     \label{fig:max_drops}
 \end{figure}
@@ -396,7 +417,8 @@ In Fig.~\ref{fig:timescaleDifference} we measured these time scales as function 
 \begin{figure}
     \centering
     \includegraphics[width = 0.45\textwidth]{assets/uniform_timescalesCC.pdf}
-    \caption{Breakup and collapse times $\tau$ for all numerical experiments on a uniform substrate.
+    \caption{Breakup, $\tau_b$, and collapse, $\tau_c$, for all numerical experiments on a uniform substrate \textcolor{red}{AS: Be consistent with the names. Breakup and collapse are $\tau_b$ and $\tau_c$, one cannot then use 
+    a 'collective' name $\tau$. Please, change it also in the fig}.
         On the x-axis we use the dimensionless length scale $\psi_0$ and the y-axis displays either the breakup- or collapse time $\tau$ with stars (\textcolor{jlorange}{$\star$}) or bullets (\textcolor{jlblue}{$\bullet$}) respectively.
         The dashed line serves as a guide to eye and shows an exponential growth that is in agreement with the breakup data. 
         The dash-dotted line shows and exponential decay which can be motivated by the collapse data.
@@ -429,7 +451,7 @@ Edwards et al.~\cite{edwardsControllingBreakupToroidal2021} performed related ex
 \begin{figure}
     \centering
     \includegraphics[width=0.48\textwidth]{assets/bandBreakup_timescales.pdf}
-    \caption{Breakup times $\tau_b$ normalized by their respective $\tau_m$ for the banded case Eq.~\ref{eq:theta_band}.
+    \caption{Breakup times $\tau_b$ \textcolor{red}{AS: In the figure it is written $\tau_r$. Please, fix it} normalized by their respective $\tau_m$ for the banded case Eq.~\ref{eq:theta_band}.
     Different colors depict different contact angle contrasts $\Delta\theta$.
     The dashed line is a linear function of $\psi_0$. %with $La = \gamma\rho R_0/\mu^2$ as slope.
     }
