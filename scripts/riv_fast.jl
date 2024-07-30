@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.42
+# v0.19.45
 
 using Markdown
 using InteractiveUtils
@@ -368,22 +368,23 @@ begin
 		tickfont = (12, :black),
 		minorticks = true,
 		legend = :topright,
-		ylims = (0.3, 10),
-		xlims = (0.001, 0.8)
+		ylims = (1e5, 1e7),
+		# xlims = (0.001, 0.8)
 	)
 	scatter!(collapses.psi0, 
-		collapses.collapsT ./ collapses.tauM ./ 1.0, 
+		collapses.collapsT, #./ collapses.tauM ./ 1.0, 
 		label="collapse",
 		m = (8, :circ, 0.75),
 		color = cgrad(:Dark2_4, 4, categorical = true), 
 		#palette(:default)[1:4],
 		zcolor = collapses.theta,
 		xlabel="ψ₀", 
-		ylabel = "τ/τₘ",
+		#ylabel = "τ/τₘ",
+		ylabel = "t l.b.u.",
 		# yaxis=:log10,
 	)
 	scatter!(breakup.psi0, 
-		breakup.breakupT ./ breakup.tauM ./ 1.0, 
+		breakup.breakupT, #./ breakup.tauM ./ 1.0, 
 		label="breakup",
 		color = cgrad(:Dark2_4, 4, categorical = true), 
 		#palette(:default)[1:4],
@@ -391,8 +392,8 @@ begin
 		m = (8, :star5, 0.75)
 	)
 	xaxislin = collect(0.0:0.001:1)
-	plot!(xaxislin, 0.32 .* exp.(15.5 .* xaxislin), l = (2, :black, :dash), label="∝ exp(aψ₀)")
-	plot!(xaxislin, 16 .* exp.(-5.8 .* xaxislin), l = (2, :black, :dashdot), label="∝exp(-bψ₀)")
+	# plot!(xaxislin, 0.32 .* exp.(15.5 .* xaxislin), l = (2, :black, :dash), label="∝ exp(aψ₀)")
+	# plot!(xaxislin, 16 .* exp.(-5.8 .* xaxislin), l = (2, :black, :dashdot), label="∝exp(-bψ₀)")
 	# w = 14
 	# n = -1.2
 	# plot!(xaxislin, (((0.15 .* exp.(22 .* xaxislin))).^(n) + ((90 .* exp.(-10. .* xaxislin) .+ 0.2)).^(n)).^(1/n),l = (2, :black, :solid), label="Ulf")
@@ -402,10 +403,11 @@ begin
 	# scatter!(breakup.psi0, breakup.breakupT ./ breakup.tauM, label="breakup")
 	# scatter!(collapses.psi0, tau_rim_here ./ collapses.tauM, label="paper")
 	# println((3/2 .* (collapses.Rstart[1] .- collapses.Rdrop[1]) ./ (0.01 * (deg2rad.(collapses.theta[1])).^3)))
+	timescalesPlot
 end
 
 # ╔═╡ a095a147-2348-4f1b-94b1-77a5e137bb8f
-savefig(timescalesPlot, "../assets/uniform_timescales.pdf")
+savefig(timescalesPlot, "../assets/uniform_timescales_lbu.pdf")
 
 # ╔═╡ bb861b57-fc7d-43ae-a899-693064da0434
 begin
@@ -421,45 +423,47 @@ begin
 	normfactors2 = [1, 1, 1, 1]
 	timescalesBandPlot = plot(
 		xlabel="ψ₀", 
-		ylabel ="τᵣ/τₘ",
+		# ylabel ="τᵣ/τₘ",
+		ylabel ="t l.b.u.",
 		# xaxis=:log10,
 		grid = false,
 		legendfontsize = 11,
 		guidefont = (16, :black),
 		tickfont = (12, :black),
 		minorticks = true,
-		legend = :topleft,
-		ylims = (0, 30),
-		xlims = (0.0, 0.35)
+		# legend = :topleft,
+		legend = :topright,
+		# ylims = (0, 30),
+		xlims = (0.0, 0.5)
 	)
 	scatter!(breakupBand40.psi0, 
-		breakupBand40.breakupT ./ normfactors[1], 
+		breakupBand40.breakupT, # ./ normfactors[1], 
 		label="Δθ = 20°",
 		m = (8, :circ, 0.75),
 		# yaxis=:log10,
 	)
 	scatter!(breakupBand30.psi0, 
-		breakupBand30.breakupT ./ normfactors[2], 
+		breakupBand30.breakupT, # ./ normfactors[2], 
 		label="Δθ = 30°",
 		m = (8, :circ, 0.75)
 	)
 	scatter!(breakupBand20.psi0, 
-		breakupBand20.breakupT ./ normfactors[3], 
+		breakupBand20.breakupT, # ./ normfactors[3], 
 		label="Δθ = 40°",
 		m = (8, :circ, 0.75)
 	)
 	scatter!(breakupBand10.psi0, 
-			breakupBand10.breakupT ./ normfactors[4], 
+			breakupBand10.breakupT, # ./ normfactors[4], 
 			label="Δθ = 50°",
 			m = (8, :circ, 0.75)
 	)
-	plot!(xaxislin, 0.0 .+ (85 .* xaxislin), l = (2, :black, :dash), label="∝ cψ₀")
+	# plot!(xaxislin, 0.0 .+ (85 .* xaxislin), l = (2, :black, :dash), label="∝ cψ₀")
 	# plot!(xaxislin, 16 .* exp.(-5.8 .* xaxislin), l = (2, :black, :dashdot), label="∝exp(-bψ₀)")
 	
 end
 
 # ╔═╡ e8f374b6-c06c-42a7-a279-64a85d403d98
-savefig(timescalesBandPlot, "../assets/bandBreakup_timescales_2.pdf")
+savefig(timescalesBandPlot, "../assets/bandBreakup_timescales_2_lbu.pdf")
 
 # ╔═╡ 920cb851-4f6e-443d-a1c7-adf1035b91c1
 md"## Linear wettability gradients"
@@ -488,9 +492,13 @@ begin
 	initial40 = subset(initial_data, :R0 => a -> a .== 180, :rr0 => b -> b .== 20, :angle => c -> c .== 40)
 	ll = initial40.hdrop[1]
 	# tt = 3/2*(iC.R0[1] + iC.realrr[1] - iC.rdrop[1])/(0.01 * ics[4]^3)
-	tt = 1/initial40.sigmaMax[1]*(2π/9)^(1.5)
+	# tt = 1/initial40.sigmaMax[1]*(2π/9)^(1.5) # This is the paper one
+	tt = 1.
 	#initial = subset(initial_data, :R0 => a -> a .== 180, :rr0 => b -> b .== 20, :angle => c -> c .== 40)
-	Roft = plot(xlabel = L"t/\tau_m", ylabel = L"R(t)/H_D",
+	Roft = plot(
+		xlabel = "t l.b.u.", 
+		# xlabel = L"t/\tau_m", 
+		ylabel = L"R(t)/H_D",
 		# yaxis=:log10,
 		# xaxis=:log10,
 		grid = false,
@@ -500,8 +508,9 @@ begin
 		minorticks = true,
 		legend = :bottomright,
 		# w = 2,
-		ylims = (0.0, 10),
-		xlims = (0.0, 42)
+		# ylims = (0.0, 10),
+		# xlims = (0.0, 42)
+		xlims = (0.0, 2.5e6)
 	)
 	plot!(plain.time ./ tt, plain.R_t ./ ll, label="Eq.(7), θ = 40°", l=(2.5, :solid))
 	plot!(band.time ./ tt, band.R_t ./ ll, label="Eq.(8), θ = 40°", l = (2.5, :dash))
@@ -511,7 +520,7 @@ begin
 end
 
 # ╔═╡ 3b9e37c1-466d-4ce8-9133-599c3f3deb42
-savefig(Roft, "../assets/radius_time_gradient_negative.pdf")
+savefig(Roft, "../assets/radius_time_gradient_negative_lbu.pdf")
 
 # ╔═╡ 69c0e684-69da-4419-bfa9-40f17016579a
 begin
@@ -553,7 +562,8 @@ end
 begin
 	initial20 = subset(initial_data, :R0 => a -> a .== 180, :rr0 => b -> b .== 80, :angle => c -> c .== 20)
 	ll2 = initial20.hdrop[1]
-	tt2 = 1/initial20.sigmaMax[1]*(π/9)^(1.5)
+	# tt2 = 1/initial20.sigmaMax[1]*(π/9)^(1.5) # the paper time
+	tt2 = 1.
 	
 	Roftpos = plot(xlabel = L"t/\tau_m", ylabel = L"R(t)/H_D",
 		# yaxis=:log10,
@@ -565,8 +575,8 @@ begin
 		minorticks = true,
 		legend = :bottomleft,
 		# w = 2,
-		ylims = (4, 12),
-		xlims = (0, 7.5)
+		# ylims = (4, 12),
+		# xlims = (0, 7.5)
 	)
 	plot!(plain20.time ./ tt2, plain20.R_t ./ ll2, label="Eq.(7)", l=(2.5, :solid))
 	plot!(band20.time ./ tt2, band20.R_t ./ ll2, label="Eq.(8)", l = (2.5, :dash))
@@ -575,7 +585,7 @@ begin
 end
 
 # ╔═╡ 23b6e6e6-4a81-48bb-897f-5586c95d7b48
-savefig(Roftpos, "../assets/radius_time_gradient_positive.pdf")
+savefig(Roftpos, "../assets/radius_time_gradient_positive_lbu.pdf")
 
 # ╔═╡ e2018388-8732-4186-bb8e-20fff9e73eaa
 begin
