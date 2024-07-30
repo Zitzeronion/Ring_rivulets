@@ -258,22 +258,28 @@ The contact angle, in agreement with the lubrication approximation~\cite{oronLon
   \label{fig:ringschema}
 \end{figure}
 
-As the initial thickness profile $h_0(\mathbf{x})=h(\mathbf{x}, t=0)$ we take the equation for a toroidal cap with radial symmetry along the $z$-axis and centred in the origin of the coordinate system, which reads,
-in polar coordinates $(\xi, \phi)$ (with $x = \xi \cos(\phi)$, $y=\xi \sin(\phi)$,
+We initialise the thickness profile $h_0(\mathbf{x})=h(\mathbf{x}, t=0)$ by first imposing the shape of a toroidal cap, with radial symmetry along the $z$-axis, centred in the origin of the coordinate system
+and with major an minor radii $R_0$ and $r_0$,
+whose equation in polar coordinates $(\xi, \phi)$ (with $x = \xi \cos(\phi)$, $y=\xi \sin(\phi)$ reads,
 % \begin{strip}
 \begin{equation}\label{eq:torus}
-h_0(\mathbf{x}) = 
-\left\{
-\begin{array}{ll}
-\left(B - r_0\cos(\theta) + h_{\ast}\right)(1+\varepsilon\mathcal{N})  & \mbox{if } |R_0-\xi|<r_0 \sin(\theta)\\
-h_{\ast} & \mbox{otherwise}
-\end{array}
-\right.
+h_0(\mathbf{x})=\left(\sqrt{r_0^2 - \left(R_0-\xi\right)^2} - r_0\cos(\theta) + h_{\ast}\right)
 \end{equation}
+for $|R_0-\xi|<r_0$ (and $h_0(\mathbf{x})=h_{\ast}$, otherwise); then, we let it relax to the actual 
+equilibrium shape~\cite{diezBreakupFluidRivulets2009} which we slightly perturb with a Gaussian noise with zero mean and variance $10^{-4}r_0^2 \sin^2(\theta)$. 
+%\begin{equation}\label{eq:torus}
+%h_0(\mathbf{x}) = 
+%\left\{
+%\begin{array}{ll}
+%\left(B - r_0\cos(\theta) + h_{\ast}\right)(1+\varepsilon\mathcal{N})  & \mbox{if } |R_0-\xi|<r_0 %\sin(\theta)\\
+%h_{\ast} & \mbox{otherwise}
+%\end{array}
+%\right.
+%\end{equation}
 % \end{strip}
-where $B = \sqrt{r_0^2 - \left(R_0-\xi\right)^2}$, $R_0$ and $r_0$ are the major and minor torus radii, respectively (see Fig.~\ref{fig:ringschema}).
-$\mathcal{N}$ is a Gaussian random variable with zero mean and 
-unit variance and  $\varepsilon = 10^{-2}$.
+%where $B = \sqrt{r_0^2 - \left(R_0-\xi\right)^2}$, $R_0$ and $r_0$ are the major and minor torus radii, respectively (see Fig.~\ref{fig:ringschema}).
+%$\mathcal{N}$ is a Gaussian random variable with zero mean and 
+%unit variance and  $\varepsilon = 10^{-2}$.
 As anticipated in the introduction, on top of the reference case, with uniform contact angle, we consider two different wettability patterns: i) an annular patch 
 \begin{equation}\label{eq:theta_band}
     \theta(\xi) =\begin{cases}
@@ -337,27 +343,33 @@ respectively.
 \end{figure}
 %As a criterion for a breakup we assume 
 %$\Delta h(\tau_b) \approx 2r(1-\cos(\theta)$.
-Such quantity is expected to grow exponentially in the linear instability regime~\cite{wuBreakupPatternedNanoscale2010, gonzalezStabilityLiquidRing2013, nguyenCompetitionCollapseBreakup2012}, with a growth rate
+Such quantity should grow exponentially in the linear instability regime~\cite{wuBreakupPatternedNanoscale2010, gonzalezStabilityLiquidRing2013, nguyenCompetitionCollapseBreakup2012}, with a growth rate that depends on 
+both the aspect-ratio $\psi_0$ and on the contact angle $\theta_0$~\cite{gonzalezStabilityLiquidRing2013}; for $\psi_0 \ll 1$, though, the dynamics approximates the 
+linear rivulet case and the growth is essentially independent on $\psi_0$. In fact, in this limit, 
+as shown with full symbols in Fig.~\ref{fig:first_growth}, we could achieve a nice collapse of the $\Delta h$ vs $t$ 
+curves for different couples $(\theta_0,\psi_0)$, provided the time is rescaled by the characteristic, contact angle dependent, time 
+$\tau_m \propto (\mu R/\gamma) \sin(\theta_0)/\theta_0^{3/2}$. 
+The rescaling, on the contrary, does not work for large $\psi_0$ (empty symbols in Fig.~\ref{fig:first_growth}), when ring collapse takes place, leading to the closure of the inner hole 
+and to the formation of single droplet.
 %\begin{equation}\label{eq:growth-sigma}
 %    \sigma_m = \frac{\gamma a \theta^{3/2}\sqrt{\theta - \sin(2\theta)/2}}%{6\mu\sin(\theta)\sqrt{A}}, 
 %\end{equation}
-\begin{equation}\label{eq:growth-sigma}
-    \sigma_m = \frac{A \gamma \theta^3}{6\mu\sin(\theta)}, 
-\end{equation}
-where $A \approx 0.0379$~\cite{wuBreakupPatternedNanoscale2010, diezBreakupFluidRivulets2009}.
+%\begin{equation}\label{eq:growth-sigma}
+%    \sigma_m = \frac{A \gamma \theta^3}{6\mu\sin(\theta)}, 
+%\end{equation}
+%where $A \approx 0.0379$~\cite{wuBreakupPatternedNanoscale2010, diezBreakupFluidRivulets2009}.
 %We like to mention that Eq.~(\ref{eq:growth-sigma}) differs from %ref~\cite{wuBreakupPatternedNanoscale2010} by a factor of $\theta^{-3/2}$, however %using $\sigma_m$ we can derive a timescale $\tau_m$ by simply inverting the growth %rate  
 %\begin{equation}\label{eq:tau_m}
 %    \tau_{m} = \frac{1}{\sigma_m} = \frac{6\mu\sin(\theta)\sqrt{A}}{\gamma a 
 %\theta^{3/2}\sqrt{\theta - \sin(2\theta)/2}}.      
 %\end{equation}
-In Fig.~\ref{fig:first_growth} we show $\Delta h$ data at different time steps for the uniform pattern normalized by their respective $H_D$ and $\tau_m = \sigma_m^{-1}$ as the different symbols.  
-We find a reasonable collapse for the full symbols with this rescaling and as a guide to eye we add a black dashed line that is proportional to $e^{\sigma_m t}$, see Eq.~(\ref{eq:growth-sigma}). 
-The empty symbols on the other hand do not show a pronounced growth, with the one exception of the open triangles ($\triangle$, $\psi_0 = 0.173$). 
-The filled symbols are numerical experiments that lead to break up of the rivulet, while the empty symbols display the collapse into a single droplet.
-
-Therefore, the $\Delta h$ values along $\xi(h_{\max})$ of the rivulet allow us to distinguish between initial conditions that lead to breakups and droplet fragmentation, as such following the dashed line in Fig.~\ref{fig:first_growth}, and a collapse into a single droplet as shown by the open symbols in Fig.~\ref{fig:first_growth}.
-The open triangles ($\triangle$, $\psi_0 = 0.173$) actually mark an edge case in which $\Delta h$ grows with a similar slope as the filled symbols, however the timescale on which the instability grows is too long as compared to the collapse timescale. 
-We will get back to this point in Sec.~\ref{subsec:wettability} where we discuss the banded case, Eq.~(\ref{eq:theta_band}) and show that the collapse is fast for larger $\psi_0$s as compared to the breakup instability.
+%In Fig.~\ref{fig:first_growth} we show $\Delta h$ data at different time steps for the uniform pattern %normalized by their respective $H_D$ and $\tau_m = \sigma_m^{-1}$ as the different symbols.  
+%We find a reasonable collapse for the full symbols with this rescaling and as a guide to eye we add a %black dashed line that is proportional to $e^{\sigma_m t}$, see Eq.~(\ref{eq:growth-sigma}). 
+%The empty symbols on the other hand do not show a pronounced growth, with the one exception of the open %triangles ($\triangle$, $\psi_0 = 0.173$). 
+%The filled symbols are numerical experiments that lead to break up of the rivulet, while the empty %symbols display the collapse into a single droplet.
+%Therefore, the $\Delta h$ values along $\xi(h_{\max})$ of the rivulet allow us to distinguish between %initial conditions that lead to breakups and droplet fragmentation, as such following the dashed line %in Fig.~\ref{fig:first_growth}, and a collapse into a single droplet as shown by the open symbols in %Fig.~\ref{fig:first_growth}.
+%The open triangles ($\triangle$, $\psi_0 = 0.173$) actually mark an edge case in which $\Delta h$ grows %with a similar slope as the filled symbols, however the timescale on which the instability grows is too %long as compared to the collapse timescale. 
+%We will get back to this point in Sec.~\ref{subsec:wettability} where we discuss the banded case, %Eq.~(\ref{eq:theta_band}) and show that the collapse is fast for larger $\psi_0$s as compared to the %breakup instability.
 
 \subsection{Breakup modes and droplets}\label{subsec:drop-counting}
 \begin{figure}
