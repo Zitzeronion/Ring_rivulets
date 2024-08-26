@@ -125,7 +125,7 @@
 \includegraphics{head_foot/DOI} & \noindent\LARGE{\textbf{Instabilities of ring-rivulets: Impact of wettability patterns$^\dag$}} \\%Article title goes here instead of the text "This is the title"
 \vspace{0.3cm} & \vspace{0.3cm} \\
 
- & \noindent\large{Stefan Zitz,\textit{$^{a,b}$} Andrea Scagliarini,\textit{$^{c,d}$} Johan Roenby\textit{$^{a}$}} \\%Author names go here instead of "Full name", etc.
+ & \noindent\large{Stefan Zitz,\textit{$^{a\ast}$} Andrea Scagliarini,\textit{$^{b,c}$} Johan Roenby\textit{$^{a}$}} \\%Author names go here instead of "Full name", etc.
 
 \includegraphics{head_foot/dates} & \noindent\normalsize{
 Rivulets and droplets are naturally appearing shapes when small amounts of liquid are brought into contact with a partially wettable substrate.
@@ -152,10 +152,10 @@ Thus making it possible to enhance the probability for a Rayleigh-Plateau type b
 %%%FOOTNOTES%%%
 
 \footnotetext{\textit{$^{a}$~IMFUFA, Department of Science and Environment, Roskilde University, Postbox 260, 4000 Roskilde, DK. Tel: +45 2993 1923; E-mail: johan@ruc.dk}}
-\footnotetext{\textit{$^{b}$~Research Center Pharmaceutical Engineering GmbH, Inffeldgasse 13, 8010 Graz, Austria, E-mail: stefan.zitz@rcpe.at}}
+\footnotetext{\textit{$^{\ast}$~current E-mail: stefan.zitz@rcpe.at}}
 
-\footnotetext{\textit{$^{c}$~Institute for Applied Mathematics "M. Picone" (IAC), Consiglio Nazionale delle Ricerche (CNR), Via dei Taurini 19, 00185 Rome, Italy, E-mail: andrea.scagliarini@cnr.it}}
-\footnotetext{\textit{$^{d}$~INFN, sezione Roma ``Tor Vergata'', via della Ricerca Scientifica 1, 00133 Rome, Italy}}
+\footnotetext{\textit{$^{b}$~Institute for Applied Mathematics "M. Picone" (IAC), Consiglio Nazionale delle Ricerche (CNR), Via dei Taurini 19, 00185 Rome, Italy, E-mail: andrea.scagliarini@cnr.it}}
+\footnotetext{\textit{$^{c}$~INFN, sezione Roma ``Tor Vergata'', via della Ricerca Scientifica 1, 00133 Rome, Italy}}
 
 
 %Please use \dag to cite the ESI in the main text of the article.
@@ -351,34 +351,16 @@ curves for different couples $(\theta_0,\psi_0)$, provided the time is rescaled 
 $\tau_m \propto (\mu R/\gamma) \sin(\theta_0)/\theta_0^{3/2}$. 
 The rescaling, on the contrary, does not work for large $\psi_0$ (empty symbols in Fig.~\ref{fig:first_growth}), when ring collapse takes place, leading to the closure of the inner hole 
 and to the formation of single droplet.
-%\begin{equation}\label{eq:growth-sigma}
-%    \sigma_m = \frac{\gamma a \theta^{3/2}\sqrt{\theta - \sin(2\theta)/2}}%{6\mu\sin(\theta)\sqrt{A}}, 
-%\end{equation}
-%\begin{equation}\label{eq:growth-sigma}
-%    \sigma_m = \frac{A \gamma \theta^3}{6\mu\sin(\theta)}, 
-%\end{equation}
-%where $A \approx 0.0379$~\cite{wuBreakupPatternedNanoscale2010, diezBreakupFluidRivulets2009}.
-%We like to mention that Eq.~(\ref{eq:growth-sigma}) differs from %ref~\cite{wuBreakupPatternedNanoscale2010} by a factor of $\theta^{-3/2}$, however %using $\sigma_m$ we can derive a timescale $\tau_m$ by simply inverting the growth %rate  
-%\begin{equation}\label{eq:tau_m}
-%    \tau_{m} = \frac{1}{\sigma_m} = \frac{6\mu\sin(\theta)\sqrt{A}}{\gamma a 
-%\theta^{3/2}\sqrt{\theta - \sin(2\theta)/2}}.      
-%\end{equation}
-%In Fig.~\ref{fig:first_growth} we show $\Delta h$ data at different time steps for the uniform pattern %normalized by their respective $H_D$ and $\tau_m = \sigma_m^{-1}$ as the different symbols.  
-%We find a reasonable collapse for the full symbols with this rescaling and as a guide to eye we add a %black dashed line that is proportional to $e^{\sigma_m t}$, see Eq.~(\ref{eq:growth-sigma}). 
-%The empty symbols on the other hand do not show a pronounced growth, with the one exception of the open %triangles ($\triangle$, $\psi_0 = 0.173$). 
-%The filled symbols are numerical experiments that lead to break up of the rivulet, while the empty %symbols display the collapse into a single droplet.
-%Therefore, the $\Delta h$ values along $\xi(h_{\max})$ of the rivulet allow us to distinguish between %initial conditions that lead to breakups and droplet fragmentation, as such following the dashed line %in Fig.~\ref{fig:first_growth}, and a collapse into a single droplet as shown by the open symbols in %Fig.~\ref{fig:first_growth}.
-%The open triangles ($\triangle$, $\psi_0 = 0.173$) actually mark an edge case in which $\Delta h$ grows %with a similar slope as the filled symbols, however the timescale on which the instability grows is too %long as compared to the collapse timescale. 
-%We will get back to this point in Sec.~\ref{subsec:wettability} where we discuss the banded case, %Eq.~(\ref{eq:theta_band}) and show that the collapse is fast for larger $\psi_0$s as compared to the %breakup instability.
 
 \subsection{Breakup modes and droplets}\label{subsec:drop-counting}
+
 \begin{figure}
     \centering
-    \includegraphics[width=0.45\textwidth]{assets/maxdropsUniBandCC.pdf}
-    \caption{\textcolor{red}{Maximum number of droplets} $n_{max}$ over reduced aspect ratio $\psi_0$.
-    Different symbols show different substrates, the uniform substrate is depict with stars 
-    \textcolor{red}{AS: The caption does not seem consistent with the figure. Please check}(\textcolor{black}{$\star$}) and the band pattern by bullets (\textcolor{black}{$\bullet$}).
-    We compare our results to the linear stability analysis (LSA) from Gonz{\'a}lez et al.~\cite{gonzalezStabilityLiquidRing2013}}
+    \includegraphics[width=0.45\textwidth]{n_drops_vs_psi_uniform.eps}
+    \includegraphics[width=0.45\textwidth]{n_drops_vs_psi_pattern.eps}    
+    \caption{Droplet number $n_d$ vs aspect ratio $\psi_0$ on uniform (top) and 
+    banded (bottom) substrates, respectively. The solid line depicts the 
+    approximation of the LSA prediction by Gonz{\'a}lez et al.~\cite{gonzalezStabilityLiquidRing2013}, $n_d = \pi/(2\psi_0)$.}
     \label{fig:max_drops}
 \end{figure}
 
