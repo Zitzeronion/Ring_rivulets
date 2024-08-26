@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.40
+# v0.19.46
 
 using Markdown
 using InteractiveUtils
@@ -167,30 +167,6 @@ begin
 	println(thetaC, " ",  θ, " ", 2*r*sin(θ))
 	plot(h[256, 61:91], minorticks=true, aspect_ratio=1)
 	
-end
-
-# ╔═╡ 3eaf9941-d510-4a91-99bf-2084bbe3ea40
-begin
-	p = plot()
-	for ang in [1/9, 1/6, 2/9]
-		for R in [180]
-			for rr in [20, 40, 80]
-				h = RivuletTools.torus(512, 512, rr, R, ang, (256,256))
-				plot!(h[256, :], 
-					xlims=(0, 256),
-					ylims=(0, 20),
-					lw = 2,
-					aspect_ratio = 5,
-					xlabel = "x/[Δx]",
-					ylabel = "height",
-					palette = :Paired_10,
-					label="R=$(R)-r=$(rr)-θ=$(Int(round(rad2deg((ang*π)))))",
-				)
-			end
-		end
-	end
-	savefig(p, "../assets/initial_conditions_R180.png")
-	p
 end
 
 # ╔═╡ 1ebb5c9b-df33-4c48-8240-bbff2a06520c
@@ -1265,52 +1241,6 @@ l = (3, :solid))
 h20040 = measurements[(measurements.R .== 200) .& (measurements.rr .== 40) .& (measurements.kbt .== 0.0), :]
   ╠═╡ =#
 
-# ╔═╡ 87c627a8-2c54-44ff-aa66-d9b5c379f646
-#=╠═╡
-begin
-	markers1 = [:circle, :ut, :s]
-	linesty1 = [:solid, :dash, :dashdot]
-	timescale = collect(25000:25000:2500000)
-	t0 = initial_data[(initial_data.R0 .== 200) .& (initial_data.rr0 .== 40) .& (initial_data.angle .== 20), :t0][1]
-	h0 = initial_data[(initial_data.R0 .== 200) .& (initial_data.rr0 .== 40) .& (initial_data.angle .== 20), :maxh0][1]
-	p = plot(timescale, 
-		h20040[h20040.theta .== 20, :dH], 
-		label="θ=20°", 
-		l=(3, :solid), 
-		xlabel="t", 
-		ylabel="Δh",
-		st = :samplemarkers,
-		step = 5, 	
-		title = "Unscaled",
-		marker = (8, :circle, 0.6),		
-		# yaxis=:log,
-		#xaxis=:log,
-		# ylims = (0, 5),
-		legendfontsize = 12,			# legend font size
-        tickfontsize = 12,	# tick font and size
-        guidefontsize = 13,	# label font and size
-		)
-	for ang in enumerate([30.0, 40.0])
-		plot!(
-		timescale, 
-		h20040[h20040.theta .== ang[2], :dH], 
-		label="θ=$(ceil(Int, ang[2]))°", 
-		l=(3, linesty1[ang[1]+1]), 
-		# xlabel="t/τ", 
-		# ylabel="Δh/h₀",
-		st = :samplemarkers,
-		step = 5, 						
-		marker = (8, markers1[ang[1]+1], 0.6),		
-		# yaxis=:log,
-		# xaxis=:log,
-		)
-	end
-	savefig(p, "../assets/delth_base.png")
-	p
-	
-end
-  ╠═╡ =#
-
 # ╔═╡ c848d2cf-5d36-4437-b53a-e278150e75ef
 #=╠═╡
 begin
@@ -1481,6 +1411,78 @@ begin
 	end
 	savefig(p5, "../assets/delth_filmscaling.png")
 	p5
+	
+end
+  ╠═╡ =#
+
+# ╔═╡ 3eaf9941-d510-4a91-99bf-2084bbe3ea40
+#=╠═╡
+begin
+	p = plot()
+	for ang in [1/9, 1/6, 2/9]
+		for R in [180]
+			for rr in [20, 40, 80]
+				h = RivuletTools.torus(512, 512, rr, R, ang, (256,256))
+				plot!(h[256, :], 
+					xlims=(0, 256),
+					ylims=(0, 20),
+					lw = 2,
+					aspect_ratio = 5,
+					xlabel = "x/[Δx]",
+					ylabel = "height",
+					palette = :Paired_10,
+					label="R=$(R)-r=$(rr)-θ=$(Int(round(rad2deg((ang*π)))))",
+				)
+			end
+		end
+	end
+	savefig(p, "../assets/initial_conditions_R180.png")
+	p
+end
+  ╠═╡ =#
+
+# ╔═╡ 87c627a8-2c54-44ff-aa66-d9b5c379f646
+#=╠═╡
+begin
+	markers1 = [:circle, :ut, :s]
+	linesty1 = [:solid, :dash, :dashdot]
+	timescale = collect(25000:25000:2500000)
+	t0 = initial_data[(initial_data.R0 .== 200) .& (initial_data.rr0 .== 40) .& (initial_data.angle .== 20), :t0][1]
+	h0 = initial_data[(initial_data.R0 .== 200) .& (initial_data.rr0 .== 40) .& (initial_data.angle .== 20), :maxh0][1]
+	p = plot(timescale, 
+		h20040[h20040.theta .== 20, :dH], 
+		label="θ=20°", 
+		l=(3, :solid), 
+		xlabel="t", 
+		ylabel="Δh",
+		st = :samplemarkers,
+		step = 5, 	
+		title = "Unscaled",
+		marker = (8, :circle, 0.6),		
+		# yaxis=:log,
+		#xaxis=:log,
+		# ylims = (0, 5),
+		legendfontsize = 12,			# legend font size
+        tickfontsize = 12,	# tick font and size
+        guidefontsize = 13,	# label font and size
+		)
+	for ang in enumerate([30.0, 40.0])
+		plot!(
+		timescale, 
+		h20040[h20040.theta .== ang[2], :dH], 
+		label="θ=$(ceil(Int, ang[2]))°", 
+		l=(3, linesty1[ang[1]+1]), 
+		# xlabel="t/τ", 
+		# ylabel="Δh/h₀",
+		st = :samplemarkers,
+		step = 5, 						
+		marker = (8, markers1[ang[1]+1], 0.6),		
+		# yaxis=:log,
+		# xaxis=:log,
+		)
+	end
+	savefig(p, "../assets/delth_base.png")
+	p
 	
 end
   ╠═╡ =#

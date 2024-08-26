@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.45
+# v0.19.46
 
 using Markdown
 using InteractiveUtils
@@ -19,6 +19,123 @@ end
 
 # ╔═╡ 947d4e49-8215-4a9b-8e04-589efba72c7b
 initial_data = RivuletTools.t0_data()
+
+# ╔═╡ e9ad0789-2961-41b7-b256-b4b0a4a1c179
+dfLSAcleancorrected = CSV.read("../data/maxdroplets-corrected.csv", DataFrame)
+
+# ╔═╡ 21c82afc-93fe-42ce-ab4b-1e58db95f15d
+begin
+	@df dfLSAcleancorrected scatter(
+    	:psi0,
+    	:ndrops,
+    	group = :substrate,
+    	# title = "",
+    	xlabel = "ψ₀",
+    	ylabel = "n max",
+		legendfontsize = 12,
+		guidefont = (16, :black),
+		tickfont = (12, :black),
+    	m = (0.5, [:circle :star], 12),
+    	# bg = RGB(0.2, 0.2, 0.2)
+	)
+	
+	psis0 = collect(0.001:0.001:1)
+	LSA_drops = plot!(psis0, π ./ (2 .* psis0), 
+	# xlabel = L"\psi_0",
+	# ylabel = L"n_{max}",
+	label = "Eq. (18)",
+	xlims= (0, 0.805),
+	ylims = (0, 30),
+	minorticks = true,
+	l = (:black, 2),
+	grid = false)
+	
+	# plot!(psis, π ./ (2 .* psis) .- exp.(-psis), 
+	# xlabel = L"\psi_0",
+	# ylabel = L"n_{max}",
+	# label = "LSA - better",
+	# l = (:black, :dash, 2),
+	# )
+	# savefig(LSA_drops, "../assets/LSA_droplets.pdf")
+	LSA_drops
+end
+
+# ╔═╡ afbb3609-4835-4f23-aad2-2ed3fcbba2b9
+begin
+	dataUni = subset(dfLSAcleancorrected, :substrate => s -> s .== "uniform")
+	dataBa = subset(dfLSAcleancorrected, :substrate => s -> s .== "patterned")
+	for i in enumerate(dataUni.ndrops)
+		if i[2] == 0
+			dataUni.ndrops[i[1]] = 1
+		end
+	end
+	for i in enumerate(dataBa.ndrops)
+		if i[2] == 1
+			dataBa.ndrops[i[1]] = 2
+		end
+	end
+	dataBa
+end
+
+# ╔═╡ 7b0d9dae-31de-4e97-9ee9-9d67d75fadfb
+begin
+	xvals = collect(0.04:0.01:0.7)
+	uniplot = plot(xlabel="ψ₀", 
+	ylabel="n₀", 
+	xlims=(0.03, 1.1), 
+	ylims=(0.9, 100), 
+	xscale=:log10, 
+	yscale=:log10, 
+	legendfontsize = 12,
+	guidefont = (16, :black),
+	tickfont = (12, :black),
+	minorticks = true,
+	grid=false)
+
+	dataUni10 = subset(dataUni, :theta => s -> s .== 10)
+	dataUni20 = subset(dataUni, :theta => s -> s .== 20)
+	dataUni30 = subset(dataUni, :theta => s -> s .== 30)
+	dataUni40 = subset(dataUni, :theta => s -> s .== 40)
+	scatter!(dataUni10.psi0, dataUni10.ndrops, label="θₐ = 10°", mc=palette(:default)[1], ms=10, ma=0.7, m=:circ)
+	scatter!(dataUni20.psi0, dataUni20.ndrops, label="θₐ = 20°", mc=palette(:default)[2], ms=10, ma=0.7, m=:rect)
+	scatter!(dataUni30.psi0, dataUni30.ndrops, label="θₐ = 30°", mc=palette(:default)[3], ms=10, ma=0.7, m=:star5)
+	scatter!(dataUni40.psi0, dataUni40.ndrops, label="θₐ = 40°", mc=palette(:default)[4], ms=10, ma=0.7, m=:diamond)
+
+	plot!(xvals, π ./ (2 .* xvals), label="π/(2ψ₀)", l = (:black, 2))
+end
+
+# ╔═╡ 3f233d34-2e97-4401-ab73-c04cc81fb3bc
+savefig(uniplot, "../assets/Ndrops_uni_new.pdf")
+
+# ╔═╡ 25298d58-772a-4364-ad71-eaee643906f6
+begin
+	banplot = plot(xlabel="ψ₀", 
+	ylabel="n₀", 
+	xlims=(0.03, 1.1), 
+	ylims=(0.9, 100), 
+	xscale=:log10, 
+	yscale=:log10, 
+	l = (:black, 2),
+	legendfontsize = 12,
+	guidefont = (16, :black),
+	tickfont = (12, :black),
+	minorticks = true,
+	grid=false)
+
+	dataBan10 = subset(dataBa, :theta => s -> s .== 10)
+	dataBan20 = subset(dataBa, :theta => s -> s .== 20)
+	dataBan30 = subset(dataBa, :theta => s -> s .== 30)
+	dataBan40 = subset(dataBa, :theta => s -> s .== 40)
+	scatter!(dataBan10.psi0, dataBan10.ndrops, label="θₐ = 10°", mc=palette(:default)[1], ms=10, ma=0.7, m=:circ)
+	scatter!(dataBan20.psi0, dataBan20.ndrops, label="θₐ = 20°", mc=palette(:default)[2], ms=10, ma=0.7, m=:rect)
+	scatter!(dataBan30.psi0, dataBan30.ndrops, label="θₐ = 30°", mc=palette(:default)[3], ms=10, ma=0.7, m=:star5)
+	scatter!(dataBan40.psi0, dataUni40.ndrops, label="θₐ = 40°", mc=palette(:default)[4], ms=10, ma=0.7, m=:diamond)
+	
+	plot!(xvals, π ./ (2 .* xvals), label="π/(2ψ₀)", l = (:black, 2))
+end
+
+# ╔═╡ 3a9b16e8-b18f-4f86-ab07-035156a582e3
+savefig(banplot, "../assets/Ndrops_ban_new.pdf")
 
 # ╔═╡ b43862d9-24c9-4a25-ab45-c9e016331cae
 growthDF = CSV.read("../data/ring_all_sims_nokBT.csv", DataFrame)
@@ -2737,6 +2854,13 @@ version = "1.4.1+1"
 # ╠═98443f3c-d712-11ee-0e87-0d4cb8ba0aea
 # ╠═265292da-57e8-455e-9093-855069961f3d
 # ╠═947d4e49-8215-4a9b-8e04-589efba72c7b
+# ╠═e9ad0789-2961-41b7-b256-b4b0a4a1c179
+# ╠═21c82afc-93fe-42ce-ab4b-1e58db95f15d
+# ╠═afbb3609-4835-4f23-aad2-2ed3fcbba2b9
+# ╠═7b0d9dae-31de-4e97-9ee9-9d67d75fadfb
+# ╠═3f233d34-2e97-4401-ab73-c04cc81fb3bc
+# ╠═25298d58-772a-4364-ad71-eaee643906f6
+# ╠═3a9b16e8-b18f-4f86-ab07-035156a582e3
 # ╠═b43862d9-24c9-4a25-ab45-c9e016331cae
 # ╠═3544b7df-56be-4fe2-aa45-753cd04a5439
 # ╠═a3190736-9b19-4355-9843-33215b1707de
