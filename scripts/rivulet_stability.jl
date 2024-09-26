@@ -29,6 +29,7 @@ function rivulet_run(
     device::String;
     shape = :ring, 
     arrested = false,
+    gradient = (false, 1/18, 2/9),
     R = 150,
     rr = 100,
     ϵ = 0.01,
@@ -36,7 +37,13 @@ function rivulet_run(
     fluid=zeros(sys.param.Tmax÷dump, sys.Lx*sys.Ly),
     verbos=true
 )
-    println("Running a simulation on rivulet stability\nThe rivulet is curved and resembles a torus")
+    msg = "The substrate is uniform with theta = $(sys.param.θ)"
+    if arrested 
+        msg = "The substrate is patterned and constrains the rivulet"
+    elseif gradient[1]
+        msg = "The substrate has a linear wettability gradient"
+    end
+    println("Running a simulation on rivulet stability\nThe rivulet is curved and resembles a torus\n$(msg)")
     state = Swalbe.Sys(sys, device, kind="thermal")
     # Set up initial condition
     if shape == :ring
@@ -55,13 +62,25 @@ function rivulet_run(
                 theta[i] = 1/3
             end
         end
-    end
+    elseif gradient[1]
+        # Wettability gradient that radial decreases the contact angle
+        theta = zeros(sys.Lx, sys.Ly)
+        dist = zeros(sys.Lx, sys.Ly)
+        for i in 1:sys.Lx
+            for j in 1:sys.Ly
+                dist[i,j] = round(Int, sqrt((i - sys.Lx÷2)^2 + (j - sys.Ly÷2)^2))
+            end
+        end
+        # All values will be multiplied with pi inside the pressure calculation
+        theta .= (gradient[3]-gradient[2])/R .* dist .+ gradient[2]
+        theta[dist .> R] .= gradient[3]
+    end 
         # Push it to the desired device
     if device == "CPU"
         state.height .= h
     elseif device == "GPU"
         CUDA.copyto!(state.height, h)
-        if arrested
+        if arrested || gradient[1]
             pinned = CUDA.zeros(Float64, sys.Lx, sys.Ly)
             CUDA.copyto!(pinned, theta)
         end
@@ -79,7 +98,7 @@ function rivulet_run(
             end
         end
         
-        if arrested
+        if arrested || gradient[1]
             Swalbe.filmpressure!(state.pressure, state.height, state.dgrad, sys.param.γ, pinned, sys.param.n, sys.param.m, sys.param.hmin, sys.param.hcrit)
         else
             Swalbe.filmpressure!(state, sys)
@@ -108,28 +127,46 @@ end
 timeInterval = 25000
 
 # Make a parameter sweep
-for ang in [1/9] # 2/9, 1/6, 1/18
-    for kb in [0.0, 1e-6]
-        sys = Swalbe.SysConst(512, 512, Swalbe.Taumucs(Tmax=2500000, kbt=kb, n=3, m=2, θ=ang))
-        for outerRad in [160, 180, 200]
-            for innerRad in [20, 30, 40]
-                # Run the simulation
-                fluid = rivulet_run(sys, "GPU", R=outerRad, rr=innerRad, arrested=true, dump=timeInterval)
-                df_fluid = Dict()
-                nSnapshots = sys.param.Tmax ÷ timeInterval
-                for t in 1:nSnapshots
-                    # println("In saving loop at $(t) with $(size(fluid[t,:]))")
-                    df_fluid["h_$(t * timeInterval)"] = fluid[t,:]
-                end
-                println("Saving rivulet snapshots for R=$(outerRad) and r=$(innerRad) to disk")
-                save_ang = Int(round(rad2deg(π*sys.param.θ)))
-                file_name = "data/Rivulets/arrested_height_R_$(outerRad)_r_$(innerRad)_ang_$(save_ang)_kbt_$(sys.param.kbt)_nm_$(sys.param.n)-$(sys.param.m)_runDate_$(year(today()))$(month(today()))$(day(today()))$(hour(now()))$(minute(now())).jld2"
-                save(file_name, df_fluid)
-                CUDA.reclaim()
-                fluid .= 0.0
-                df_fluid = Dict()
-                println("Done with $(ang) $(kb) $(outerRad) $(innerRad)")
-            end
-        end
+for inC in [(150, 40, 1/9), (200, 80, 1/9), (150, 80, 1/18), (180, 80, 1/18), (200, 80, 1/18)] # 1/9, 1/6,  
+    # for deltas in [1.0] # 0.5, 2.5
+    # for mintheta in [1/6, 2/9] # 0.5, 2.5
+    ang = inC[3]
+    sys = Swalbe.SysConst(512, 512, Swalbe.Taumucs(Tmax=7500000, δ=1.0, n=3, m=2, θ=ang))
+    # for outerRad in [180]# [160, 180, 200]
+    # for innerRad in [80]# [60, 80, 100]
+    # Run the simulation
+    arr = false #true
+    mintheta = 1/9
+    grad = (false, mintheta, ang) #true
+    slips = false
+    outerRad = inC[1]
+    innerRad = inC[2]
+    fluid = rivulet_run(sys, "GPU", R=outerRad, rr=innerRad, arrested=arr, dump=timeInterval, gradient=grad)
+    df_fluid = Dict()
+    nSnapshots = sys.param.Tmax ÷ timeInterval
+    for t in 1:nSnapshots
+        # println("In saving loop at $(t) with $(size(fluid[t,:]))")
+        df_fluid["h_$(t * timeInterval)"] = fluid[t,:]
     end
+    println("Saving rivulet snapshots for R=$(outerRad) and r=$(innerRad) to disk")
+    save_ang = round(Int,rad2deg(π*sys.param.θ))
+    theta_c = round(Int,rad2deg(π*mintheta))
+    theta_o = round(Int,rad2deg(π*ang))
+    if arr
+        file_name = "data/Rivulets/arrested_height_R_$(outerRad)_r_$(innerRad)_ang_$(save_ang)_kbt_$(sys.param.kbt)_nm_$(sys.param.n)-$(sys.param.m)_runDate_$(year(today()))$(month(today()))$(day(today()))$(hour(now()))$(minute(now())).jld2"
+    elseif slips
+        file_name = "data/Rivulets/slip_$(Int(10*deltas))_height_R_$(outerRad)_r_$(innerRad)_ang_$(save_ang)_kbt_$(sys.param.kbt)_nm_$(sys.param.n)-$(sys.param.m)_runDate_$(year(today()))$(month(today()))$(day(today()))$(hour(now()))$(minute(now())).jld2"
+    elseif grad[1]
+        file_name = "data/Rivulets/wet_grad_lin_$(theta_c)$(theta_o)_height_R_$(outerRad)_r_$(innerRad)_ang_$(save_ang)_kbt_$(sys.param.kbt)_nm_$(sys.param.n)-$(sys.param.m)_runDate_$(year(today()))$(month(today()))$(day(today()))$(hour(now()))$(minute(now())).jld2"
+    else
+        file_name = "data/Rivulets/height_R_$(outerRad)_r_$(innerRad)_ang_$(save_ang)_kbt_$(sys.param.kbt)_nm_$(sys.param.n)-$(sys.param.m)_runDate_$(year(today()))$(month(today()))$(day(today()))$(hour(now()))$(minute(now())).jld2"
+    end
+    save(file_name, df_fluid)
+    CUDA.reclaim()
+    fluid .= 0.0
+    df_fluid = Dict()
+    println("Done with $(ang) $(outerRad) $(innerRad)")
+    # end
+    # end
+    # end
 end
