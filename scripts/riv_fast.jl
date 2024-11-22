@@ -431,6 +431,35 @@ begin
 	breakup = subset(timeScaleDF, :breakupT => a -> a .> 0)
 end
 
+# ╔═╡ 3036b2ee-f926-420a-ae82-4bd9228e0e0e
+breakup
+
+# ╔═╡ 934751a3-485f-4ba1-b9ce-6da11172c22a
+begin
+	tau_B = (1/6 .* (breakup.rr0) ./ 0.01)
+	symdict = Dict(10=>:circ, 20=>:rect, 30=>:star, 40=>:diamond)
+	bPlot = plot(xlabel="ψ₀", 
+		ylabel = "τ",
+		# yaxis=:log10,
+		grid = false,
+		legendfontsize = 11,
+		guidefont = (16, :black),
+		tickfont = (12, :black),
+		minorticks = true,
+		legend = :topright,
+		ylims = (800, 2400),
+		xlims = (0.02, 0.2)
+	)
+	scatter!(breakup.psi0, 
+		breakup.breakupT ./ (1/6 .* (breakup.rr0) ./ 0.01), #breakup.tauM, 
+		label="breakup",
+		# zcolor = breakup.theta,
+		m = (8, symdict[breakup.theta], 0.75)
+		# m = (8, :star5, 0.75)
+	)
+	# plot!(xaxis,55 .* xaxis .- 2.5)
+end
+
 # ╔═╡ ab30944a-c4f1-4b3a-9fae-b1d6a69c7a48
 begin
 	tau_rim_C = (3/2 .* (collapses.Rstart .- collapses.Rdrop) ./ (0.01 * (deg2rad.(collapses.theta)).^3))
@@ -579,7 +608,14 @@ end
 savefig(timescalesBandPlot, "../assets/bandBreakup_timescales_2.pdf")
 
 # ╔═╡ 920cb851-4f6e-443d-a1c7-adf1035b91c1
-md"## Linear wettability gradients"
+md"## Linear wettability gradients
+
+As a last section to this study we introduce linear wettability gradient along the radial direction.
+The idea here is that we can change a coalescence state to a breakup state and vise versa just by wettability gradients.
+"
+
+# ╔═╡ 9e390058-f2b1-42e2-b6a4-2e03137ac325
+md"Below are some calculation for the gradients."
 
 # ╔═╡ 5b6ac82a-28c7-428d-9209-74e0acaa5edd
 (1/6)/0.01
@@ -883,7 +919,7 @@ StatsPlots = "~0.15.7"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.4"
+julia_version = "1.10.5"
 manifest_format = "2.0"
 project_hash = "89aa256743f420f89609c81b433097cb52213ce9"
 
@@ -2795,7 +2831,7 @@ version = "0.15.1+0"
 [[deps.libblastrampoline_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850b90-86db-534c-a0d3-1478176c7d93"
-version = "5.8.0+1"
+version = "5.11.0+0"
 
 [[deps.libfdk_aac_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -2872,6 +2908,8 @@ version = "1.4.1+1"
 # ╠═eb90e8ff-580e-4b88-928b-91cdcb425107
 # ╠═70da024e-4bf6-4a92-ae48-073df610ff2e
 # ╠═68577639-24f9-4dc6-a5e5-49957c63af15
+# ╠═3036b2ee-f926-420a-ae82-4bd9228e0e0e
+# ╠═934751a3-485f-4ba1-b9ce-6da11172c22a
 # ╠═ab30944a-c4f1-4b3a-9fae-b1d6a69c7a48
 # ╠═2bbe79a6-41f1-4cd2-b7c2-f369e1452b2c
 # ╠═5235a548-ce73-4f62-9e24-2076a6419f7d
@@ -2881,6 +2919,7 @@ version = "1.4.1+1"
 # ╠═6b9bf7a8-7b6d-40e6-8d01-96e4fdf05a96
 # ╠═e8f374b6-c06c-42a7-a279-64a85d403d98
 # ╠═920cb851-4f6e-443d-a1c7-adf1035b91c1
+# ╠═9e390058-f2b1-42e2-b6a4-2e03137ac325
 # ╠═5b6ac82a-28c7-428d-9209-74e0acaa5edd
 # ╠═505230c0-8040-4a89-8e68-4bef09257888
 # ╠═c92ecb8d-99ed-43f2-bf73-5fbe5c55d58e
