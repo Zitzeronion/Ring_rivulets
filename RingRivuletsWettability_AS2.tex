@@ -136,7 +136,7 @@ Here we study, by means of numerical simulations, the dewetting dynamics of a ri
 In particular, we consider, beyond the homogeous case, an annular band of lower contact angle as compared to the background and a constant radial gradient of contact angle, pointing either inward or outward from the centre. 
 We show that by tuning the parameters characterizing the patterns, it is possible to control 
 not only the stability of the rivulet, i.e. its breakup/collapse dynamics and 
-the associated time scalers, but also the dewetting morphology, in terms of number and position of the formed droplets.
+the associated time scales, but also the dewetting morphology, in terms of number and position of the formed droplets.
 %Thus making it possible to enhance the probability for a Rayleigh-Plateau type %break up into multiple droplets or to accelerate the capillary retraction that %stems from the curvature difference of the ring and leads to a single droplet.
 }
 
@@ -231,7 +231,7 @@ The contact angle, in agreement with the lubrication approximation~\cite{oronLon
 \subsection{Initial conditions}
 \begin{figure}
 \centering
-  \includegraphics[width=0.45\textwidth]{New_fig1.png}
+  \includegraphics[width=0.45\textwidth]{assets/schema_theta0.pdf}
   \caption{Schematic setup of our initial conditions. In (a) we show a render of the initial fluid state and display $R_0$ and $r_0$. 
   Below in panels (b)-(d) we show different wettability patterns with yellow being more wettable than red.
   While (b) depicts the band pattern, (c) and (d) show radial gradient wettabilities.} 
@@ -281,7 +281,8 @@ which the line $h(R(t),\phi,t)$ "touches" the substrate, namely
 \end{equation}
 \begin{figure}
     \centering
-    \includegraphics[width = 0.45\textwidth]{taub_vs_psi0.pdf}
+    %\includegraphics[width = 0.45\textwidth]{taub_vs_psi0.pdf}
+    \includegraphics[width = 0.45\textwidth]{assets/breakup_tc.pdf}
     \caption{Rivulet breakup times (in units of $t_c = \mu r_0/\gamma$) for various substrate contact angle 
     as a function of the initial aspect-ratio $\psi_0$.}
     \label{fig:breakuptimes}
@@ -290,7 +291,8 @@ For the lowest contact angle, $\tau_b$ grows with $\psi_0$. Such behaviour
 was indeed predicted by the theoretical approach of Gonz\'alez et al~\cite{gonzalezStabilityLiquidRing2013}, assuming that the growth rate of the instability in the linear regime determines also the time scales of breakup. For larger contact angle ($\theta_0 > 10^{\circ}$), i.e. when disjoining pressure effects start to be relevant, instead, the breakup times tend to become almost independent from $\psi_0$, suggesting that the time scales are dictated essentially by the substrate wettability.\\
 \begin{figure}
     \centering
-    \includegraphics[width = 0.45\textwidth]{tauc_vs_psi0.pdf}
+    % \includegraphics[width = 0.45\textwidth]{tauc_vs_psi0.pdf}
+    \includegraphics[width = 0.45\textwidth]{assets/psi_0_collapse.pdf}
     \caption{Log-log plot of the rivulet collapse times (in units of $t_c = \mu r_0/\gamma$) for various substrate contact angle 
     as a function of the initial aspect-ratio $\psi_0$; the solid line indicates the power law $\tau_c \theta_0^2/t_c \sim \psi_0^{-2}$ (see Eq.(\ref{eq:modeltauc}) and related discussion for further details).}
     \label{fig:collapsetimes}
@@ -322,15 +324,18 @@ substrates with space-varying contact angle (i.e. {\it patterned substrates}).
 As anticipated in the introduction, we consider two different wettability patterns: i) an annular band 
 \begin{equation}\label{eq:theta_band}
     \theta(\xi) =\begin{cases}
-        \theta_a \equiv \theta_0,\quad \text{for}~|R_0-\xi| < r_0\sin(\theta_0) \\
-        \theta_b,\quad \text{otherwise}
+        \theta_a \quad \text{for}~|R_0-\xi| < r_0\sin(\theta_0) \\
+        \theta_b\quad \text{otherwise}
     \end{cases},
 \end{equation}
 ii) an axially symmetric linear contact angle profile
 \begin{equation}\label{eq:theta_grad}
-    \theta(\xi) = \frac{\theta_{a}-\theta_{b}}{R_0} \xi + \theta_{b},
+    \theta(\xi) =\begin{cases}
+        \frac{(\theta_{b}-\theta_{a})}{R_0} \xi + \theta_{a} \quad \text{for}~\xi \leq R_0 \\
+        \theta_b \quad \text{otherwise}
+    \end{cases},
 \end{equation}
-where either $\theta_{a} > \theta_{b}$ (outward pointing gradient) or $\theta_a < \theta_b$ (inward pointing
+where either $\theta_{b} > \theta_{a}$ (outward pointing gradient) or $\theta_b < \theta_a$ (inward pointing
  gradient).
 The different contact angle patterns are then used in Eq.~(\ref{eq:disjoinpressure}) which, in turn, enters in Eq.~(\ref{eq:thinsolve}) through the total pressure, Eq.~(\ref{eq:filmpressure}).
 The idea behind such choices is that the former serves as an effective boundary which removes the collapse mode and the latter helps us to understand the force balance between wetting and retraction of the ring-rivulet, see Eqs.~(\ref{eq:theta_band}-\ref{eq:theta_grad}).
@@ -353,16 +358,16 @@ $\psi_0$. It appears that, by disentangling the radial dynamics driven by contac
     %\includegraphics[width=0.45\textwidth]{n_drops_vs_psi_uniform.eps}
     \includegraphics[width=0.45\textwidth]{assets/Ndrops_ban_new.pdf}    
     \caption{Droplet number $n_d$ vs aspect ratio $\psi_0$ on substrates patterned with 
-    the annular band, Eq.(\ref{eq:theta_band}).
+    the annular band, Eq.~(\ref{eq:theta_band}).
     for various contact angles $\theta_0$. The solid line depicts the 
     approximated LSA prediction, Eq.~(\ref{eq:maxDrops})~\cite{gonzalezStabilityLiquidRing2013}.}
     \label{fig:max_drops_band}
 \end{figure}
 \begin{figure}
     \centering
-    \includegraphics[width=0.48\textwidth]{taub_vs_psi0_pattern_annular.pdf}
+    \includegraphics[width=0.48\textwidth]{assets/breakup_band_hmm.pdf}
     \caption{Log-log plot of the ring rivulet breakup times as a function of the initial aspect-ratio, for the annular band pattern, Eq.~\ref{eq:theta_band}.
-    Different colors depict different contact angle $\theta_a$ ($\theta_b = 60^{\circ}$ is kept fixed).
+    Different colors depict different value of the contact angle contrasts $\theta_a$ ($\theta_b = 60^{\circ}$ is kept fixed), see Eq.~(\ref{eq:theta_band}).
     The linear function of $\psi_0$ is reported with a dashed line as a guide for the eye.
     }
     \label{fig:bandBreakupT}
@@ -372,24 +377,21 @@ In Fig.~\ref{fig:bandBreakupT}, we show the dependence of the breakup times on $
 when the constraint on the band is less effective, the breakup time grows with $\psi_0$, in agreement with the prediction of the LSA~\cite{gonzalezStabilityLiquidRing2013}. As $\theta_a$ decreases, though, the confining effect decouples radial dynamics and dewetting and $\tau_b$ tends to become almost independent on 
 $\psi_0$, but determined, instead, by the local contact angle. The breakup times are larger than in the uniform substrate case (cfr. Fig~\ref{fig:breakuptimes}): so, overall the annular band pattern 
 makes the ring rivulet slightly more stable against rupture.
-{\bf ANDREA: This is to be discussed.
-Although having numerical experiments run up to $t = 25\tau_m$ we do not always observe the breakup. 
-This is indicated in by the $n_{\max} = 1$ data in Fig.~\ref{fig:max_drops}, where the bullets (\textcolor{black}{$\bullet$}) show data from the banded pattern. 
-In those simulations the ring-rivulet has not ruptured at the end of the simulation time.
-However, $\Delta h$ measurements show growth in some cases.}
 
 \subsubsection{Linear radial profile}\label{subsubsec:linwettgrad}
 \begin{figure}
     \centering
-    \includegraphics[width=0.48\textwidth]{assets/grad_heatmap.pdf}
-    \caption{Evolution of the radius of a ring-rivulet $R(t)$ normalized by the droplet height $H_D$ for different contact angle cases (line styles and colours) and $\psi = 0.133$.
-    The first argument of $g(a,b)$ is the contact angle in the centre of the numerical domain and the second argument is the contact angle at $R_0$ and beyond. 
+    \includegraphics[width=0.48\textwidth]{assets/n_grad_thetaA.pdf}
+    \caption{Evolution of the principal radius of a ring-rivulet, $R(t)$, normalized by its initial value $R_0$, for different contact $\theta_a$ at fixed $\theta_b = 40^{\circ}$ 
+    (i.e. positive gradient, see Eq.~(\ref{eq:theta_grad})) and $\psi = 0.1$.
     Besides the lines we add heatmap snapshots of the film thickness $h(\mathbf{x},t)$ where yellow indicates a large value and dark blue a small value (colorbars are not scaled).}
     \label{fig:negativewetgrad}
 \end{figure}
-We consider, now, the linear wettability profile, first with a positive contact angle gradient ($\theta_b < \theta_a=40^{\circ}$ in Eq.~(\ref{eq:theta_grad})), such that the wettability increases towards the centre. 
-Fig.~\ref{fig:negativewetgrad} shows measurements of the ring radius $R(t)$ for different wettability scenarios at $\psi_0 \approx 0.1$: {\bf ANDREA: What's the point of showing the band here?} a uniform substrate with $\theta_0 = 40^{\circ}$, an annular band with $\theta_a =?$ ($\theta_b =?$) and three different linear contact angle profiles with $\theta_b = 10^{\circ}, 20^{\circ}, 30^{\circ}$. The value of $\psi_0<0.2$ is chosen to be in the range where breakup is expected and hole collapse is inhibited.
-In fact, for the uniform and banded cases (solid blue and dashed orange lines, respectively),
+We consider, now, the linear wettability profile, first with a positive contact angle gradient ($\theta_a < \theta_b=40^{\circ}$ in Eq.~(\ref{eq:theta_grad})), such that the wettability increases towards the centre. 
+Fig.~\ref{fig:negativewetgrad} shows measurements of the ring radius $R(t)$ for three different gradients realized with $\theta_a = \{ 10^{\circ}, 20^{\circ}, 30^{\circ} \}$ and on a uniform substrate with 
+contact angle $\theta_0 = 40^{\circ}$, which is reported as a reference. 
+The value of the aspect-ratio is set to $\psi_0 = 0.1$ such to be in the range where breakup is expected and hole collapse is inhibited ($\psi_0 \lesssim 0.2$).
+In fact, for the uniform case (solid blue line),
 $R(t)$ stays almost constant for the entire simulation, signalling that 
 the ring ruptures and forms droplets, which essentially do not slide (or slide very little to a new equilibrium radial position) over the substrate.
 From the remaining curves, on the contrary, we can see the impact of the wettability gradient that favours ring retraction. 
@@ -402,49 +404,42 @@ eventually re-merge at the centre. The substrate modulation is able, then, to de
 \begin{figure}
     \centering
     \includegraphics[width=0.48\textwidth]{assets/radius_time_gradient_positive.pdf}
-    \caption{Evolution of the radius of a ring-rivulet $R(t)$ normalized by the droplet height $H_D$ for different contact angle cases (line styles and colours) and $\psi = 0.3$.
-    The first argument of $g(a,b)$ is the contact angle in the centre of the numerical domain and the second argument is the contact angle at $R_0$ and beyond.}
+    \caption{Evolution of the principal radius of a ring-rivulet, $R(t)$, normalized by its initial value $R_0$, for different contact $\theta_a$ at fixed $\theta_b = 40^{\circ}$ 
+    (i.e. negative gradient, see Eq.~(\ref{eq:theta_grad})) and $\psi = 0.3$.}
     \label{fig:positivewetgrad}
 \end{figure}
-We then performed numerical simulations with a negative contact angle gradient ($\theta_b > \theta_a = 20^{\circ}$), thus the substrate is less and less wettable as the centre of the whole is approached.
+We then performed numerical simulations with a negative contact angle gradient ($\theta_a > \theta_b = 20^{\circ}$), thus the substrate is less and less wettable as the centre of the whole is approached.
 We set $\psi_0 = 0.3$, so to be in the regime where ring retraction and hole collapse are favoured and the wettability gradient acts as a competing mechanism.
 In Fig.~\ref{fig:positivewetgrad} we show $R(t)$ for 
-The blue curve depicts the evolution on the uniform substrate, as indicated in Fig.~\ref{fig:max_drops} $\psi_0$ values larger than $0.25$ lead to a collapse.
-Unsurprisingly, the banded pattern prohibits this collapse and stabilizes the ring during the duration of the numerical experiment as shown by the orange dashed line.
-Additionally we have two negative gradients shown in green and purple. 
-The larger negative gradient, the green curve, the centre of the rivulet is actually pushed away from $R_0$ leading to an increase of radius.
-Here we also observe a break up in the long time limit, due to the use of periodic boundary conditions we observe the coalescence of two droplets and thus only have three droplets.
-Without periodic boundary conditions we most likely find four droplets which would agree with Eq.~(\ref{eq:maxDrops}).
-For the smaller negative gradient we do not observe such an effect and the data is barely distinguishable from the banded case.
-In neither of these two case we see a break up until the last iteration of our simulation.
-However, once again a wettability gradient changes a collapsing state into a non collapsing one.
+$\theta_a = \{ 30^{\circ}, 40^{\circ} \}$ and for the uniform case, with $\theta_0 = 40^{\circ}$, which is again reported for comparison.
+The monotonic decrease of $R(t)$ on the latter substrate (blue line) indicates, indeed, that the hole is shrinking, as expected for the given value of $\psi_0$. 
+Collapse is, instead, inhibited by the outward directed wettability gradient, as the behaviour of the orange and green lines, approaching stationary plateau values, suggest; actually, for the largest gradient, a slight initial increase of the ring radius is even observed. 
+This alternative way of removing the collapse mode, then, allows to transiently stabilize rivulets
+of comparatively large width (with respect ot the annular band, for instance), hence to deposit 
+larger volume of liquids in a ring shape of a given hole radius. 
 
 \section{Conclusions}\label{sec:conclu}
-We have presented numerical experiments of a liquid ring-rivulet on a uniform and patterned substrate. 
-The basis of our experiments is the thin film equation with a disjoining pressure model.
-We are able to reproduce results of Gonz{\'a}lez et al.~\cite{gonzalezStabilityLiquidRing2013} and show some agreement for small $\psi_0$ values concerning the most unstable mode and as such the number of droplets, for both the uniform and a patterned substrate.
-For $\psi_0 > 0.25$ the capillary retraction outpaces the breakup and the collapse is the more likely outcome.
-We further found a good analytical approximation for the growth rate on the uniform substrate as shown in Fig.~\ref{fig:first_growth}. 
-
-Our main aim, however, is to address the impact of wettability on the dynamics of the ring-rivulet.
-We therefore considered two patterns, one that restricts the rivulet to a band and effectively removes the collapse mode and a positive as well as a negative wettability gradient towards the centre.
-The banded pattern shows good agreement with the predicted number of droplets, in the small $\psi_0$ regime. 
-Interestingly, the rupture times seems linearly correlated with $\psi_0$ as shown in Fig.~\ref{fig:bandBreakupT}.
-
-The wettability gradient patterns on the other hand allow us to tune the two competing time scales, namely the breakup time $t_b$ and the collapse time $t_c$.
-We show this in Fig.~\ref{fig:negativewetgrad}, where the initial conditions ($\psi \approx 0.13$) favor a breakup of the ring, or $t_b < t_c$.
-By applying the positive wettability gradient we can not only force the rivulet to end up in a collapsed state, but can approach this state via different trajectories. 
-Having a strong radial gradient allows to skip the breakup and thus $t_c < t_b$.
-If we however the gradient we can pass by different droplet states with either four or eight droplets.
-In case of a negative radial wettability gradient we find that similar to the band pattern, collapse is unlikely.
-
-As a future perspective of this work we would like to add thermal fluctuations to the system as some experimental realizations using molten metal.
-On the other hand a dynamic pattern may allow for radial breakup as well, because currently we only observed azimuthal breakup.
+We have presented results on the stability and dewetting pathways of liquid ring-shaped rivulets, from mesoscopic numerical simulations of the thin film equation, featuring a disjoining pressure model that allows to consider substrates with various wettability patterns. 
+We first considered the dewetting on a uniform substrate, for different values of the contact angle, $\theta_0$. In agreement with theoretical predictions, we observed that, for $\psi_0 \ll 1$, the rivulet breaks up into droplets,
+whose number follows, approximately, the relation 
+$n_d \approx \pi/(2\psi_0)$~\cite{gonzalezStabilityLiquidRing2013}, basically for all contact angles 
+explored.
+For $\psi_0 \gtrsim 0.2$, we found that rivulet retraction (hole collapse) occurs, irrespective of the contact angle. 
+If the equilibrium state does not seem to be strongly affected by the wettability, the characteristic time scale of breakup and collapse do. In the breakup regime ($\psi_0 < 0.2$), the breakup times, $\tau_b$,
+grow with $\psi_0$ (as expected from models without disjoining pressure~\cite{gonzalezStabilityLiquidRing2013}) only for very small contact angles. 
+For $\theta_0 > 10^{\circ}$, $\tau_b$ becomes essentially independent from $\psi_0$. 
+In the collapse regime ($\psi_0 > 0.2$), the characteristic time $\tau_c$ is found to decreases with 
+the aspect-ratio as $\tau_c  \sim \psi_0^{-2}$; we provided phenomenological argument to explain theoretically the origin of such behaviour.\\
+Introducing a wettability pattern, whereby the ring-rivulet is deposited on an annular patch of lower contact angle with respect to the background, we show that the collapse mode is removed and the rivulet undergoes breakup for any value of the aspect-ratio, though, on time scales comparatively longer (i.e. the pattern makes the rivulet more stable against rupture). Moreover, we observed that, as the contact angle mismatch between patch and background is increased, the number of formed droplets deviates from the homogeneous substrate case (and from the theoretical expectation) and tends to become independent from $\psi_0$.\\
+By means of a linear radial contact angle profile we managed, depending on the sign of the gradient, to either induce hole collapse in an otherwise stable against shrinkage rivulet ($\psi_0<0.2$), or, alternatively, to stabilise to their initial principal radius rivulets with aspect-ratios that would lead to collapse ($\psi>0.2$). \\
+A perspective venue for future development of this work would be to introduce time-dependent wettability patterns, as done in \cite{zitzControllingDewettingMorphologies2023}, which should provide a further handle to allow a better control on the instabilities, possibly opening the way to new, unexpected, dewtting pathways.
 
 \section*{Author Contributions}
-We strongly encourage authors to include author contributions and recommend using \href{https://casrai.org/credit/}{CRediT} for standardised contribution descriptions. Please refer to our general \href{https://www.rsc.org/journals-books-databases/journal-authors-reviewers/author-responsibilities/}{author guidelines} for more information about authorship.
+S. Z, A. S. and J. R.  contributed equally to the design and conceptualization. S. Z. carried out the numerical experiments. S. Z. and A. S. performed the analysis of the results and wrote the original draft. 
 
-For footnotes in the main text of the article please number the footnotes to avoid duplicate symbols. \textit{e.g.}\ \texttt{\textbackslash footnote[num]\{your text\}}. The corresponding author $\ast$ counts as footnote 1, ESI as footnote 2, \textit{e.g.}\ if there is no ESI, please start at [num]=[2], if ESI is cited in the title please start at [num]=[3] \textit{etc.} Please also cite the ESI within the main body of the text using \dag. For the reference section, the style file \texttt{rsc.bst} can be used to generate the correct reference style.
+\section*{Data availability}
+The data is readily available at \href{https://github.com/Zitzeronion/Ring_rivulets}{https://github.com/Zitzeronion/Ring\_rivulets}
+%For footnotes in the main text of the article please number the footnotes to avoid duplicate symbols. \textit{e.g.}\ \texttt{\textbackslash footnote[num]\{your text\}}. The corresponding author $\ast$ counts as footnote 1, ESI as footnote 2, \textit{e.g.}\ if there is no ESI, please start at [num]=[2], if ESI is cited in the title please start at [num]=[3] \textit{etc.} Please also cite the ESI within the main body of the text using \dag. For the reference section, the style file \texttt{rsc.bst} can be used to generate the correct reference style.
 
 \section*{Conflicts of interest}
 There are no conflicts to declare.
