@@ -1,0 +1,89 @@
+Dear Dr. Zitz:
+
+Your manuscript, referenced below, has been reviewed for publication in The Journal of Chemical Physics.
+
+Manuscript Number: JCP25-AR-00028
+Title: Instabilities of ring-rivulets: Impact of substrate wettability
+Author(s): Stefan Zitz, Andrea Scagliarini, and Johan Roenby
+
+After review, we find that your manuscript is not publishable in its current form in The Journal of Chemical Physics, and will require major revision and additional peer review. Please consult the reviewers' comments (below) for more information.
+
+The revised manuscript is due no later than 16-Mar-2025. After 16-Mar-2025 we ask that you submit your revision as a new manuscript. In this case, please include all the information requested below as we will make every effort to engage the same reviewers.
+
+Please prepare a point-by-point response to address each reviewer's comments and indicate how the manuscript has been revised. This response should be uploaded as a "Response Letter" file upon submission of the revised manuscript. For each comment from each reviewer, please respond in three steps: 1) reproduce the comment; 2) respond to the comment (even if you are not making any changes); and 3) indicate what changes (if any) you have made and where they appear (by page in the revised manuscript). Please also indicate your changes within a marked copy of the manuscript (use highlighting or a different color text). Upload the marked copy as a "Marked Up Manuscript" file type. This file should be uploaded in addition to a clean version of the main text file.
+
+Please use the URL below to submit your revision:
+
+https://jcp.peerx-press.org/cgi-bin/main.plex?el=A6BK6NOdT3A6WLeb5I3A9ftda1SmLKm1GikEiQa4vr11gY
+
+Best regards,
+
+Professor David Reichman
+Columbia University
+Department of Chemistry
+
+------------------------------------------------------------------------------
+Manuscript #JCP25-AR-00028:
+
+Editor's Comments:
+
+
+Reviewer Comments:
+Reviewer #1 Evaluations:
+Recommendation: Optional revision
+New Potential Energy Surface: No
+Overall Rating (required): Top 5-25% - significant, novel, and impactful contribution of broad interest
+
+Reviewer #1 (Comments to the Author):
+
+The paper contains a numerical study of the collapse of ring rivulets under different contact line conditions. The study is well designed and the paper is well written and accompanied by useful figures. The only point I ask the authors is to clarify the physical situation in the introduction, by just modifying the wording a bit. My critique concerns just the fact that it can be expressed more clearly that
+- the initial configuration of the ring rivulet is metastable to begin with;
+- it can either decay directly into a signle spherical (cylindrical) droplet of equal volume or
+- into several droplets of smaller volumes.
+Otherwise, I consider the paper acceptable for publication.
+
+
+
+
+Reviewer #2 Evaluations:
+Recommendation: Major revision
+New Potential Energy Surface: No
+Overall Rating (required): Top 25-50% - significant and/or novel contribution of broad interest with potential for impact
+
+Reviewer #2 (Comments to the Author):
+
+This paper deals with the breakup or collapse of a liquid ring on a substrate with or without variable wettability. It is interesting and has potential for publication, but I think there are some points that should be addressed before reaching a final decision.
+
+With respect to the mobility function, I think the paper requires some references and clarifications. This form is not the usual one. The paper of Haley and Miksis [1] considers several possibilities for the slip coefficient $\lambda(h)$ for its eq. (2.22). The usual one is treating $\lambda$ as a constant [2]. This case accounts for the second term of the denominator of eq. (2) in this paper. Haley and Miksis discuss the differences in the results when selecting other different models for $\lambda(h)$ including one that goes as $\lambda=\lambda_1/h$ that accounts for the third term in the denominator of (2). However, we have a mixture of both cases in this paper. This means that some further discussion is needed when comparing the results here with those of previous works. I wonder why the authors did not consider first the case of constant $\lambda$ since the comparisons are made against an approximate LSA result that uses this assumption. The inclusion of the other law will alter some results making more difficult to asses the origin of any discrepancy.
+
+The other point is the simultaneous inclusion of the disjoining pressure term of eq. (4) with the slipping model. The slipping model allows for an equilibrium while the disjoining term does not, as explained in [2]. This leads to the question whether it is possible to reach an equilibrium as stated in section 2.1. If that is the case it should be shown that it is reached before the breakup or collapse dominate the evolution. For example, the authors could show that their simulations reach the analytical equilibrium solution in section 3.1 of [2] when disjoining pressure is not considered. This serves as a check that the simulation with their lattice Boltzmann method does not introduce nothing strange to the problem. Moreover, if the full system does not reach any equilibrium soon enough, some of the results may depend strongly on the initial condition. Does a change in the initial form of the profile change the results?
+
+The results with uniform wettability could be related with many previous works, but the analysis should be expanded to ascertain the validity of some of the conclusion drawn by the authors from them. Apart form the points stated before, there are other aspects not taken into account in the discussion of the results of this section.
+
+Firstly, they restrict the discussion to an approximate LSA result which is expected to work well for small aspect ratios and large mean radii, but they neglect the more detailed analysis made in [2] for higher aspect ratios and different mean radii. Note that the stability depends on both parameters, but the authors do not mention the second one. In fact, I am not sure which is the value of the mean radius, $r_m$ in the simulations. The comparison with an approximate formula for very large $r_m$ is lacking some interesting results in fig. 16 of [2] that show an abrupt change in the number of drops for large aspect ratios with respect to the approximate formula. This is quite similar to the results shown in fig 2 of this paper. Note that the aspect ratio defined in section 3.1 of the submitted paper is a bit different from that used in [2]. It is related to the initial state in the present paper, while it is the aspect ratio of the equilibrium in González et al. Therefore, the statement made by the authors that "the theory leading to (6) does not account for the disjoinin pressure" (sic, note the typo) is misleading. The approximate formula may not account for the results but the underlying LSA theory of the simple slip model could explain the results even if the disjoining pressure term is absent.
+Moreover, González et al. discussed the relation of disjoining pressure and slip models. How are the present results related to those for disjoining pressure in [2]?
+
+Secondly, the breakup times and collapse times of the ring are discussed in detail in [2], but a deeper look on the meaning of the results of this manuscript is missing. Are the collapse times closer to the LSA, the quasi-static or the disjoining pressure model? The breakup times depend on the number of drops formed since the growth rates vary with the azimuthal number n. However, fig. 3 neglects this relevant information that could explain better the results.
+
+Thirdly, the assumption that disjoining pressure effects are relevant for large contact angles and suffice to explain the differences is not quite convincing. We should note that large contact angles may lead to a break of the basic assumptions leading to eq. (1). Moreover, in order to ascertain the importance of an effect, some quantitative comparison should be made. Could the authors provide more convincing proof of their assumption? How does the relative importance of the disjoining term with the other ones in the equation (1) compare?
+
+Finally, I should mention that the dependence of the growth rate of the mode $n=0$ leading to the collapse with the aspect ratio is done in fig. 13 of [2] for a given $r_m$. It shows that the collapse time decreases as the aspect ratio increases. It would be interesting to show if the power law predicted in eq. (10) coincides with these previous results. The deduction of eq. (10) is based on the Cox-Voinov model that has been shown to be not very accurate in real situations (see [3]), while the Petrov and Petrov model is better by combining Blake and Cox-Voinov approaches. The authors should justify why they are using the Cox-Voinov law instead of a more appropriate one. Note that the points in fig. 4, suggest a dependence on $\theta_0$ that is different to that given by the proposed law, since the points do not align completely for all $\theta_0$ with the theoretical line.
+
+Some of my previous criticisms of the discussion of the results of section 3.1 apply to section 3.2. I recommend taking them into account while revising the manuscript.
+
+Although the introduction of the paper is reasonable, the authors do not mention previous work on radial and angular variation of wettability for drops [4] that may be relevant for section 3.2.
+
+Fig. 5 is a mess and difficult to understand, probably because the parameter $r_m$ is absent. However, the comments about the approximate formula (6) being at odds with the results have the same drawbacks as those in the previous section.
+
+The results about the annular band are interesting as a way to deter the collapse. I wonder if this explains why the breakup is faster than in the uniform case, since the energy invested in the collapse is now transferred to the breakup. Could the authors show the evolution of the amplitudes of the collapse (axisymmetric) and the breakup (non axisymmetric perturbations) as time evolves? This could help in understanding the reasons of the observed behaviour.
+
+With respect to the wettability radial profile, the authors observe a faster collapse competing with the breakup for $\theta_b>\theta_a$ . The collapse is probably best modeled by a quasi-static model of the type developed in [2], since as the time evolves the conditions for equilibrium are changed by the variations of the contact angles. This, in turn, changes the aspect ratios and $r_m$ leading to faster or slower local growth rates of the mode $n=0$. I think the authors should discuss in more detail why the gradients affect the retraction, since this is an interesting method to control the formation and location of the drops.
+
+Unfortunately, I cannot recommend the publication of this paper as it is due to the concerns discussed above. My overall opinion is that the paper requires some revision, but that the ideas and results presented about the influence of the wettability gradients to control the drops are very valuable.
+
+
+
+[1] Haley and Miksis JFM 223, 57
+[2] González et al. JFM 718, 246
+[3] Ravazzoli et al. PRE 95, 053111
+[4] Savva et al. JFM 859, 321
