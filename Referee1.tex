@@ -1,0 +1,61 @@
+\documentclass[12pt,english]{article}
+
+\usepackage{natbib}
+
+\usepackage{graphics,graphicx,dcolumn,bm,fleqn,epic,eepic,float}
+\usepackage{amssymb,amsmath,multirow,rotate,rotating,color}
+\usepackage[utf8]{inputenc}
+
+\usepackage[english]{babel}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{tikz}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+}
+%\usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
+\tikzset{fontscale/.style = {font=\relsize{#1}}}
+\usetikzlibrary{calc}
+\makeatother
+
+\newcommand{\figref}[1]{Fig.~\ref{fig:#1}}
+\newcommand{\eqnref}[1]{Eq.~(\ref{eq:#1})}
+\newcommand{\ts}{\textsuperscript}
+
+\definecolor{tuered}{RGB}{214,0,74}
+
+\newcommand{\todo}[1]{\textbf{\textcolor{tuered}{ TODO: #1}}}
+
+\newcommand{\vectornorm}[1]{\left|\left|#1\right|\right|}
+
+\renewcommand{\vec}[1]{\mathbf{#1}}
+\newcommand{\uvec}[1]{\hat{\vec{#1}}}
+\newcommand{\tensor}[1]{\mathbf{#1}}
+
+\definecolor{pyblue}{HTML}{1F77B4}
+\definecolor{pyorange}{HTML}{FF7F0C}
+\definecolor{pygreen}{HTML}{2CA02C}
+\definecolor{pyred}{HTML}{D62728}
+
+\begin{document}
+
+% The referee PDF has been generated from r239 -- 'make referee' command.
+
+\section*{Reply to Referee one}
+
+We thank the Referee for her/his critical reading of our manuscript and the positive assessment in her/his report.
+We are glad to read that he/she finds the study well designed and the paper well written. Upon a careful rereading of the introduction, we understand, indeed, the Referee's concern about the nature of the stability of ring-rivulets, which was not made crystal clear since 
+the very beginning. We thank, therefore, the Referee for pointing this 
+out and we added the following sentence in the introduction:\\
+\\
+\textcolor{red}{Ring-rivulets are, consequently, intrinsically unstable structure, that can either decay directly into a single droplet of equal volume or into several droplets of smaller volumes.}
+
+
+% \bibliographystyle{abbrv}
+% \bibliography{aipsamp}
+
+\end{document}
