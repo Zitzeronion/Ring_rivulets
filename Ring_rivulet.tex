@@ -223,13 +223,18 @@ Fig.~\ref{fig:collapsetimes} shows the time $\tau_c$ taken by the liquid to full
     \tau_c = \min_t \{t | h(\xi=0,\phi,t) > h_{\ast}\}.
 \end{equation}
 Upon rescaling by $t_c$ and multiplying by $\theta_0$ we observe that the collapse times decay with the initial aspect-ratio as $\tau_c \theta_0/t_c \sim \psi_0^{-2}$; such behaviour is explained in what follows.
-The collapse time can be seen as the time the point (in the radial coordinate) $\xi_1(t) = R(t) - w(t) \approx R(t)$\footnote{This approximation holds since $R \gg w$ most of the time during the retraction process} needs to reach the origin $\xi = 0$. 
+The collapse time can be seen as the time the point (in the radial coordinate)
+\textcolor{blue}{$\xi_1(t) = R(t) - \frac{w(t)}{2}$}
+needs to reach the origin $\xi = 0$. 
 We prove in the Appendix (see section \ref{sec:derivation}) that, under certain assumptions, the following differential equation for $R(t)$ holds:
 \begin{equation}\label{eq:modelC4}
     -\frac{d R^2}{dt} \approx 4\alpha \, \theta_0^{\alpha+1} \, \frac{r_0^2}{t_c}.
 \end{equation}
 The latter equation can be integrated to $R_0^2 - R^2(t) \approx 4 \alpha \theta_0^{\alpha +1} r_0^2 t/t_c$.
-The collapse time, then, is such that $R^2(\tau_c) \approx 0$, whence $\tau_c  \approx R_0^2 t_c/(4 \alpha r_0^2 \theta_0^{\alpha+1})$, which can be recast into (recall that $\psi_0 \approx 2 r_0 \theta_0/R_0$ for small $\theta$) 
+\textcolor{blue}{The collapse time, then, is such that  
+$R^2(\tau_c) \approx \frac{w_0^2}{4}$\footnote{This approximation holds since $\dot{w}(t) \ll \dot{R}(t)$ most of the time during the retraction process.}, whence 
+$\tau_c/t_c  \approx (1-\psi_0^2/4)R_0^2 /(4 \alpha r_0^2 \theta_0^{\alpha+1})$, 
+which can be recast into (approximating $\psi_0 \approx 2 r_0 \theta_0/R_0$ for small $\theta$ and since $\psi_0^2/4 \ll 1$)}
 \begin{equation}\label{eq:modeltauc}
     \frac{\tau_c}{t_c} \sim  \theta_0^{1-\alpha} \psi_0^{-2},
 \end{equation}
@@ -363,10 +368,13 @@ The initial profiles have been generated using $R_0\in[80, 120, 150, 180, 200]$ 
 
 \section{Derivation of equation (\ref{eq:modelC4})}\label{sec:derivation}
 Let $\theta_A$ and $\theta_B$ be the contact angles at the advancing and receding contact lines, respectively, assuming a generic speed-angle law of the form $\text{Ca} \sim \theta^{\alpha}$ (see, e.g., Popescu et al\cite{Popescu2012} and references therein), which, 
-for $\alpha = 3$ leads to the usual Cox-Voinov-Tanner law \cite{SnoeijerARFM2013}), we have
+for $\alpha = 3$ leads to the usual Cox-Voinov-Tanner law \cite{SnoeijerARFM2013}), we have {\bf AS: Cite the same footnote as before,  check how to do it with 
+the JCP template}
+\textcolor{blue}{
 \begin{equation}\label{eq:modelCV}
-    \theta_A^{\alpha} - \theta_R^{\alpha} \propto Ca = \frac{\mu}{\gamma} U = - \frac{\mu}{\gamma} \dot{R}(t)
+    \theta_A^{\alpha} - \theta_R^{\alpha} \propto Ca = \frac{\mu}{\gamma} U \approx - \frac{\mu}{\gamma} \dot{R}(t)
 \end{equation}
+}
 (the minus sign comes from the fact that the ring radius is decreasing), whence, if we write $\theta_A = \theta_0 + \delta \theta$ and $\theta_R = \theta_0 - \delta \theta$ (with $\delta \theta \ll \theta_{A,R}$), we get
 \begin{equation}\label{eq:modelC2}
     - \frac{\mu}{\gamma} \dot{R}(t) \approx 2 \alpha \theta_0^{\alpha-1} \delta \theta.
